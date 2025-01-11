@@ -161,7 +161,7 @@ object Drivetrain : SubsystemBase() {
                 }
                 false
             },
-             Array<SubsystemBase> (1) { this }// Reference to this subsystem to set requirements
+             this// Reference to this subsystem to set requirements
         )
     }
 
