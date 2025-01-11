@@ -1,0 +1,3 @@
+[submodule "src/main/kotlin/frc/robot/beaverlib"]
+	path = src/main/kotlin/frc/robot/beaverlib
+	url = https://github.com/beavertronics/beaverlib.git

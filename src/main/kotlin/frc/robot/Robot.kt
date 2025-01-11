@@ -1,12 +1,10 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-package com.team2898.robot
+package frc.robot
 
 import com.fasterxml.jackson.databind.util.Named
 import com.pathplanner.lib.auto.NamedCommands
-import com.team2898.robot.commands.*
-import com.team2898.robot.subsystems.*
 import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.wpilibj.DataLogManager
 import edu.wpi.first.wpilibj.TimedRobot
@@ -25,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
  */
 class Robot : TimedRobot() {
     private var m_autonomousCommand: Command? = null
-    var autoCommand: Command = InstantCommand({})
+    var autoCommand: Command = InstantCommand()
     lateinit var robotContainer: RobotContainer
     val commandScheduler = CommandScheduler.getInstance()
 

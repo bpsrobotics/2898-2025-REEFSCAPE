@@ -3,8 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 @file:Suppress("unused")
 
-package com.team2898.robot
+package frc.robot
 
+import beaverlib.utils.Units.Linear.inches
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.config.SparkBaseConfig
 import edu.wpi.first.math.geometry.Translation2d
@@ -12,7 +13,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj2.command.Command
-import com.team2898.engine.utils.units.*
 import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.XboxController
@@ -128,7 +128,8 @@ class Constants {
 
         // Constraint for the motion profiled robot angle controller
         val ThetaControllerConstraints = TrapezoidProfile.Constraints(
-                MaxAngularSpeedRadiansPerSecond, MaxAngularSpeedRadiansPerSecondSquared)
+                MaxAngularSpeedRadiansPerSecond, MaxAngularSpeedRadiansPerSecondSquared
+        )
     }
 
     object NeoMotorConstants {

@@ -1,7 +1,7 @@
-package com.team2898.robot.commands.swerve
+package frc.robot.commands.swerve
 
-import com.team2898.robot.OI
-import com.team2898.robot.subsystems.NavX
+import frc.robot.OI
+import frc.robot.subsystems.NavX
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
