@@ -37,6 +37,7 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.networktables.StructArrayPublisher
 import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -144,10 +145,10 @@ object Drivetrain : SubsystemBase() {
             this::getPose,  // Robot pose supplier
             this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            driveFieldOrientedConsumer,  //FIXME this is a field oriented consumber, NOT RELETIVE// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+            driveFieldOrientedConsumer,  //FIXME this is a field oriented consumer, NOT RELATIVE// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
                 PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-                PIDConstants(RotationP, RotationI, RotationD),
+                PIDConstants(RotationP, RotationI, RotationD)
             ),
             config,  // The robot configuration
             {
@@ -183,7 +184,7 @@ object Drivetrain : SubsystemBase() {
         return SysIdRoutine(
             SysIdRoutine.Config(),
             SysIdRoutine.Mechanism(
-                { volts: Measure<Voltage> ->
+                { volts: Voltage ->
                     swerveDrive.modules.forEach {
                         it.driveMotor.voltage = volts.`in`(Volt)
                     }
@@ -264,26 +265,26 @@ object Drivetrain : SubsystemBase() {
      * @return A command that follows the path.
      */
     fun getAutonomousCommand(
-        autoName: String,
-        setOdomAtStart: Boolean,
+        autoName: String//,
+//        setOdomAtStart: Boolean
     ): Command {
-        var startPosition: Pose2d = Pose2d()
-        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
-            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
-        } else {
-            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
-        }
-
-        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
-            startPosition = GeometryUtil.flipFieldPose(startPosition)
-        }
-
-        if (setOdomAtStart)
-        {
-            if (startPosition != null) {
-                resetOdometry(startPosition)
-            }
-        }
+//        var startPosition: Pose2d = Pose2d()
+//        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
+//            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
+//        } else {
+//            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
+//        }
+//
+//        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
+//            startPosition = GeometryUtil.flipFieldPose(startPosition)
+//        }
+//
+//        if (setOdomAtStart)
+//        {
+//            if (startPosition != null) {
+//                resetOdometry(startPosition)
+//            }
+//        }
 
         // TODO: Configure path planner's AutoBuilder
         return PathPlannerAuto(autoName)
@@ -298,7 +299,7 @@ object Drivetrain : SubsystemBase() {
     fun drive(
         translation: Translation2d,
         rotation: Double,
-        fieldOriented: Boolean,
+        fieldOriented: Boolean
     ) {
         swerveDrive.drive(translation, rotation, fieldOriented, false)
     }
@@ -314,7 +315,7 @@ object Drivetrain : SubsystemBase() {
         translation: Translation2d,
         rotation: Double,
         fieldOriented: Boolean,
-        centerOfRotation: Translation2d,
+        centerOfRotation: Translation2d
     ) {
         swerveDrive.drive(translation, rotation, fieldOriented, false, centerOfRotation)
     }
@@ -393,7 +394,7 @@ object Drivetrain : SubsystemBase() {
     fun getTargetSpeeds(
         vForward: Double,
         vSide: Double,
-        angle: Rotation2d,
+        angle: Rotation2d
     ): ChassisSpeeds {
         return swerveDrive.swerveController.getTargetSpeeds(vForward, vSide, angle.radians, getHeading().radians, maximumSpeed)
     }
@@ -515,7 +516,7 @@ object Drivetrain : SubsystemBase() {
                 MathUtil.applyDeadband(turnX, 0.1),
                 MathUtil.applyDeadband(turnY, 0.1),
                 swerveDrive.odometryHeading.radians,
-                swerveDrive.maximumVelocity
+                swerveDrive.maximumChassisVelocity //TODO Make sure that this is MaximumVelocy
             ));
         }
     }
