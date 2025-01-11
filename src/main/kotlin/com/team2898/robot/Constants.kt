@@ -5,7 +5,8 @@
 
 package com.team2898.robot
 
-import com.revrobotics.CANSparkBase
+import com.revrobotics.spark.SparkBase
+import com.revrobotics.spark.config.SparkBaseConfig
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -94,8 +95,8 @@ class Constants {
         const val TurningFF = 0.0
         const val TurningMinOutput = 0.5
         const val TurningMaxOutput = 1.0
-        val DrivingMotorIdleMode = CANSparkBase.IdleMode.kBrake
-        val TurningMotorIdleMode = CANSparkBase.IdleMode.kBrake
+        val DrivingMotorIdleMode = SparkBaseConfig.IdleMode.kBrake
+        val TurningMotorIdleMode = SparkBaseConfig.IdleMode.kBrake
         const val DrivingMotorCurrentLimit = 30 // amps
         const val TurningMotorCurrentLimit = 10 // amps
     }
