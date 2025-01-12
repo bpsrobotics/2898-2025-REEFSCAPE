@@ -1,28 +1,28 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-package com.team2898.robot.subsystems
+package frc.robot.subsystems
 
 
 import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.commands.PathPlannerAuto
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.util.DriveFeedforwards
 import com.pathplanner.lib.util.GeometryUtil
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig
-import com.pathplanner.lib.util.PIDConstants
-import com.pathplanner.lib.util.ReplanningConfig
-import com.team2898.engine.utils.units.Volts
-import com.team2898.robot.Constants
-import com.team2898.robot.Constants.AutoConstants.RotationD
-import com.team2898.robot.Constants.AutoConstants.RotationI
-import com.team2898.robot.Constants.AutoConstants.RotationP
-import com.team2898.robot.Constants.AutoConstants.TranslationD
-import com.team2898.robot.Constants.AutoConstants.TranslationI
-import com.team2898.robot.Constants.AutoConstants.TranslationP
-import com.team2898.robot.OI.translationX
-import com.team2898.robot.OI.translationY
-import com.team2898.robot.OI.turnX
-import com.team2898.robot.OI.turnY
-import com.team2898.robot.subsystems.Drivetrain.swerveDrive
+import frc.robot.Constants
+import frc.robot.Constants.AutoConstants.RotationD
+import frc.robot.Constants.AutoConstants.RotationI
+import frc.robot.Constants.AutoConstants.RotationP
+import frc.robot.Constants.AutoConstants.TranslationD
+import frc.robot.Constants.AutoConstants.TranslationI
+import frc.robot.Constants.AutoConstants.TranslationP
+import frc.robot.OI.translationX
+import frc.robot.OI.translationY
+import frc.robot.OI.turnX
+import frc.robot.OI.turnY
+import frc.robot.subsystems.Drivetrain.run
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.PIDController
@@ -37,7 +37,7 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.networktables.StructArrayPublisher
 import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.units.Voltage
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -51,12 +51,9 @@ import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
 import swervelib.math.SwerveMath
-import swervelib.parser.SwerveControllerConfiguration
-import swervelib.parser.SwerveDriveConfiguration
 import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
-import java.io.File
 import java.util.*
 import java.util.function.BooleanSupplier
 
@@ -71,6 +68,17 @@ object Drivetrain : SubsystemBase() {
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    lateinit var config : RobotConfig;
+    init {
+        try{
+            config = RobotConfig.fromGUISettings();
+        } catch (e : Exception) {
+            // Handle exception as needed
+            e.printStackTrace();
+        }
+    }
 
 //    var targetStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
 //    getStructArrayTopic("SwerveStates/targetStates", SwerveModuleState.struct).publish()
@@ -133,30 +141,27 @@ object Drivetrain : SubsystemBase() {
      * Setup AutoBuilder for PathPlanner.
      */
     fun setupPathPlanner() {
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
             this::getPose,  // Robot pose supplier
             this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            this::chassisDrive,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-            HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+            driveFieldOrientedConsumer,  //FIXME this is a field oriented consumer, NOT RELATIVE// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
                 PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-                PIDConstants(RotationP, RotationI, RotationD),  // Rotation PID constants
-                Constants.DriveConstants.MaxSpeedMetersPerSecond,  // Max module speed, in m/s
-                0.4567,  // Drive base radius in meters. Distance from robot center to furthest module.
-                ReplanningConfig() // Default path replanning config. See the API for the options here
+                PIDConstants(RotationP, RotationI, RotationD)
             ),
-            BooleanSupplier {
-
+            config,  // The robot configuration
+            {
                 // Boolean supplier that controls when the path will be mirrored for the red alliance
                 // This will flip the path being followed to the red side of the field.
                 // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
                 val alliance = DriverStation.getAlliance()
                 if (alliance.isPresent) {
-                    alliance.get() == Alliance.Red
+                    return@configure alliance.get() == Alliance.Red
                 }
                 false
             },
-            this // Reference to this subsystem to set requirements
+             this// Reference to this subsystem to set requirements
         )
     }
 
@@ -179,7 +184,7 @@ object Drivetrain : SubsystemBase() {
         return SysIdRoutine(
             SysIdRoutine.Config(),
             SysIdRoutine.Mechanism(
-                { volts: Measure<Voltage> ->
+                { volts: Voltage ->
                     swerveDrive.modules.forEach {
                         it.driveMotor.voltage = volts.`in`(Volt)
                     }
@@ -260,26 +265,26 @@ object Drivetrain : SubsystemBase() {
      * @return A command that follows the path.
      */
     fun getAutonomousCommand(
-        autoName: String,
-        setOdomAtStart: Boolean,
+        autoName: String//,
+//        setOdomAtStart: Boolean
     ): Command {
-        var startPosition: Pose2d = Pose2d()
-        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
-            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
-        } else {
-            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
-        }
-
-        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
-            startPosition = GeometryUtil.flipFieldPose(startPosition)
-        }
-
-        if (setOdomAtStart)
-        {
-            if (startPosition != null) {
-                resetOdometry(startPosition)
-            }
-        }
+//        var startPosition: Pose2d = Pose2d()
+//        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
+//            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
+//        } else {
+//            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
+//        }
+//
+//        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
+//            startPosition = GeometryUtil.flipFieldPose(startPosition)
+//        }
+//
+//        if (setOdomAtStart)
+//        {
+//            if (startPosition != null) {
+//                resetOdometry(startPosition)
+//            }
+//        }
 
         // TODO: Configure path planner's AutoBuilder
         return PathPlannerAuto(autoName)
@@ -294,7 +299,7 @@ object Drivetrain : SubsystemBase() {
     fun drive(
         translation: Translation2d,
         rotation: Double,
-        fieldOriented: Boolean,
+        fieldOriented: Boolean
     ) {
         swerveDrive.drive(translation, rotation, fieldOriented, false)
     }
@@ -310,7 +315,7 @@ object Drivetrain : SubsystemBase() {
         translation: Translation2d,
         rotation: Double,
         fieldOriented: Boolean,
-        centerOfRotation: Translation2d,
+        centerOfRotation: Translation2d
     ) {
         swerveDrive.drive(translation, rotation, fieldOriented, false, centerOfRotation)
     }
@@ -349,6 +354,7 @@ object Drivetrain : SubsystemBase() {
      * @return The current pose of the robot.
      */
     fun getPose() = swerveDrive.pose
+    val getPoseProducer: () -> Pose2d = { getPose() }
 
     /**
      * Method to display a desired trajectory to a field2d object.
@@ -388,7 +394,7 @@ object Drivetrain : SubsystemBase() {
     fun getTargetSpeeds(
         vForward: Double,
         vSide: Double,
-        angle: Rotation2d,
+        angle: Rotation2d
     ): ChassisSpeeds {
         return swerveDrive.swerveController.getTargetSpeeds(vForward, vSide, angle.radians, getHeading().radians, maximumSpeed)
     }
@@ -495,10 +501,10 @@ object Drivetrain : SubsystemBase() {
         fieldOriented = !fieldOriented
     }
 
-    fun driveFieldOriented(fieldSpeeds: ChassisSpeeds){
+    fun driveFieldOriented(fieldSpeeds: ChassisSpeeds) : Unit {
         swerveDrive.driveFieldOriented(fieldSpeeds)
     }
-
+    val  driveFieldOrientedConsumer: (ChassisSpeeds) -> Unit = { fieldSpeeds: ChassisSpeeds -> driveFieldOriented(fieldSpeeds) }
     fun driveCommand(): Command {
         return run{
             val scaledInputs = SwerveMath.scaleTranslation(Translation2d(
@@ -506,11 +512,12 @@ object Drivetrain : SubsystemBase() {
                 MathUtil.applyDeadband(translationX, 0.1)),
                 0.8
             )
-            drive(swerveDrive.swerveController.getTargetSpeeds(scaledInputs.x, scaledInputs.y,
+            drive(
+                swerveDrive.swerveController.getTargetSpeeds(scaledInputs.x, scaledInputs.y,
                 MathUtil.applyDeadband(turnX, 0.1),
                 MathUtil.applyDeadband(turnY, 0.1),
                 swerveDrive.odometryHeading.radians,
-                swerveDrive.maximumVelocity
+                swerveDrive.maximumChassisVelocity //TODO Make sure that this is MaximumVelocy
             ));
         }
     }

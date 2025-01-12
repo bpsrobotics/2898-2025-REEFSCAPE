@@ -1,27 +1,22 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-package com.team2898.robot
+package frc.robot
 
 //import com.team2898.robot.Constants.OperatorConstants
 
 import com.pathplanner.lib.auto.AutoBuilder
 
-import com.team2898.engine.utils.Vector
-import com.team2898.robot.OI.driverX
-import com.team2898.robot.OI.intakeSpeed
-import com.team2898.robot.OI.operatorTrigger
-import com.team2898.robot.OI.resetGyro
-import com.team2898.robot.OI.rightTrigger
-import com.team2898.robot.OI.translationX
-import com.team2898.robot.OI.translationY
-import com.team2898.robot.OI.turnX
-import com.team2898.robot.commands.bintake.Grasp
-import com.team2898.robot.commands.bintake.RunBintake
-import com.team2898.robot.commands.intake.RunIntake
-import com.team2898.robot.commands.swerve.NavXReset
-import com.team2898.robot.subsystems.*
-import com.team2898.robot.subsystems.Drivetrain.getDriveSysIDCommand
+import frc.robot.OI.driverX
+import frc.robot.OI.intakeSpeed
+import frc.robot.OI.operatorTrigger
+import frc.robot.OI.resetGyro
+import frc.robot.OI.rightTrigger
+import frc.robot.OI.translationX
+import frc.robot.OI.translationY
+import frc.robot.OI.turnX
+import frc.robot.commands.swerve.NavXReset
+import frc.robot.subsystems.Drivetrain.getDriveSysIDCommand
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.XboxController
@@ -30,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.commands.swerve.TeleopDriveCommand
+import frc.robot.subsystems.Drivetrain
 
 
 /**
@@ -52,11 +48,10 @@ class RobotContainer {
             { MathUtil.applyDeadband(-translationX, 0.1) },
             { MathUtil.applyDeadband(turnX, 0.1)},
             { true },
-            { false },
+            { false }
         )
 
 
-    val intake: RunIntake = RunIntake({MathUtil.applyDeadband(-intakeSpeed, 0.5)})
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
@@ -68,7 +63,6 @@ class RobotContainer {
         autoCommandChooser = AutoBuilder.buildAutoChooser("6piece")
 
         Drivetrain.defaultCommand = teleopDrive
-        Intake.defaultCommand = intake
 
         configureBindings()
 
@@ -84,8 +78,6 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
-        Intake
-        ToteManipulator
     }
 
     /**
@@ -101,27 +93,6 @@ class RobotContainer {
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
-
-        when {
-            driverX -> {
-                getDriveSysIDCommand()
-            }
-
-            operatorTrigger -> {
-                Grasp()
-            }
-
-            resetGyro -> {
-                NavXReset()
-            }
-        }
-        when (OI.hatVector) {
-            Vector(0, -1) -> Intake.getIntakeSysIDCommand()
-            Vector(0,1) -> RunBintake({5.0})
-        }
-
-
-
     }
 
 }

@@ -1,15 +1,14 @@
-package com.team2898.robot
+package frc.robot
 
-import com.team2898.engine.utils.Vector
-import com.team2898.engine.utils.async.Promise
-import com.team2898.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
-import com.team2898.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
-import com.team2898.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER1
-import com.team2898.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER2
-import com.team2898.robot.Constants.ButtonConstants.ARM_DIRECT_STOWED
-import com.team2898.robot.Constants.ButtonConstants.ARM_DOWN
-import com.team2898.robot.Constants.ButtonConstants.ARM_UP
-import com.team2898.robot.Constants.ButtonConstants.SHOOT
+import beaverlib.utils.geometry.Vector2
+import frc.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
+import frc.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
+import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER1
+import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER2
+import frc.robot.Constants.ButtonConstants.ARM_DIRECT_STOWED
+import frc.robot.Constants.ButtonConstants.ARM_DOWN
+import frc.robot.Constants.ButtonConstants.ARM_UP
+import frc.robot.Constants.ButtonConstants.SHOOT
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
@@ -19,6 +18,7 @@ import edu.wpi.first.wpilibj.event.BooleanEvent
 import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.beaverlib.async.Promise
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -106,7 +106,7 @@ object OI : SubsystemBase() {
     val driverX
         get() = driverController.xButton
     //    val resetGyro: BooleanEvent = driverController.rightBumper(loop).debounce(0.5).rising()
-    val resetGyro get() = driverController.rightBumper
+    val resetGyro get() = driverController.rightBumperButton
 
     val climb get() = operatorController.getRawButton(12)
 
@@ -118,11 +118,11 @@ object OI : SubsystemBase() {
         get() = driverController.yButtonPressed
     val highHat get() = operatorController.pov
     val hatVector get() = when (operatorController.pov) {
-        0 -> Vector(0,1)
-        90 -> Vector(1,0)
-        180 -> Vector(0,-1)
-        270 -> Vector(-1,0)
-        else -> Vector.zero
+        0 -> Vector2(0.0,1.0)
+        90 -> Vector2(1.0,0.0)
+        180 -> Vector2(0.0,-1.0)
+        270 -> Vector2(-1.0,0.0)
+        else -> Vector2.zero()
     }
 
     val armSelectUp get() = operatorController.getRawButton(ARM_UP)
@@ -152,15 +152,15 @@ object OI : SubsystemBase() {
             else  -> this
         }
         fun toVector() = when (this) {
-            LEFT -> Vector(-1,0)
-            RIGHT -> Vector(1,0)
-            UP -> Vector(0,1)
-            DOWN -> Vector(0,-1)
-            INACTIVE -> Vector.zero
-            UPLEFT -> Vector(-1,1)
-            UPRIGHT -> Vector(1, 1)
-            DOWNLEFT -> Vector(-1, -1)
-            DOWNRIGHT -> Vector(1, -1)
+            LEFT -> Vector2(-1.0,0.0)
+            RIGHT -> Vector2(1.0,0.0)
+            UP -> Vector2(0.0,1.0)
+            DOWN -> Vector2(0.0,-1.0)
+            INACTIVE -> Vector2.zero()
+            UPLEFT -> Vector2(-1.0,1.0)
+            UPRIGHT -> Vector2(1.0, 1.0)
+            DOWNLEFT -> Vector2(-1.0, -1.0)
+            DOWNRIGHT -> Vector2(1.0, -1.0)
         }
     }
 
@@ -198,7 +198,8 @@ object OI : SubsystemBase() {
             promise.then { update(); Promise.resolve(Unit) }
         }
         fun update(){
-            if(rumbleTimer.hasElapsed(rumbleTime) && !(try {waiting.map { it.hasFulfilled }.reduce { acc, b -> acc or b }} catch (_:Throwable) {false})) {
+            if(rumbleTimer.hasElapsed(rumbleTime) && !(try {
+                    waiting.map { it.hasFulfilled }.reduce { acc, b -> acc or b }} catch (_:Throwable) {false})) {
                 driverController.setRumble(GenericHID.RumbleType.kBothRumble, 0.0)
             }
             waiting.forEach {
