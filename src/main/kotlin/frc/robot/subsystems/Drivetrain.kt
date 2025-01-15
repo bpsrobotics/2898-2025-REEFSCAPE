@@ -27,6 +27,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -119,6 +120,12 @@ object Drivetrain : SubsystemBase() {
             swerveDrive.stopOdometryThread()
         }
         setupPathPlanner()
+        Vision.listeners.add {
+            val position: Pose2d? = Vision.getRobotPosition(it)?.toPose2d()
+            if (position != null) {
+                swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
+            }
+        }
     }
 
     /**
