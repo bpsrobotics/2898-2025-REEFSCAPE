@@ -85,15 +85,6 @@ object Drivetrain : SubsystemBase() {
 //
 ////    var targStates = arrayOf(swerveDrive.getTargetSpeeds(-translationY, -translationX, Rotation2d(-turnX)))
 
-
-    /**
-     * Whether the robot should drive field oriented or robot oriented.
-     * Whether the robot should drive field oriented or robot oriented.
-     * @see drive
-     */
-    var fieldOriented: Boolean = true
-
-
     override fun periodic() {
         Constants.ModuleConstants.TurningP = SmartDashboard.getNumber("TurningKP", Constants.ModuleConstants.TurningP)
         Constants.ModuleConstants.TurningI = SmartDashboard.getNumber("TurningKI", Constants.ModuleConstants.TurningI)
@@ -130,13 +121,6 @@ object Drivetrain : SubsystemBase() {
         setupPathPlanner()
     }
 
-
-
-
-
-
-
-
     /**
      * Setup AutoBuilder for PathPlanner.
      */
@@ -145,7 +129,7 @@ object Drivetrain : SubsystemBase() {
             this::getPose,  // Robot pose supplier
             this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            driveFieldOrientedConsumer,  //FIXME this is a field oriented consumer, NOT RELATIVE// Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
                 PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
                 PIDConstants(RotationP, RotationI, RotationD)
@@ -228,8 +212,6 @@ object Drivetrain : SubsystemBase() {
             .linearVelocity(MetersPerSecond.of(module.driveMotor.velocity))
     }
 
-
-
     /**
      * Return SysID command for drive motors from YAGSL
      * @return A command that SysIDs the drive motors.
@@ -291,20 +273,6 @@ object Drivetrain : SubsystemBase() {
     }
 
     /**
-     * Simple drive method that translates and rotates the robot.
-     * @param translation The desired X and Y velocity of the robot.
-     * @param rotation The desired rotational velocity of the robot.
-     * @param fieldOriented Whether the robot's motion should be field oriented or robot oriented.
-     */
-    fun drive(
-        translation: Translation2d,
-        rotation: Double,
-        fieldOriented: Boolean
-    ) {
-        swerveDrive.drive(translation, rotation, fieldOriented, false)
-    }
-
-    /**
      * Advanced drive method that translates and rotates the robot, with a custom center of rotation.
      * @param translation The desired X and Y velocity of the robot.
      * @param rotation The desired rotational velocity of the robot.
@@ -313,9 +281,9 @@ object Drivetrain : SubsystemBase() {
      */
     fun drive(
         translation: Translation2d,
-        rotation: Double,
-        fieldOriented: Boolean,
-        centerOfRotation: Translation2d
+        rotation: Double = 0.0,
+        fieldOriented: Boolean = false,
+        centerOfRotation: Translation2d = Translation2d()
     ) {
         swerveDrive.drive(translation, rotation, fieldOriented, false, centerOfRotation)
     }
@@ -324,18 +292,11 @@ object Drivetrain : SubsystemBase() {
      * Simple drive method that uses ChassisSpeeds to control the robot.
      * @param velocity The desired ChassisSpeeds of the robot
      */
-    fun drive(velocity: ChassisSpeeds) {
-        swerveDrive.drive(velocity)
+    fun drive(velocity: ChassisSpeeds, fieldOriented: Boolean = false) {
+        if(fieldOriented) swerveDrive.driveFieldOriented(velocity); else swerveDrive.drive(velocity)
     }
 
-    /**
-     * Method to set the desired speeds of the swerve drive.
-     * @param chassisSpeeds The desired speeds of the swerve drive.
-     */
-    fun chassisDrive(chassisSpeeds: ChassisSpeeds) {
-        swerveDrive.setChassisSpeeds(chassisSpeeds)
-    }
-
+    val  driveConsumer: (ChassisSpeeds) -> Unit = { fieldSpeeds: ChassisSpeeds -> drive(fieldSpeeds) }
     /**
      * Method to get the Kinematics object of the swerve drive.
      */
@@ -354,7 +315,6 @@ object Drivetrain : SubsystemBase() {
      * @return The current pose of the robot.
      */
     fun getPose() = swerveDrive.pose
-    val getPoseProducer: () -> Pose2d = { getPose() }
 
     /**
      * Method to display a desired trajectory to a field2d object.
@@ -465,6 +425,15 @@ object Drivetrain : SubsystemBase() {
         swerveDrive.addVisionMeasurement(measurement, timestamp)
     }
 
+    /**
+     * Set the standard deviations of the vision measurements.
+     * @param stdDevX The standard deviation of the X component of the vision measurements.
+     * @param stdDevY The standard deviation of the Y component of the vision measurements.
+     * @param stdDevTheta The standard deviation of the rotational component of the vision measurements.
+     */
+    fun setVisionMeasurementStdDevs(stdDevX: Double, stdDevY: Double, stdDevTheta: Double) {
+        swerveDrive.swerveDrivePoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(stdDevX, stdDevY, stdDevTheta))
+    }
 
     /**
      * PID Controller for the heading of the robot.
@@ -484,27 +453,6 @@ object Drivetrain : SubsystemBase() {
         return HeadingPID.calculate(measurement, setpoint)
     }
 
-
-    /**
-     * Set the standard deviations of the vision measurements.
-     * @param stdDevX The standard deviation of the X component of the vision measurements.
-     * @param stdDevY The standard deviation of the Y component of the vision measurements.
-     * @param stdDevTheta The standard deviation of the rotational component of the vision measurements.
-     */
-    fun setVisionMeasurementStdDevs(stdDevX: Double, stdDevY: Double, stdDevTheta: Double) {
-        swerveDrive.swerveDrivePoseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(stdDevX, stdDevY, stdDevTheta))
-    }
-
-
-    /** function to toggle field oriented drive */
-    fun toggleFieldOriented() {
-        fieldOriented = !fieldOriented
-    }
-
-    fun driveFieldOriented(fieldSpeeds: ChassisSpeeds) : Unit {
-        swerveDrive.driveFieldOriented(fieldSpeeds)
-    }
-    val  driveFieldOrientedConsumer: (ChassisSpeeds) -> Unit = { fieldSpeeds: ChassisSpeeds -> driveFieldOriented(fieldSpeeds) }
     fun driveCommand(): Command {
         return run{
             val scaledInputs = SwerveMath.scaleTranslation(Translation2d(
