@@ -74,9 +74,6 @@ object Drivetrain : SubsystemBase() {
     // store this in your Constants file
     lateinit var config : RobotConfig;
     init {
-
-    }
-    init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
         try{
@@ -105,10 +102,10 @@ object Drivetrain : SubsystemBase() {
         swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
         // Updates odometry whenever a new
         Vision.listeners.add ( "UpdateOdometry") {
-            val position: Pose2d? = Vision.getRobotPosition(it)?.toPose2d()
-            if (position != null) {
-                swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
-            }
+            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
+            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
+            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
         }
 
     }
@@ -127,6 +124,8 @@ object Drivetrain : SubsystemBase() {
         Constants.ModuleConstants.DrivingI = SmartDashboard.getNumber("DrivingKI", Constants.ModuleConstants.DrivingI)
         Constants.ModuleConstants.DrivingD = SmartDashboard.getNumber("DrivingKD", Constants.ModuleConstants.DrivingD)
 
+        SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
+        SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)
 
         swerveStates.set(swerveDrive.states)
 
