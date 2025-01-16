@@ -19,7 +19,7 @@ val robotToCam = Transform3d(
 object Vision : SubsystemBase() {
     val cam = PhotonCamera("Camera_Module_v1")
     var results = mutableListOf<PhotonPipelineResult>()
-    val listeners : MutableList<(PhotonPipelineResult) -> Unit>
+    val listeners : MutableList<(PhotonPipelineResult) -> Unit> = mutableListOf<(PhotonPipelineResult) -> Unit>()
     var poseEstimator =
         PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
     // Correct pose estimate with vision measurements
