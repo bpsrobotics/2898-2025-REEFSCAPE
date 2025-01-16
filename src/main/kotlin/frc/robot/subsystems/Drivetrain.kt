@@ -11,6 +11,7 @@ import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import com.pathplanner.lib.util.DriveFeedforwards
 import com.pathplanner.lib.util.GeometryUtil
+import edu.wpi.first.math.*
 import frc.robot.Constants
 import frc.robot.Constants.AutoConstants.RotationD
 import frc.robot.Constants.AutoConstants.RotationI
@@ -23,8 +24,6 @@ import frc.robot.OI.translationY
 import frc.robot.OI.turnX
 import frc.robot.OI.turnY
 import frc.robot.subsystems.Drivetrain.run
-import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
@@ -32,6 +31,8 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.numbers.N1
+import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -73,12 +74,43 @@ object Drivetrain : SubsystemBase() {
     // store this in your Constants file
     lateinit var config : RobotConfig;
     init {
+
+    }
+    init {
+        // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
+        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
         try{
             config = RobotConfig.fromGUISettings();
         } catch (e : Exception) {
             // Handle exception as needed
             e.printStackTrace();
         }
+        try {
+            swerveDrive =
+                SwerveParser(Constants.DriveConstants.DRIVE_CONFIG).createSwerveDrive(Constants.DriveConstants.MaxSpeedMetersPerSecond)
+        } catch (e: Exception){
+            e.printStackTrace()
+            throw RuntimeException("error creating swerve",e)
+        }
+        swerveDrive.setHeadingCorrection(false) // Heading correction should only be used while controlling the robot via angle.
+        swerveDrive.setCosineCompensator(false) //!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+
+        if (visionDriveTest) {
+//                setupPhotonVision()
+            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+            swerveDrive.stopOdometryThread()
+        }
+        setupPathPlanner()
+
+        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
+        // Updates odometry whenever a new
+        Vision.listeners.add ( "UpdateOdometry") {
+            val position: Pose2d? = Vision.getRobotPosition(it)?.toPose2d()
+            if (position != null) {
+                swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
+            }
+        }
+
     }
 
 //    var targetStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
@@ -100,32 +132,6 @@ object Drivetrain : SubsystemBase() {
 
 //        targetStates.set()
 //        targetStates.set(getTargetSpeeds(-translationY, -translationX, Rotation2d(-turnX)))
-    }
-
-    init {
-        // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
-        SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
-        try {
-            swerveDrive =
-                SwerveParser(Constants.DriveConstants.DRIVE_CONFIG).createSwerveDrive(Constants.DriveConstants.MaxSpeedMetersPerSecond)
-        } catch (e: Exception){
-            e.printStackTrace()
-            throw RuntimeException("error creating swerve",e)
-        }
-        swerveDrive.setHeadingCorrection(false) // Heading correction should only be used while controlling the robot via angle.
-        swerveDrive.setCosineCompensator(false) //!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-        if (visionDriveTest) {
-//                setupPhotonVision()
-            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
-            swerveDrive.stopOdometryThread()
-        }
-        setupPathPlanner()
-        Vision.listeners.add {
-            val position: Pose2d? = Vision.getRobotPosition(it)?.toPose2d()
-            if (position != null) {
-                swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
-            }
-        }
     }
 
     /**
