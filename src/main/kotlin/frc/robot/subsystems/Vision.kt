@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.Matrix
@@ -14,7 +15,12 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy
 import org.photonvision.targeting.PhotonPipelineResult
 
 
-val aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+val aprilTagFieldLayout = AprilTagFieldLayout(
+    mutableListOf(AprilTag(0, Pose3d(Translation3d(5.0,0.0,1.0), Rotation3d(0.0,0.0,0.0))
+    )),
+    10.0,10.0)
+
+    //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
     Translation3d(0.5, 0.0, 0.5),
     Rotation3d(0.0, 0.0, 0.0)
@@ -63,7 +69,7 @@ object Vision : SubsystemBase() {
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
     }
     override fun periodic(){
-        results = cam.getAllUnreadResults()
+        results = cam.allUnreadResults
         if (results.isEmpty()) return
         // Iterate through each of the results
         results.forEach { visionResult: PhotonPipelineResult ->
