@@ -15,7 +15,6 @@ import frc.robot.OI.rightTrigger
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
 import frc.robot.OI.turnX
-import frc.robot.commands.swerve.NavXReset
 import frc.robot.subsystems.Drivetrain.getDriveSysIDCommand
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.Joystick
@@ -60,13 +59,13 @@ class RobotContainer {
 
         // Configure the trigger bindings
 
-        autoCommandChooser = AutoBuilder.buildAutoChooser("6piece")
+        //autoCommandChooser = AutoBuilder.buildAutoChooser("6piece")
 
         Drivetrain.defaultCommand = teleopDrive
 
         configureBindings()
 
-        SmartDashboard.putData("Auto mode", autoCommandChooser)
+        //SmartDashboard.putData("Auto mode", autoCommandChooser)
 
 
 

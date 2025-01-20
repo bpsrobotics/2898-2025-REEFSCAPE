@@ -72,16 +72,16 @@ object  Drivetrain : SubsystemBase() {
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
-    lateinit var config : RobotConfig;
+//    lateinit var config : RobotConfig;
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
-        try{
-            config = RobotConfig.fromGUISettings();
-        } catch (e : Exception) {
-            // Handle exception as needed
-            e.printStackTrace();
-        }
+//        try{
+//            config = RobotConfig.fromGUISettings();
+//        } catch (e : Exception) {
+//            // Handle exception as needed
+//            e.printStackTrace();
+//        }
         try {
             swerveDrive =
                 SwerveParser(Constants.DriveConstants.DRIVE_CONFIG).createSwerveDrive(Constants.DriveConstants.MaxSpeedMetersPerSecond)
@@ -97,7 +97,7 @@ object  Drivetrain : SubsystemBase() {
             // Stop the odometry thread if we are using vision that way we can synchronize updates better.
             swerveDrive.stopOdometryThread()
         }
-        setupPathPlanner()
+//        setupPathPlanner()
 
         swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
         // Updates odometry whenever a new
@@ -136,30 +136,30 @@ object  Drivetrain : SubsystemBase() {
     /**
      * Setup AutoBuilder for PathPlanner.
      */
-    fun setupPathPlanner() {
-        AutoBuilder.configure(
-            this::getPose,  // Robot pose supplier
-            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
-                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-                PIDConstants(RotationP, RotationI, RotationD)
-            ),
-            config,  // The robot configuration
-            {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-                val alliance = DriverStation.getAlliance()
-                if (alliance.isPresent) {
-                    return@configure alliance.get() == Alliance.Red
-                }
-                false
-            },
-             this// Reference to this subsystem to set requirements
-        )
-    }
+//    fun setupPathPlanner() {
+//        AutoBuilder.configure(
+//            this::getPose,  // Robot pose supplier
+//            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
+//            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+//            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+//            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
+//                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
+//                PIDConstants(RotationP, RotationI, RotationD)
+//            ),
+//            config,  // The robot configuration
+//            {
+//                // Boolean supplier that controls when the path will be mirrored for the red alliance
+//                // This will flip the path being followed to the red side of the field.
+//                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+//                val alliance = DriverStation.getAlliance()
+//                if (alliance.isPresent) {
+//                    return@configure alliance.get() == Alliance.Red
+//                }
+//                false
+//            },
+//             this// Reference to this subsystem to set requirements
+//        )
+//    }
 
     /**
      * Directly send voltage to the drive motors.
@@ -258,31 +258,31 @@ object  Drivetrain : SubsystemBase() {
      * @param setOdomAtStart Whether to update the robot's odometry to the start pose of the path.
      * @return A command that follows the path.
      */
-    fun getAutonomousCommand(
-        autoName: String//,
-//        setOdomAtStart: Boolean
-    ): Command {
-//        var startPosition: Pose2d = Pose2d()
-//        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
-//            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
-//        } else {
-//            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
-//        }
+//    fun getAutonomousCommand(
+//        autoName: String//,
+////        setOdomAtStart: Boolean
+//    ): Command {
+////        var startPosition: Pose2d = Pose2d()
+////        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
+////            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
+////        } else {
+////            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
+////        }
+////
+////        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
+////            startPosition = GeometryUtil.flipFieldPose(startPosition)
+////        }
+////
+////        if (setOdomAtStart)
+////        {
+////            if (startPosition != null) {
+////                resetOdometry(startPosition)
+////            }
+////        }
 //
-//        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
-//            startPosition = GeometryUtil.flipFieldPose(startPosition)
-//        }
-//
-//        if (setOdomAtStart)
-//        {
-//            if (startPosition != null) {
-//                resetOdometry(startPosition)
-//            }
-//        }
-
-        // TODO: Configure path planner's AutoBuilder
-        return PathPlannerAuto(autoName)
-    }
+//        // TODO: Configure path planner's AutoBuilder
+//        return PathPlannerAuto(autoName)
+//    }
 
     /**
      * Advanced drive method that translates and rotates the robot, with a custom center of rotation.
