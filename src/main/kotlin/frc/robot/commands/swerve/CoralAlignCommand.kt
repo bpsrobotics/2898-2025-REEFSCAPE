@@ -1,7 +1,9 @@
 package frc.robot.commands.swerve
+import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
@@ -10,7 +12,9 @@ import frc.robot.subsystems.Vision
 import frc.robot.subsystems.aprilTagFieldLayout
 import org.photonvision.targeting.PhotonTrackedTarget
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 class CoralAlignCommand(
     val speedConsumer: (Transform2d) -> Unit
@@ -36,21 +40,26 @@ class CoralAlignCommand(
             distY = trackedTarget.y
             distX = trackedTarget.x
             yaw = usedTarget.yaw
-            angleZ = trackedTarget.rotation.z
+            angleZ = trackedTarget.rotation.y.radiansToDegrees()
 
         }
+
     }
 
     override fun execute() {
+        val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
         val currentRotation = swerveDrive.pose.rotation.degrees
-        val angleVelocity = if (!yaw.within(10.0, 0.0)){-1.0 * yaw * 0.1 }else{0}.toDouble()
-        val horizontalVelocity = if (!distY.within(0.1, 0.0)){-1.0 * distY * 0.1 }else{0}.toDouble()
         val tagPose = aprilTagFieldLayout.getTagPose(usedTarget.fiducialId).get()
+        val desiredHeading = tagPose.rotation.y.radiansToDegrees() + 180
+        val angleVelocity = if (!desiredHeading.within(10.0, 0.0)){-1.0 * (desiredHeading - (currentRotation+180)) * 0.1}else{0.0}
+        val horizontalVelocity = if (!(distY+cos(currentRotation+180+Vision.cameraOffset.rotation.y)*offsetDist).within(0.1, 0.0)){-1.0 * distY * 0.1 }else{0.0}
 
-        speedConsumer(Transform2d(
+
+        speedConsumer( Transform2d(
             horizontalVelocity * cos(tagPose.rotation.y),
-            horizontalVelocity * sin(tagPose.rotation.y)
-            , Rotation2d(angleVelocity)))
+            horizontalVelocity * sin(tagPose.rotation.y),
+            Rotation2d(angleVelocity))
+        )
     }
 
     override fun isFinished(): Boolean {

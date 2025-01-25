@@ -107,6 +107,7 @@ class Constants {
         const val DriveDeadband = 0.05
         const val SpeedMultiplierMin = 0.4
         const val SpeedMultiplierMax = 1.0
+        const val DEADZONE_THRESHOLD = 0.1
     }
 
     object AutoConstants {
@@ -185,5 +186,6 @@ class Constants {
         const val RED_ALLIANCE_SPEAKER_TAG_ID = 4
         const val BLUE_ALLIANCE_SPEAKER_TAG_ID = 7
     }
+
 
 }

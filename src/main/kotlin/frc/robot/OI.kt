@@ -38,7 +38,7 @@ object OI : SubsystemBase() {
      * Threshold below which [process] will return 0.
      * 0.1 historically used, but optimal value unknown.
      */
-    private const val DEADZONE_THRESHOLD = 0.1
+
 
     /**
      * Utility function for controller axis, optional deadzone and square/cube for extra fine-grain control
@@ -52,7 +52,7 @@ object OI : SubsystemBase() {
         var output = 0.0
 
         if (deadzone) {
-            output = MathUtil.applyDeadband(input, DEADZONE_THRESHOLD)
+            output = MathUtil.applyDeadband(input, Constants.OIConstants.DEADZONE_THRESHOLD)
         }
 
         if (square) {

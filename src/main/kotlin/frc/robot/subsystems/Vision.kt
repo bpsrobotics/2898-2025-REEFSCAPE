@@ -61,6 +61,7 @@ data class Signal<Type>(
 
 object Vision : SubsystemBase() {
     val cam = PhotonCamera("Camera_Module_v1")
+    val cameraOffset = robotToCam
     var results = mutableListOf<PhotonPipelineResult>()
     val listeners = Signal<PhotonPipelineResult>()
     var poseEstimator =
