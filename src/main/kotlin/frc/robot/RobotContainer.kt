@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.commands.swerve.NavXReset
 import frc.beaverlib.async.Promise
 import frc.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
 import frc.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
@@ -62,6 +63,7 @@ class RobotContainer {
     // The robot's subsystems and commands are defined here...
     //private val m_exampleSubsystem = ExampleSubsystem()
     // Replace with CommandPS4Controller or CommandJoystick if needed
+
 
     private fun process(
         input: Double,
@@ -184,6 +186,8 @@ class RobotContainer {
     val operatorTrigger = JoystickButton(operatorController, 1)
 
 
+
+
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
             { MathUtil.applyDeadband(translationY, 0.1) },
@@ -192,6 +196,9 @@ class RobotContainer {
             { true },
             { false }
         )
+
+    val navXResetCommand: NavXReset = NavXReset()
+
     val intakeSpeed get() = operatorController.throttle
 
 
@@ -238,6 +245,10 @@ class RobotContainer {
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
+
+
+
+        resetGyro.whileTrue(navXResetCommand)
 
     }
 
