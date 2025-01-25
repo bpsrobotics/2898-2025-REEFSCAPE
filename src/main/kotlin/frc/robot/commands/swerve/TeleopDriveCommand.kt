@@ -3,7 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.commands.swerve
 
+import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
@@ -34,6 +36,9 @@ class TeleopDriveCommand(
     private val slowMode: () -> Boolean
     private val controller: SwerveController
     private val swerve: Drivetrain = Drivetrain
+    var addSpeed = Transform2d()
+    /** adds to the speed of the robot */
+    val speedConsumer: (Transform2d) -> Unit = { addSpeed += it}
 
     init {
         this.vForward = vForward
@@ -67,10 +72,11 @@ class TeleopDriveCommand(
 
         // Drive using raw values.
         swerve.drive(
-            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed),
-            angVelocity * controller.config.maxAngularVelocity,
+            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed) + addSpeed.translation,
+            angVelocity * controller.config.maxAngularVelocity + addSpeed.rotation.radians,
             driveMode()
         )
+        addSpeed = Transform2d()
     }
 
     /** @suppress */

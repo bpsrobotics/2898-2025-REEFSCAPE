@@ -82,7 +82,7 @@ class RobotContainer {
     private fun initializeObjects() {
         Drivetrain
     }
-    val corralCommand = CoralAlignCommand()
+    val corralCommand = CoralAlignCommand(teleopDrive.speedConsumer)
     /**
      * Use this method to define your trigger->command mappings. Triggers can be created via the
      * [Trigger.Trigger] constructor with an arbitrary
