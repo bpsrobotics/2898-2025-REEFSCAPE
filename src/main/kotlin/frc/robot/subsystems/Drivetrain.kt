@@ -116,13 +116,7 @@ object  Drivetrain : SubsystemBase() {
 ////    var targStates = arrayOf(swerveDrive.getTargetSpeeds(-translationY, -translationX, Rotation2d(-turnX)))
 
     override fun periodic() {
-        Constants.ModuleConstants.TurningP = SmartDashboard.getNumber("TurningKP", Constants.ModuleConstants.TurningP)
-        Constants.ModuleConstants.TurningI = SmartDashboard.getNumber("TurningKI", Constants.ModuleConstants.TurningI)
-        Constants.ModuleConstants.TurningD = SmartDashboard.getNumber("TurningKD", Constants.ModuleConstants.TurningD)
 
-        Constants.ModuleConstants.DrivingP = SmartDashboard.getNumber("DrivingKP", Constants.ModuleConstants.DrivingP)
-        Constants.ModuleConstants.DrivingI = SmartDashboard.getNumber("DrivingKI", Constants.ModuleConstants.DrivingI)
-        Constants.ModuleConstants.DrivingD = SmartDashboard.getNumber("DrivingKD", Constants.ModuleConstants.DrivingD)
 
         SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
         SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)

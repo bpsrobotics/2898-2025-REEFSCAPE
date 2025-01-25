@@ -1,14 +1,7 @@
 package frc.robot
 
 import beaverlib.utils.geometry.Vector2
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER1
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER2
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_STOWED
-import frc.robot.Constants.ButtonConstants.ARM_DOWN
-import frc.robot.Constants.ButtonConstants.ARM_UP
-import frc.robot.Constants.ButtonConstants.SHOOT
+
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
@@ -18,7 +11,9 @@ import edu.wpi.first.wpilibj.event.BooleanEvent
 import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
+import frc.robot.Constants.ButtonConstants.RESET_GYRO
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -75,12 +70,6 @@ object OI : SubsystemBase() {
     private val driverController = XboxController(0)
     private val operatorController = Joystick(1)
 
-    // Left and right shoulder switches (the ones next to the trigger) for quickturn
-    val quickTurnRight
-        get() = process(driverController.rightTriggerAxis, deadzone = true, square = true)
-    val quickTurnLeft
-        get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
-
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle
     /** Driver controller's throttle on the left joystick for the X Axis, from -1 (left) to 1 (right) */
@@ -101,21 +90,12 @@ object OI : SubsystemBase() {
         get() = driverController.leftTriggerAxis
     val rightTrigger
         get() = driverController.rightTriggerAxis
-    val driverY
-        get() = driverController.yButton
-    val driverX
-        get() = driverController.xButton
-    //    val resetGyro: BooleanEvent = driverController.rightBumper(loop).debounce(0.5).rising()
-    val resetGyro get() = driverController.rightBumperButton
 
-    val climb get() = operatorController.getRawButton(12)
 
-    val alignButton
-        get() = driverController.yButton
-    val alignButtonRelease
-        get() = driverController.yButtonReleased
-    val alignButtonPressed
-        get() = driverController.yButtonPressed
+    val resetGyro = JoystickButton(driverController, RESET_GYRO)
+
+
+
     val highHat get() = operatorController.pov
     val hatVector get() = when (operatorController.pov) {
         0 -> Vector2(0.0,1.0)
@@ -125,15 +105,6 @@ object OI : SubsystemBase() {
         else -> Vector2.zero()
     }
 
-    val armSelectUp get() = operatorController.getRawButton(ARM_UP)
-    val armSelectDown get() = operatorController.getRawButton(ARM_DOWN)
-
-    val armDirectGround get() = operatorController.getRawButton(ARM_DIRECT_GROUND)
-    val armDirectStowed get() = operatorController.getRawButton(ARM_DIRECT_STOWED)
-    val armDirectAmp get() = operatorController.getRawButton(ARM_DIRECT_AMP)
-    val armDirectShooter1 get() = operatorController.getRawButton(ARM_DIRECT_SHOOTER1)
-    val armDirectShooter1Pressed get() = operatorController.getRawButtonPressed(ARM_DIRECT_SHOOTER1)
-    val armDirectShooter2 get() = operatorController.getRawButton(ARM_DIRECT_SHOOTER2)
 
     val intakeSpeed get() = operatorController.throttle
 
@@ -141,8 +112,6 @@ object OI : SubsystemBase() {
 //    val shooterOutake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0, 1) }
 
 
-    val climbUp get() = operatorController.getRawButton(6)
-    val climbDown get() = operatorController.getRawButton(4)
     enum class Direction {
         LEFT, RIGHT, UP, DOWN, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT, INACTIVE;
 
@@ -211,14 +180,7 @@ object OI : SubsystemBase() {
         Rumble.update()
     }
 
-//    init {
-//        armUp.debounce(0.05).onTrue(InstantCommand({
-//            Arm.setGoal(Arm.setpoint + 0.1)
-//        }))
-//        armDown.debounce(0.05).onTrue(InstantCommand({
-//            Arm.setGoal(Arm.setpoint - 0.1)
-//        }))
-//    }
+
 
 
 }

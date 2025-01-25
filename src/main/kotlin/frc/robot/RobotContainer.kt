@@ -5,11 +5,6 @@ package frc.robot
 
 //import com.team2898.robot.Constants.OperatorConstants
 
-import com.pathplanner.lib.auto.AutoBuilder
-
-import frc.robot.OI.driverX
-import frc.robot.OI.intakeSpeed
-import frc.robot.OI.operatorTrigger
 import frc.robot.OI.resetGyro
 import frc.robot.OI.rightTrigger
 import frc.robot.OI.translationX
@@ -23,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 
@@ -37,9 +33,10 @@ class RobotContainer {
     // The robot's subsystems and commands are defined here...
     //private val m_exampleSubsystem = ExampleSubsystem()
     // Replace with CommandPS4Controller or CommandJoystick if needed
-    private val driverController = XboxController(0)
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
+
+
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
@@ -49,6 +46,8 @@ class RobotContainer {
             { true },
             { false }
         )
+
+    val navXResetCommand: NavXReset = NavXReset()
 
 
 
@@ -92,6 +91,10 @@ class RobotContainer {
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
+
+
+        resetGyro.whileTrue(navXResetCommand)
+
     }
 
 }
