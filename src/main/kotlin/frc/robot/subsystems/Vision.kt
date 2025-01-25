@@ -22,7 +22,7 @@ val aprilTagFieldLayout = AprilTagFieldLayout(
 
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
-    Translation3d(0.5, 0.0, 0.5),
+    Translation3d(-0.0762, 0.0, 0.5),
     Rotation3d(0.0, 0.0, 0.0)
 ) //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
 

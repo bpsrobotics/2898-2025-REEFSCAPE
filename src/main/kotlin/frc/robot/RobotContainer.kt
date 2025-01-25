@@ -23,6 +23,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.OI.alignButton
+import frc.robot.OI.alignButtonRelease
+import frc.robot.OI.allign
+import frc.robot.commands.swerve.CoralAlignCommand
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 
@@ -78,13 +82,16 @@ class RobotContainer {
     private fun initializeObjects() {
         Drivetrain
     }
-
+    val corralCommand = CoralAlignCommand()
     /**
      * Use this method to define your trigger->command mappings. Triggers can be created via the
      * [Trigger.Trigger] constructor with an arbitrary
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
+        allign.whileTrue(corralCommand)
+
+
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { m_exampleSubsystem.exampleCondition() }
         //        .onTrue(ExampleCommand(m_exampleSubsystem))

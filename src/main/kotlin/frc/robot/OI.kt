@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.event.BooleanEvent
 import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.beaverlib.async.Promise
 import kotlin.math.pow
 import kotlin.math.sign
@@ -73,6 +74,8 @@ object OI : SubsystemBase() {
         process(this, deadzone, square, cube)
 
     private val driverController = XboxController(0)
+    private val commandDriverController = CommandXboxController(0)
+
     private val operatorController = Joystick(1)
 
     // Left and right shoulder switches (the ones next to the trigger) for quickturn
@@ -81,6 +84,8 @@ object OI : SubsystemBase() {
     val quickTurnLeft
         get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
 
+
+    val allign = commandDriverController.rightBumper()
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle
     /** Driver controller's throttle on the left joystick for the X Axis, from -1 (left) to 1 (right) */
