@@ -8,7 +8,6 @@ package frc.robot
 import beaverlib.utils.geometry.Vector2
 import com.pathplanner.lib.auto.AutoBuilder
 
-import frc.robot.OI.driverX
 import frc.robot.OI.intakeSpeed
 import frc.robot.OI.operatorTrigger
 import frc.robot.OI.resetGyro
@@ -33,18 +32,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.commands.swerve.NavXReset
 import frc.beaverlib.async.Promise
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER1
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER2
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_STOWED
-import frc.robot.Constants.ButtonConstants.ARM_DOWN
-import frc.robot.Constants.ButtonConstants.ARM_UP
-import frc.robot.OI.Direction
-import frc.robot.OI.Rumble
-import frc.robot.OI.alignButton
-import frc.robot.OI.alignButtonRelease
-import frc.robot.OI.allign
 import frc.robot.OI.process
 import frc.robot.commands.swerve.CoralAlignCommand
 import frc.robot.commands.swerve.TeleopDriveCommand

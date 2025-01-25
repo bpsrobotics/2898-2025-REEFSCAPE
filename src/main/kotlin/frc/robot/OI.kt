@@ -68,7 +68,6 @@ object OI : SubsystemBase() {
         process(this, deadzone, square, cube)
 
     private val driverController = XboxController(0)
-    private val commandDriverController = CommandXboxController(0)
 
     private val operatorController = Joystick(1)
 
@@ -79,7 +78,6 @@ object OI : SubsystemBase() {
         get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
 
 
-    val allign = commandDriverController.rightBumper()
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle
     /** Driver controller's throttle on the left joystick for the X Axis, from -1 (left) to 1 (right) */
