@@ -20,6 +20,8 @@ val aprilTagFieldLayout = AprilTagFieldLayout(
     )),
     10.0,10.0)
 
+val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField)
+
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
     Translation3d(-0.0762, 0.0, 0.5),
@@ -60,23 +62,26 @@ data class Signal<Type>(
 }
 
 object Vision : SubsystemBase() {
-    val cam = PhotonCamera("Camera_Module_v1")
+    val cam = PhotonCamera("Arducam_OV9281_USB_Camera")
     val cameraOffset = robotToCam
     var results = mutableListOf<PhotonPipelineResult>()
     val listeners = Signal<PhotonPipelineResult>()
     var poseEstimator =
-        PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
+        PhotonPoseEstimator(aprilTagFieldInGame, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
+    var previousPose = Pose2d()
+
     init {
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
     }
     override fun periodic(){
         results = cam.allUnreadResults
-        if (results.isEmpty()) return
-        // Iterate through each of the results
-        results.forEach { visionResult: PhotonPipelineResult ->
-            // Iterate through each of the listener functions, and call them passing the vision result as the input
-            listeners.update (visionResult)
-        }
+        if (results.isNullOrEmpty()) return
+            // Iterate through each of the results
+            results.forEach { visionResult: PhotonPipelineResult ->
+                // Iterate through each of the listener functions, and call them passing the vision result as the input
+                listeners.update(visionResult)
+
+            }
     }
 
     /**
@@ -85,8 +90,10 @@ object Vision : SubsystemBase() {
      * @return The estimated Pose3d of the robot. If there is none, return null.
      */
     fun getRobotPosition(result: PhotonPipelineResult): Pose3d? {
+        setReference(previousPose)
         val estimatedPose = poseEstimator.update(result) ?: return null
         if (estimatedPose.isEmpty) return null
+        previousPose = estimatedPose.get().estimatedPose.toPose2d()
         return estimatedPose.get().estimatedPose
     }
 

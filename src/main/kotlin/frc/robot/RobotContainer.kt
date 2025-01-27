@@ -222,7 +222,7 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        coralAlign.whileTrue(corralCommand)
+        coralAlign.whileTrue(CoralAlignCommand(teleopDrive.speedConsumer))
 
 
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
