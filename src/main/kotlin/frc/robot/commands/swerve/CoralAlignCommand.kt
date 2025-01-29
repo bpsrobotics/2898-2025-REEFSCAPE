@@ -19,16 +19,16 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 class CoralAlignCommand(
-    val speedConsumer: (Transform2d) -> Unit
+    val speedConsumer: (Transform2d) -> Unit,
+    val horizontalOffset : Double = 0.0
 ) : Command() {
+
     private lateinit var usedTarget : PhotonTrackedTarget
-    private var distX = 0.0
-    private var distY = 0.0
-    private var angleZ = 0.0
-    private var yaw = 0.0
+    private var distToTag = Transform2d()
     private val runtime = Timer()
     val turningPID = TurningPID(0.1,0.01)
     val movementPID = PIDController(1.0, 0.0,0.1)
+    val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
 
 
     init { addRequirements(Drivetrain) }
@@ -40,27 +40,26 @@ class CoralAlignCommand(
             if (it.bestTarget != null) {
                 usedTarget = it.bestTarget
                 val trackedTarget = usedTarget.getBestCameraToTarget()
-                distY = trackedTarget.y
-                distX = trackedTarget.x
-                yaw = usedTarget.yaw
-                angleZ = trackedTarget.rotation.z.radiansToDegrees()
+                distToTag = Transform2d(trackedTarget.x, trackedTarget.y, Rotation2d(trackedTarget.rotation.z))
             }
 
         }
 
     }
-
+    fun trueRobotToTag(): Double {
+        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist
+    }
     override fun execute() {
         if (!::usedTarget.isInitialized) return
-
-        val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
         val currentRotation = swerveDrive.pose.rotation.degrees
         val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
         val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
+
         turningPID.setPoint = desiredHeading
-        movementPID.setpoint = 0.0
+        movementPID.setpoint = horizontalOffset
+
         val angleVelocity = if (!desiredHeading.within(3.0, 0.0)) { turningPID.turnspeedOutput(currentRotation + 180) } else { 0.0 }
-        val horizontalVelocity = if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { movementPID.calculate(distY) } else { 0.0 }
+        val horizontalVelocity = if (!trueRobotToTag().within(0.1, 0.0)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
         speedConsumer(
             Transform2d(
                 horizontalVelocity * cos(tagPose.rotation.y),
