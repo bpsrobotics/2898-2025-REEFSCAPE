@@ -18,6 +18,11 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+/**
+ * Align with the best tag, solely relying on vision
+ * @param speedConsumer Field relative drive function
+ * @param horizontalOffset How far to the left or right you want to allign with the tag
+ */
 class CoralAlignCommand(
     val speedConsumer: (Transform2d) -> Unit,
     val horizontalOffset : Double = 0.0
@@ -47,18 +52,18 @@ class CoralAlignCommand(
 
     }
     fun trueRobotToTag(): Double {
-        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist
+        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
     }
     override fun execute() {
         if (!::usedTarget.isInitialized) return
-        val currentRotation = swerveDrive.pose.rotation.degrees
+        val currentRotation = (swerveDrive.pose.rotation.degrees + 180) % 360
         val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
         val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
 
         turningPID.setPoint = desiredHeading
         movementPID.setpoint = horizontalOffset
-
-        val angleVelocity = if (!desiredHeading.within(3.0, 0.0)) { turningPID.turnspeedOutput(currentRotation + 180) } else { 0.0 }
+        // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
+        val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { turningPID.turnspeedOutput(currentRotation) } else { 0.0 }
         val horizontalVelocity = if (!trueRobotToTag().within(0.1, 0.0)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
         speedConsumer(
             Transform2d(
