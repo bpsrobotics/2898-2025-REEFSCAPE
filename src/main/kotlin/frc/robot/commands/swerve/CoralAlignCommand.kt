@@ -64,7 +64,7 @@ class CoralAlignCommand(
         movementPID.setpoint = horizontalOffset
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
         val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { turningPID.turnspeedOutput(currentRotation) } else { 0.0 }
-        val horizontalVelocity = if (!trueRobotToTag().within(0.1, 0.0)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
+        val horizontalVelocity = if (!trueRobotToTag().within(0.1, horizontalOffset)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
         speedConsumer(
             Transform2d(
                 horizontalVelocity * cos(tagPose.rotation.y),
