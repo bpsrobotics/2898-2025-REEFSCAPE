@@ -4,44 +4,20 @@
 package frc.robot.subsystems
 
 
-import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.commands.PathPlannerAuto
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.util.DriveFeedforwards
-import com.pathplanner.lib.util.GeometryUtil
 import edu.wpi.first.math.*
-import frc.robot.Constants
-import frc.robot.Constants.AutoConstants.RotationD
-import frc.robot.Constants.AutoConstants.RotationI
-import frc.robot.Constants.AutoConstants.RotationP
-import frc.robot.Constants.AutoConstants.TranslationD
-import frc.robot.Constants.AutoConstants.TranslationI
-import frc.robot.Constants.AutoConstants.TranslationP
-import frc.robot.OI.translationX
-import frc.robot.OI.translationY
-import frc.robot.OI.turnX
-import frc.robot.OI.turnY
-import frc.robot.subsystems.Drivetrain.run
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.numbers.N1
-import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.networktables.StructArrayPublisher
-import edu.wpi.first.units.Measure
+import edu.wpi.first.networktables.StructPublisher
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog
 import edu.wpi.first.wpilibj2.command.Command
@@ -49,15 +25,14 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import frc.robot.Constants
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
-import swervelib.math.SwerveMath
 import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
 import java.util.*
-import java.util.function.BooleanSupplier
 
 
 object  Drivetrain : SubsystemBase() {
@@ -73,6 +48,13 @@ object  Drivetrain : SubsystemBase() {
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
+
+//        try{
+//            config = RobotConfig.fromGUISettings();
+//        } catch (e : Exception) {
+//            // Handle exception as needed
+//            e.printStackTrace();
+//        }
         try {
             swerveDrive =
                 SwerveParser(Constants.DriveConstants.DRIVE_CONFIG).createSwerveDrive(Constants.DriveConstants.MaxSpeedMetersPerSecond)
@@ -99,12 +81,12 @@ object  Drivetrain : SubsystemBase() {
             SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
         }
 
+
+
     }
 
-//    var targetStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
-//    getStructArrayTopic("SwerveStates/targetStates", SwerveModuleState.struct).publish()
-//
-////    var targStates = arrayOf(swerveDrive.getTargetSpeeds(-translationY, -translationX, Rotation2d(-turnX)))
+    var publisher: StructPublisher<Pose2d> = NetworkTableInstance.getDefault()
+        .getStructTopic("MyPose", Pose2d.struct).publish()
 
     override fun periodic() {
 
@@ -112,11 +94,39 @@ object  Drivetrain : SubsystemBase() {
         SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
         SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)
 
+        publisher.set(getPose())
+
         swerveStates.set(swerveDrive.states)
 
-//        targetStates.set()
-//        targetStates.set(getTargetSpeeds(-translationY, -translationX, Rotation2d(-turnX)))
     }
+
+    /**
+     * Setup AutoBuilder for PathPlanner.
+     */
+//    fun setupPathPlanner() {
+//        AutoBuilder.configure(
+//            this::getPose,  // Robot pose supplier
+//            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
+//            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+//            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+//            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
+//                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
+//                PIDConstants(RotationP, RotationI, RotationD)
+//            ),
+//            ,  // The robot configuration
+//            {
+//                // Boolean supplier that controls when the path will be mirrored for the red alliance
+//                // This will flip the path being followed to the red side of the field.
+//                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+//                val alliance = DriverStation.getAlliance()
+//                if (alliance.isPresent) {
+//                    return@configure alliance.get() == Alliance.Red
+//                }
+//                false
+//            },
+//             this// Reference to this subsystem to set requirements
+//        )
+//    }
 
     /**
      * Directly send voltage to the drive motors.
@@ -210,6 +220,38 @@ object  Drivetrain : SubsystemBase() {
     }
 
     /**
+     * Gets a command that follows a path created in PathPlanner.
+     * @param pathName The path's file name.
+     * @param setOdomAtStart Whether to update the robot's odometry to the start pose of the path.
+     * @return A command that follows the path.
+     */
+//    fun getAutonomousCommand(
+//        autoName: String//,
+////        setOdomAtStart: Boolean
+//    ): Command {
+////        var startPosition: Pose2d = Pose2d()
+////        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
+////            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
+////        } else {
+////            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
+////        }
+////
+////        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
+////            startPosition = GeometryUtil.flipFieldPose(startPosition)
+////        }
+////
+////        if (setOdomAtStart)
+////        {
+////            if (startPosition != null) {
+////                resetOdometry(startPosition)
+////            }
+////        }
+//
+//        // TODO: Configure path planner's AutoBuilder
+//        return PathPlannerAuto(autoName)
+//    }
+
+    /**
      * Advanced drive method that translates and rotates the robot, with a custom center of rotation.
      * @param translation The desired X and Y velocity of the robot.
      * @param rotation The desired rotational velocity of the robot.
@@ -251,7 +293,9 @@ object  Drivetrain : SubsystemBase() {
      * Method to get the current pose of the robot.
      * @return The current pose of the robot.
      */
-    fun getPose() = Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
+    fun getPose() : Pose2d {
+        return Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
+    }
 
     /**
      * Method to display a desired trajectory to a field2d object.
@@ -259,6 +303,8 @@ object  Drivetrain : SubsystemBase() {
     fun postTrajectory(trajectory: Trajectory) {
         swerveDrive.postTrajectory(trajectory)
     }
+
+
 
     /**
      * Method to zero the gyro.
@@ -359,7 +405,7 @@ object  Drivetrain : SubsystemBase() {
      * @param timestamp The timestamp of the pose measurement.
      */
     fun addVisionMeasurement(measurement: Pose2d, timestamp: Double) {
-        swerveDrive.addVisionMeasurement(measurement, timestamp)
+        swerveDrive.addVisionMeasurement(Pose2d(measurement.x, measurement.y, measurement.rotation), timestamp)
     }
 
     /**
@@ -390,25 +436,6 @@ object  Drivetrain : SubsystemBase() {
         return HeadingPID.calculate(measurement, setpoint)
     }
 
-    fun getRobotRelativeSpeeds() : ChassisSpeeds {
-        return swerveDrive.robotVelocity
-    }
 
-    fun driveCommand(): Command {
-        return run{
-            val scaledInputs = SwerveMath.scaleTranslation(Translation2d(
-                MathUtil.applyDeadband(translationY, 0.1),
-                MathUtil.applyDeadband(translationX, 0.1)),
-                0.8
-            )
-            drive(
-                swerveDrive.swerveController.getTargetSpeeds(scaledInputs.x, scaledInputs.y,
-                MathUtil.applyDeadband(turnX, 0.1),
-                MathUtil.applyDeadband(turnY, 0.1),
-                swerveDrive.odometryHeading.radians,
-                swerveDrive.maximumChassisVelocity //TODO Make sure that this is MaximumVelocy
-            ));
-        }
-    }
 
 }
