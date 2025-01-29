@@ -37,10 +37,20 @@ class Constants {
     object ElevatorConstants {
         const val MaxVel = 2.0
         const val MaxAccel = 2.0
-        const val kP = 0.0
+
+        //PID constants
+        const val kP = 1.0
         const val kI = 0.0
         const val kD = 0.0
+
+        //FF constants
+        const val kS = 0.0
+        const val kV = 0.0
         const val kG = 0.4
+        const val kA = 0.0
+
+        const val NEG_MAX_OUTPUT = -6.0
+        const val POS_MAX_OUTPUT = 6.0
 
         enum class ElevatorState(val position: Double?) {
             Custom(0.0),
