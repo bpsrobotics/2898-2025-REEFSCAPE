@@ -1,9 +1,10 @@
 package frc.robot.commands.swerve
+import beaverlib.controls.TurningPID
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
@@ -11,8 +12,6 @@ import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
 import frc.robot.subsystems.aprilTagFieldInGame
-import frc.robot.subsystems.aprilTagFieldLayout
-import org.dyn4j.geometry.Rotation
 import org.photonvision.targeting.PhotonTrackedTarget
 import kotlin.math.cos
 import kotlin.math.pow
@@ -28,12 +27,11 @@ class CoralAlignCommand(
     private var angleZ = 0.0
     private var yaw = 0.0
     private val runtime = Timer()
-    private val swerve: Drivetrain
+    val turningPID = TurningPID(0.1,0.01)
+    val movementPID = PIDController(1.0, 0.0,0.1)
 
 
-    init {
-        this.swerve = Drivetrain
-    }
+    init { addRequirements(Drivetrain) }
 
     override fun initialize(){
         runtime.reset()
@@ -53,26 +51,28 @@ class CoralAlignCommand(
     }
 
     override fun execute() {
+        if (!::usedTarget.isInitialized) return
 
-        if (::usedTarget.isInitialized) {
-            val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
-            val currentRotation = swerveDrive.pose.rotation.degrees
-            val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
-            val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
-            val angleVelocity = if (!desiredHeading.within(10.0, 0.0)) { 1.0 * (desiredHeading - (currentRotation + 180)) * 0.1 } else { 0.0 }
-            val horizontalVelocity =
-                if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { 1.0 * distY * 1.0 } else { 0.0 }
-            speedConsumer(
-                Transform2d(
-                    horizontalVelocity * cos(tagPose.rotation.y),
-                    horizontalVelocity * sin(tagPose.rotation.y),
-                    Rotation2d(angleVelocity)
-                )
+        val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
+        val currentRotation = swerveDrive.pose.rotation.degrees
+        val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
+        val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
+        turningPID.setPoint = desiredHeading
+        movementPID.setpoint = 0.0
+        val angleVelocity = if (!desiredHeading.within(3.0, 0.0)) { turningPID.turnspeedOutput(currentRotation + 180) } else { 0.0 }
+        val horizontalVelocity = if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { movementPID.calculate(distY) } else { 0.0 }
+        speedConsumer(
+            Transform2d(
+                horizontalVelocity * cos(tagPose.rotation.y),
+                horizontalVelocity * sin(tagPose.rotation.y),
+                Rotation2d(angleVelocity)
             )
-            SmartDashboard.putNumber("horizontalVelocity", horizontalVelocity * cos(tagPose.rotation.y))
-            SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
-        }
+        )
+        SmartDashboard.putNumber("horizontalVelocity", horizontalVelocity * cos(tagPose.rotation.y))
+        SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
     }
+
+
 
     override fun isFinished(): Boolean {
         return false
