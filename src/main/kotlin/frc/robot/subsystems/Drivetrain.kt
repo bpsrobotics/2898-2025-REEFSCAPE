@@ -94,7 +94,7 @@ object  Drivetrain : SubsystemBase() {
         // Updates odometry whenever a new
         Vision.listeners.add ( "UpdateOdometry") {
             val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
+            swerveDrive.addVisionMeasurement(Pose2d(-position.x, -position.y, position.rotation), it.timestampSeconds)
             SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
             SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
         }
@@ -251,7 +251,7 @@ object  Drivetrain : SubsystemBase() {
      * Method to get the current pose of the robot.
      * @return The current pose of the robot.
      */
-    fun getPose() = swerveDrive.pose
+    fun getPose() = Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
 
     /**
      * Method to display a desired trajectory to a field2d object.

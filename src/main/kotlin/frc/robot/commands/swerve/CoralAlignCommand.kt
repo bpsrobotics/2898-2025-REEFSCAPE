@@ -12,6 +12,7 @@ import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
 import frc.robot.subsystems.aprilTagFieldInGame
 import frc.robot.subsystems.aprilTagFieldLayout
+import org.dyn4j.geometry.Rotation
 import org.photonvision.targeting.PhotonTrackedTarget
 import kotlin.math.cos
 import kotlin.math.pow
@@ -38,12 +39,15 @@ class CoralAlignCommand(
         runtime.reset()
         runtime.start()
         Vision.listeners.add("UpdateAlignCommand"){
-            usedTarget = it.bestTarget
-            val trackedTarget = usedTarget.getBestCameraToTarget()
-            distY = trackedTarget.y
-            distX = trackedTarget.x
-            yaw = usedTarget.yaw
-            angleZ = trackedTarget.rotation.y.radiansToDegrees()
+            if (it.bestTarget != null) {
+                usedTarget = it.bestTarget
+                val trackedTarget = usedTarget.getBestCameraToTarget()
+                distY = trackedTarget.y
+                distX = trackedTarget.x
+                yaw = usedTarget.yaw
+                angleZ = trackedTarget.rotation.z.radiansToDegrees()
+            }
+
         }
 
     }
@@ -54,11 +58,10 @@ class CoralAlignCommand(
             val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
             val currentRotation = swerveDrive.pose.rotation.degrees
             val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
-            val desiredHeading = tagPose.rotation.y.radiansToDegrees() + 180
-//            val angleVelocity = if (!desiredHeading.within(10.0, 0.0)) { -1.0 * (desiredHeading - (currentRotation + 180)) * 0.1 } else { 0.0 }\
-            val angleVelocity = 0.0
+            val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
+            val angleVelocity = if (!desiredHeading.within(10.0, 0.0)) { 1.0 * (desiredHeading - (currentRotation + 180)) * 0.1 } else { 0.0 }
             val horizontalVelocity =
-                if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { -1.0 * distY * 0.5 } else { 0.0 }
+                if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { 1.0 * distY * 1.0 } else { 0.0 }
             speedConsumer(
                 Transform2d(
                     horizontalVelocity * cos(tagPose.rotation.y),
@@ -77,6 +80,15 @@ class CoralAlignCommand(
 
     override fun end(interrupted: Boolean) {
         Vision.listeners.remove("UpdateAlignCommand")
+        SmartDashboard.putNumber("horizontalVelocity", 0.0)
+        SmartDashboard.putNumber("verticalVelocity", 0.0)
+        speedConsumer(
+            Transform2d(
+                0.0,
+                0.0,
+                Rotation2d(0.0)
+            )
+        )
     }
 
 

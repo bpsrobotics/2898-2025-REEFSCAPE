@@ -8,6 +8,7 @@ import edu.wpi.first.math.Nat
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
@@ -75,13 +76,15 @@ object Vision : SubsystemBase() {
     }
     override fun periodic(){
         results = cam.allUnreadResults
-        if (results.isNullOrEmpty()) return
+        SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
+        if (!results.isEmpty()) {
             // Iterate through each of the results
             results.forEach { visionResult: PhotonPipelineResult ->
                 // Iterate through each of the listener functions, and call them passing the vision result as the input
                 listeners.update(visionResult)
 
             }
+        }
     }
 
     /**
