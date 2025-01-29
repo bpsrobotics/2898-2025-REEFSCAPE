@@ -60,19 +60,13 @@ class RobotContainer {
     ): Double {
         var output = 0.0
 
-        if (deadzone) {
-            output = MathUtil.applyDeadband(input, Constants.OIConstants.DEADZONE_THRESHOLD)
-        }
+        if (deadzone) output = MathUtil.applyDeadband(input, Constants.OIConstants.DEADZONE_THRESHOLD)
 
-        if (square) {
-            // To keep the signage for output, we multiply by sign(output). This keeps negative inputs resulting in negative outputs.
-            output = output.pow(2) * sign(output)
-        }
+        // To keep the signage for output, we multiply by sign(output). This keeps negative inputs resulting in negative outputs.
+        if (square) output = output.pow(2) * sign(output)
 
-        if (cube) {
-            // Because cubing is an odd number of multiplications, we don't need to multiply by sign(output) here.
-            output = output.pow(3)
-        }
+        // Because cubing is an odd number of multiplications, we don't need to multiply by sign(output) here.
+        if (cube) output = output.pow(3)
 
         return output
     }
@@ -84,33 +78,44 @@ class RobotContainer {
 
     private val driverController = XboxController(0)
     private val commandDriverController = CommandXboxController(0)
+    class Rumble(val controller : CommandXboxController, val time: Double = 1.0, val rumblePower : Double = 1.0, val rumbleSide : GenericHID.RumbleType = GenericHID.RumbleType.kRightRumble ) : Command() {
+        val timer = Timer()
+        override fun initialize() { timer.restart() }
+        override fun execute() { controller.setRumble(rumbleSide, rumblePower) }
+
+        override fun end(interrupted: Boolean) { controller.setRumble(rumbleSide, 0.0) }
+
+        override fun isFinished(): Boolean { return timer.hasElapsed(time) }
+    }
+
+
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
     private val operatorController = Joystick(1)
 
     val quickTurnRight
-        get() = process(driverController.rightTriggerAxis, deadzone = true, square = true)
+        get() = process(commandDriverController.rightTriggerAxis, deadzone = true, square = true)
     val quickTurnLeft
-        get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
+        get() = process(commandDriverController.leftTriggerAxis, deadzone = true, square = true)
 
     /** Driver controller's throttle on the left joystick for the X Axis, from -1 (left) to 1 (right) */
     val translationX
-        get() = process(driverController.leftX, deadzone = true, square = false)
+        get() = process(commandDriverController.leftX, deadzone = true, square = false)
 
     /** Driver controller's throttle on the left joystick for the Y Axis, from -1 (down) to 1 (up) */
     val translationY
-        get() = process(driverController.leftY, deadzone = true, square = false)
+        get() = process(commandDriverController.leftY, deadzone = true, square = false)
 
     /** Driver controller's throttle on the right joystick for the X Axis, from -1 (left) to 1 (right) */
     val turnX
-        get() = process(driverController.rightX, deadzone = true, square = false)
+        get() = process(commandDriverController.rightX, deadzone = true, square = false)
     /** Driver controller's throttle on the right joystick for the Y Axis, from -1 (down) to 1 (up) */
     val turnY
-        get() = process(driverController.rightY, deadzone = true, square = false)
+        get() = process(commandDriverController.rightY, deadzone = true, square = false)
 
     val leftTrigger
-        get() = driverController.leftTriggerAxis
+        get() = commandDriverController.leftTriggerAxis
     val rightTrigger
-        get() = driverController.rightTriggerAxis
+        get() = commandDriverController.rightTriggerAxis
 
     val driverY = JoystickButton(driverController, 4)
     val driverX = JoystickButton(driverController, 3)
@@ -203,9 +208,6 @@ class RobotContainer {
         configureBindings()
 
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
-
-
-
     }
     fun getAutonomousCommand(): Command{
         val path = autoCommandChooser.selected
