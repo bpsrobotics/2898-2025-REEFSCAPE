@@ -4,6 +4,12 @@
 package frc.robot.subsystems
 
 
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.commands.PathPlannerAuto
+import com.pathplanner.lib.config.ModuleConfig
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.*
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
@@ -11,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -18,6 +25,7 @@ import edu.wpi.first.networktables.StructArrayPublisher
 import edu.wpi.first.networktables.StructPublisher
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog
 import edu.wpi.first.wpilibj2.command.Command
@@ -26,6 +34,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
+import frc.robot.Constants.AutoConstants.RotationD
+import frc.robot.Constants.AutoConstants.RotationI
+import frc.robot.Constants.AutoConstants.RotationP
+import frc.robot.Constants.AutoConstants.TranslationD
+import frc.robot.Constants.AutoConstants.TranslationI
+import frc.robot.Constants.AutoConstants.TranslationP
+import frc.robot.Constants.DriveConstants.DriveKinematics
+import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
@@ -84,7 +100,7 @@ object  Drivetrain : SubsystemBase() {
             SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
         }
 
-
+        setupPathPlanner()
 
     }
 
@@ -106,30 +122,30 @@ object  Drivetrain : SubsystemBase() {
     /**
      * Setup AutoBuilder for PathPlanner.
      */
-//    fun setupPathPlanner() {
-//        AutoBuilder.configure(
-//            this::getPose,  // Robot pose supplier
-//            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
-//            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-//            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-//            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
-//                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-//                PIDConstants(RotationP, RotationI, RotationD)
-//            ),
-//            ,  // The robot configuration
-//            {
-//                // Boolean supplier that controls when the path will be mirrored for the red alliance
-//                // This will flip the path being followed to the red side of the field.
-//                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-//                val alliance = DriverStation.getAlliance()
-//                if (alliance.isPresent) {
-//                    return@configure alliance.get() == Alliance.Red
-//                }
-//                false
-//            },
-//             this// Reference to this subsystem to set requirements
-//        )
-//    }
+    fun setupPathPlanner() {
+        AutoBuilder.configure(
+            this::getPose,  // Robot pose supplier
+            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
+                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
+                PIDConstants(RotationP, RotationI, RotationD)
+            ),
+            RobotConfig(60.0, 5.058014, ModuleConfig(0.1016, MaxSpeedMetersPerSecond, 1.0, DCMotor.getNEO(1), 6.75, 40.0, 4), 0.8636),  // The robot configuration
+            {
+                // Boolean supplier that controls when the path will be mirrored for the red alliance
+                // This will flip the path being followed to the red side of the field.
+                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+                val alliance = DriverStation.getAlliance()
+                if (alliance.isPresent) {
+                    return@configure alliance.get() == DriverStation.Alliance.Red
+                }
+                false
+            },
+             this// Reference to this subsystem to set requirements
+        )
+    }
 
     /**
      * Directly send voltage to the drive motors.
@@ -229,26 +245,26 @@ object  Drivetrain : SubsystemBase() {
      * @return A command that follows the path.
      */
 //    fun getAutonomousCommand(
-//        autoName: String//,
-////        setOdomAtStart: Boolean
+//        autoName: String,
+//       setOdomAtStart: Boolean
 //    ): Command {
-////        var startPosition: Pose2d = Pose2d()
-////        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
-////            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
-////        } else {
-////            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
-////        }
-////
-////        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
-////            startPosition = GeometryUtil.flipFieldPose(startPosition)
-////        }
-////
-////        if (setOdomAtStart)
-////        {
-////            if (startPosition != null) {
-////                resetOdometry(startPosition)
-////            }
-////        }
+//        var startPosition: Pose2d = Pose2d()
+//        if(PathPlannerAuto.getStaringPoseFromAutoFile(autoName) == null) {
+//            startPosition = PathPlannerAuto.getPathGroupFromAutoFile(autoName)[0].startingDifferentialPose
+//        } else {
+//            startPosition = PathPlannerAuto.getStaringPoseFromAutoFile(autoName)
+//        }
+//
+//        if(DriverStation.getAlliance() == Optional.of(Alliance.Red)){
+//            startPosition = GeometryUtil.flipFieldPose(startPosition)
+//        }
+//
+//        if (setOdomAtStart)
+//        {
+//            if (startPosition != null) {
+//                resetOdometry(startPosition)
+//            }
+//        }
 //
 //        // TODO: Configure path planner's AutoBuilder
 //        return PathPlannerAuto(autoName)

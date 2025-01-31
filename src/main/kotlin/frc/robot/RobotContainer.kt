@@ -5,6 +5,7 @@ package frc.robot
 
 //import com.team2898.robot.Constants.OperatorConstants
 
+import com.pathplanner.lib.auto.AutoBuilder
 import frc.robot.OI.resetGyro
 import frc.robot.OI.rightTrigger
 import frc.robot.OI.translationX
@@ -58,7 +59,7 @@ class RobotContainer {
 
         // Configure the trigger bindings
 
-        //autoCommandChooser = AutoBuilder.buildAutoChooser("6piece")
+        autoCommandChooser = AutoBuilder.buildAutoChooser("Left mid start")
 
         Drivetrain.defaultCommand = teleopDrive
 

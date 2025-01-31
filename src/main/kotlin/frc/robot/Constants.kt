@@ -5,7 +5,10 @@
 
 package frc.robot
 
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Filesystem
 import java.io.File
 
@@ -28,7 +31,19 @@ class Constants {
 
     object DriveConstants {
         val MaxSpeedMetersPerSecond = 4.5
+        // Chassis configuration (left to right dist of center of the wheels)
+        val TrackWidth = Units.inchesToMeters(16.037)
 
+        // Distance between centers of right and left wheels on robot (front to back dist)
+        val WheelBase = Units.inchesToMeters(9.8)
+
+        // Distance between front and back wheels on robot: CHANGE TO MATCH WITH ROBOT
+        val DriveKinematics = SwerveDriveKinematics(
+            Translation2d(WheelBase / 2, TrackWidth / 2),
+            Translation2d(-WheelBase / 2, TrackWidth / 2),
+            Translation2d(WheelBase / 2, -TrackWidth / 2),
+            Translation2d(-WheelBase / 2, -TrackWidth / 2)
+        )
         // YAGSL `File` Configs
         val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve")
 
@@ -49,9 +64,15 @@ class Constants {
         const val kG = 0.4
         const val kA = 0.0
 
-        const val NEG_MAX_OUTPUT = -6.0
-        const val POS_MAX_OUTPUT = 6.0
+        //Max elev driver outputs
+        const val NEG_MAX_OUTPUT = -3.0
+        const val POS_MAX_OUTPUT = 3.0
 
+        //SOFT Stop limits
+        const val UPPER_LIMIT = 5000.0
+        const val LOWER_LIMIT = 0.0
+
+        //FIXME set to real heights later
         enum class ElevatorState(val position: Double?) {
             Custom(0.0),
             Stow(0.0),

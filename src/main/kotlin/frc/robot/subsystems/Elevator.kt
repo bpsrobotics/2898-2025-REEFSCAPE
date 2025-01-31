@@ -11,10 +11,12 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.MaxAccel
 import frc.robot.Constants.ElevatorConstants.MaxVel
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.POS_MAX_OUTPUT
+import frc.robot.Constants.ElevatorConstants.UPPER_LIMIT
 import frc.robot.Constants.ElevatorConstants.kD
 import frc.robot.Constants.ElevatorConstants.kG
 import frc.robot.Constants.ElevatorConstants.kI
@@ -45,6 +47,7 @@ object Elevator : SubsystemBase() {
 
 
     private val constraints = TrapezoidProfile.Constraints(MaxVel, MaxAccel)
+    val profileTimer = Timer()
     var profile = TrapezoidProfile(constraints)
     var currentState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
@@ -54,8 +57,13 @@ object Elevator : SubsystemBase() {
 
     var prevUpdateTime = 0.0
 
+    var vel = 0.0
+    var last = getPos()
+    var dP = 0.0
+
     var targetControl = false
     var targSpeed = 0.0
+    var setpoint = getPos()
     var outputPower = 0.0
     var rawOutput = 0.0
 
@@ -91,6 +99,9 @@ object Elevator : SubsystemBase() {
     override fun periodic() {
         if (botLimit.get()) {
             resetPos()
+            setpoint = LOWER_LIMIT
+        } else if (topLimit.get()) {
+            setpoint = UPPER_LIMIT
         }
         motorPeriodic()
     }
@@ -102,20 +113,36 @@ object Elevator : SubsystemBase() {
         val curTime = Timer.getFPGATimestamp()
         val dT = curTime - prevUpdateTime
         prevUpdateTime = curTime
+        dP = getPos() - last
+        vel = dP / dT
         if (targetControl) {
-            targSpeed = profile.calculate(dT, currentState, goalState).velocity
-            outputPower = elevFF .calculate(targSpeed)
+            targSpeed = profile.calculate(profileTimer.get(), currentState, goalState).velocity
+            outputPower = elevFF.calculate(targSpeed)
             outputPower += elevPID.calculate(getPos(), goalState.position)
             leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         } else {
             currentState.position = getPos()
             currentState.velocity = 0.0
-            leftMaster.set(rawOutput)
+            leftMaster.set(rawOutput.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         }
+        last = getPos()
     }
 
     fun resetPos() {
         return elevEncoder.reset()
+    }
+
+    fun voltMore(output : Double) {
+        rawOutput = output
+    }
+
+    fun setGoal(newPos: Double) {
+        if (newPos !in LOWER_LIMIT..UPPER_LIMIT) return
+        setpoint = newPos
+        profileTimer.reset()
+        profileTimer.start()
+        currentState = TrapezoidProfile.State(getPos(), vel)
+        goalState = TrapezoidProfile.State(newPos, 0.0)
     }
 
 
