@@ -39,19 +39,19 @@ object PathPlanner : SubsystemBase() {
             e.printStackTrace();
         }
         // Configure AutoBuilder last
-        AutoBuilder.configure(
-            {Drivetrain.getPose()}, // Robot pose supplier
-            {pose : Pose2d -> Drivetrain.resetOdometry(pose)}, // Method to reset odometry (will be called if your auto has a starting pose)
-            {Drivetrain.getRobotRelativeSpeeds()}, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            {speeds : ChassisSpeeds -> Drivetrain.drive(speeds)}, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ),
-            config, // The robot configuration
-            { getInvert() },
-            Drivetrain, this // Reference to this subsystem to set requirements
-        );
+//        AutoBuilder.configure(
+//            {Drivetrain.getPose()}, // Robot pose supplier
+//            {pose : Pose2d -> Drivetrain.resetOdometry(pose)}, // Method to reset odometry (will be called if your auto has a starting pose)
+//            {Drivetrain.getRobotRelativeSpeeds()}, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+//            {speeds : ChassisSpeeds -> Drivetrain.drive(speeds)}, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+//            PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+//                PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+//                PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+//            ),
+//            config, // The robot configuration
+//            { getInvert() },
+//            Drivetrain, this // Reference to this subsystem to set requirements
+//        );
     }
     fun getInvert() : Boolean{
         var alliance = DriverStation.getAlliance();

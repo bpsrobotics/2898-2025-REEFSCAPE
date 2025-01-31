@@ -76,6 +76,8 @@ class TeleopDriveCommand(
             angVelocity * controller.config.maxAngularVelocity + addSpeed.rotation.radians,
             driveMode()
         )
+        SmartDashboard.putNumber("TranslationX", forwardVelocity*swerve.maximumSpeed+addSpeed.translation.x)
+        SmartDashboard.putNumber("TranslationY", strafeVelocity*swerve.maximumSpeed+addSpeed.translation.y)
         addSpeed = Transform2d()
     }
 

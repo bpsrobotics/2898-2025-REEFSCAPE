@@ -72,8 +72,8 @@ class CoralAlignCommand(
                 Rotation2d(angleVelocity)
             )
         )
-        SmartDashboard.putNumber("horizontalVelocity", horizontalVelocity * cos(tagPose.rotation.y))
-        SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
+        SmartDashboard.putNumber("horizontalVelocity", angleVelocity)
+        SmartDashboard.putNumber("verticalVelocity", horizontalVelocity)
     }
 
 
