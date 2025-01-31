@@ -36,7 +36,7 @@ class CoralAlignCommandWithOdometry(
     var lastPose : Pose2d = Pose2d()
 
 
-    init { addRequirements(Drivetrain) }
+    //init { addRequirements(Drivetrain) }
 
     override fun initialize(){
         runtime.restart()
