@@ -36,7 +36,7 @@ class CoralAlignCommand(
     val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
 
 
-    init { addRequirements(Drivetrain) }
+    //init { addRequirements(Drivetrain) }
 
     override fun initialize(){
         runtime.reset()
