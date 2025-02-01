@@ -1,4 +1,5 @@
 package frc.robot.commands.swerve
+import beaverlib.utils.Sugar.degreesToRadians
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
 import edu.wpi.first.math.geometry.Rotation2d
@@ -14,10 +15,8 @@ import frc.robot.subsystems.aprilTagFieldInGame
 import frc.robot.subsystems.aprilTagFieldLayout
 import org.dyn4j.geometry.Rotation
 import org.photonvision.targeting.PhotonTrackedTarget
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
+import swervelib.SwerveController
+import kotlin.math.*
 
 class NOPIDCoralAlign(
     val speedConsumer: (Transform2d) -> Unit
@@ -57,16 +56,15 @@ class NOPIDCoralAlign(
             val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
             val currentRotation = (swerveDrive.pose.rotation.degrees + 180)
             val tagPose = aprilTagFieldInGame.getTagPose(usedTarget!!.fiducialId).get()
-            val desiredHeading = tagPose.rotation.y.radiansToDegrees() + 180
-            val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { (desiredHeading - currentRotation)  * 0.01 } else { 0.0 }
-//            val horizontalVelocity =
-//                if (!(distY + cos(currentRotation + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { -1.0 * distY * 1.0 } else { 0.0 }
-            val horizontalVelocity = 0.0
+            val desiredHeading =  tagPose.rotation.y + 180.0
+            val angleVelocity = if (!currentRotation.within(8.0, desiredHeading)) { (desiredHeading - currentRotation)  * 0.1 } else { 0.0 }
+            val horizontalVelocity =
+                if (!(distY).within(0.1, 0.0)) { -distY * 1.0 } else { 0.0 }
 
 
             speedConsumer(
                 Transform2d(
-                    horizontalVelocity * sin(tagPose.rotation.y),
+                    horizontalVelocity * -sin(tagPose.rotation.y),
                     horizontalVelocity * cos(tagPose.rotation.y),
                     Rotation2d(angleVelocity)
                 )
@@ -75,8 +73,12 @@ class NOPIDCoralAlign(
             SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
             SmartDashboard.putNumber("rotationalVelocity", angleVelocity)
             SmartDashboard.putNumber("currentrotation", currentRotation)
-            SmartDashboard.putBoolean("TagAngleAligned", currentRotation.within(3.0, desiredHeading))
-            SmartDashboard.putNumber("DesiredHeading", desiredHeading)
+            SmartDashboard.putNumber("distY", distY)
+            SmartDashboard.putBoolean("horizontal aligned", (distY + cos(currentRotation + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0))
+
+            SmartDashboard.putNumber("tagID", usedTarget!!.fiducialId.toDouble())
+
+
         }
     }
 

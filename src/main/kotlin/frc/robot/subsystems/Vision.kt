@@ -21,7 +21,7 @@ val aprilTagFieldLayout = AprilTagFieldLayout(
     )),
     10.0,10.0)
 
-val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField)
+val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo)
 
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
