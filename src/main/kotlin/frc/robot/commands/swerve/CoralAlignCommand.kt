@@ -52,18 +52,20 @@ class CoralAlignCommand(
 
     }
     fun trueRobotToTag(): Double {
-        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
+//        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
+        return distToTag.y
     }
     override fun execute() {
         if (!::usedTarget.isInitialized) return
         val currentRotation = (swerveDrive.pose.rotation.degrees + 180) % 360
         val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
-        val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
+        val desiredHeading = tagPose.rotation.z.radiansToDegrees()
 
         turningPID.setPoint = desiredHeading
         movementPID.setpoint = horizontalOffset
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
-        val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { turningPID.turnspeedOutput(currentRotation) } else { 0.0 }
+//        val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { -turningPID.turnspeedOutput(currentRotation) } else { 0.0 }
+        val angleVelocity = 0.0
         val horizontalVelocity = if (!trueRobotToTag().within(0.1, horizontalOffset)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
         speedConsumer(
             Transform2d(
@@ -72,8 +74,8 @@ class CoralAlignCommand(
                 Rotation2d(angleVelocity)
             )
         )
-        SmartDashboard.putNumber("horizontalVelocity", angleVelocity)
-        SmartDashboard.putNumber("verticalVelocity", horizontalVelocity)
+        SmartDashboard.putNumber("horizontalVelocity", horizontalVelocity * cos(tagPose.rotation.y))
+        SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
     }
 
 

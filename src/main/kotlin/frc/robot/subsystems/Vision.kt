@@ -112,7 +112,7 @@ object Vision : SubsystemBase() {
         val stdv = Matrix(Nat.N3(), Nat.N1())
         stdv.set(0,0, 3.0)
         stdv.set(1,0, 3.0)
-        stdv.set(2,0, 10.0)
+        stdv.set(2,0, 100000.0)
         return stdv
     }
 }

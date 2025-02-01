@@ -22,23 +22,28 @@ import kotlin.math.sqrt
 class NOPIDCoralAlign(
     val speedConsumer: (Transform2d) -> Unit
 ) : Command() {
-    private lateinit var usedTarget : PhotonTrackedTarget
+    private var usedTarget : PhotonTrackedTarget? = null
     private var distX = 0.0
     private var distY = 0.0
     private var angleZ = 0.0
     private var yaw = 0.0
     private val runtime = Timer()
 
+    init {
+
+    }
+
     override fun initialize(){
         runtime.reset()
         runtime.start()
+        usedTarget = null
         Vision.listeners.add("UpdateAlignCommand"){
             if (it.bestTarget != null) {
                 usedTarget = it.bestTarget
-                val trackedTarget = usedTarget.getBestCameraToTarget()
+                val trackedTarget = it.bestTarget.getBestCameraToTarget()
                 distY = trackedTarget.y
                 distX = trackedTarget.x
-                yaw = usedTarget.yaw
+                yaw = it.bestTarget.yaw
                 angleZ = trackedTarget.rotation.z.radiansToDegrees()
             }
 
@@ -48,23 +53,30 @@ class NOPIDCoralAlign(
 
     override fun execute() {
 
-        if (::usedTarget.isInitialized) {
+        if (usedTarget != null) {
             val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
-            val currentRotation = swerveDrive.pose.rotation.degrees
-            val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
-            val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
-            val angleVelocity = if (!desiredHeading.within(10.0, 0.0)) { 1.0 * (desiredHeading - (currentRotation + 180)) * 0.1 } else { 0.0 }
-            val horizontalVelocity =
-                if (!(distY + cos(currentRotation + 180 + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { 1.0 * distY * 1.0 } else { 0.0 }
+            val currentRotation = (swerveDrive.pose.rotation.degrees + 180)
+            val tagPose = aprilTagFieldInGame.getTagPose(usedTarget!!.fiducialId).get()
+            val desiredHeading = tagPose.rotation.y.radiansToDegrees() + 180
+            val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { (desiredHeading - currentRotation)  * 0.01 } else { 0.0 }
+//            val horizontalVelocity =
+//                if (!(distY + cos(currentRotation + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0)) { -1.0 * distY * 1.0 } else { 0.0 }
+            val horizontalVelocity = 0.0
+
+
             speedConsumer(
                 Transform2d(
-                    horizontalVelocity * cos(tagPose.rotation.y),
                     horizontalVelocity * sin(tagPose.rotation.y),
+                    horizontalVelocity * cos(tagPose.rotation.y),
                     Rotation2d(angleVelocity)
                 )
             )
             SmartDashboard.putNumber("horizontalVelocity", horizontalVelocity * cos(tagPose.rotation.y))
             SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
+            SmartDashboard.putNumber("rotationalVelocity", angleVelocity)
+            SmartDashboard.putNumber("currentrotation", currentRotation)
+            SmartDashboard.putBoolean("TagAngleAligned", currentRotation.within(3.0, desiredHeading))
+            SmartDashboard.putNumber("DesiredHeading", desiredHeading)
         }
     }
 

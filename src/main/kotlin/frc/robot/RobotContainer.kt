@@ -30,11 +30,9 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.commands.swerve.NavXReset
 import frc.beaverlib.async.Promise
 import frc.robot.OI.process
-import frc.robot.commands.swerve.CoralAlignCommand
-import frc.robot.commands.swerve.TeleopDriveCommand
+import frc.robot.commands.swerve.*
 import frc.robot.subsystems.Drivetrain
 import kotlin.math.pow
 import kotlin.math.sign
@@ -217,14 +215,14 @@ class RobotContainer {
     private fun initializeObjects() {
         Drivetrain
     }
-    val corralCommand = CoralAlignCommand(teleopDrive.speedConsumer)
+
     /**
      * Use this method to define your trigger->command mappings. Triggers can be created via the
      * [Trigger.Trigger] constructor with an arbitrary
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        coralAlign.whileTrue(CoralAlignCommand(teleopDrive.speedConsumer))
+        coralAlign.whileTrue(NOPIDCoralAlign(teleopDrive.speedConsumer))
 
 
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
