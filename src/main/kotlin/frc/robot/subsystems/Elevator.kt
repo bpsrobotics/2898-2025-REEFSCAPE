@@ -17,6 +17,7 @@ import frc.robot.Constants.ElevatorConstants.MaxVel
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.POS_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.UPPER_LIMIT
+import frc.robot.Constants.ElevatorConstants.kA
 import frc.robot.Constants.ElevatorConstants.kD
 import frc.robot.Constants.ElevatorConstants.kG
 import frc.robot.Constants.ElevatorConstants.kI
@@ -58,8 +59,10 @@ object Elevator : SubsystemBase() {
     var prevUpdateTime = 0.0
 
     var vel = 0.0
+    var accel = 0.0
     var last = getPos()
     var dP = 0.0
+    var voltageFF = kG + (kV * vel) + (kA * accel)
 
     var targetControl = false
     var targSpeed = 0.0
@@ -115,9 +118,10 @@ object Elevator : SubsystemBase() {
         prevUpdateTime = curTime
         dP = getPos() - last
         vel = dP / dT
+        accel = vel / dT
         if (targetControl) {
             targSpeed = profile.calculate(profileTimer.get(), currentState, goalState).velocity
-            outputPower = elevFF.calculate(targSpeed)
+            outputPower = voltageFF
             outputPower += elevPID.calculate(getPos(), goalState.position)
             leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         } else {
