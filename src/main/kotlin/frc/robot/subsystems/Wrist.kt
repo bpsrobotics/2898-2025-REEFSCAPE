@@ -28,6 +28,7 @@ import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.POS_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.UPPER_LIMIT
+import frc.robot.RobotMap.PivotDriverID
 
 
 import kotlin.math.cos
@@ -36,7 +37,7 @@ import kotlin.math.cos
 object Wrist {
     val pivotMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
     val profileTimer = Timer()
-    val pivotencoder = DutyCycleEncoder(RobotMap.PivotPosID)
+    val pivotencoder = DutyCycleEncoder(PivotPosID)
     var PivotConfig: SparkMaxConfig = SparkMaxConfig()
 
     var theta = 0.0
@@ -45,8 +46,8 @@ object Wrist {
     var armFF = (kG * cos(theta)) + (kS * 0.0) + (kV * angVelocity) + (kA * angAccel)
     var last = getAngle()
 
-    private val botLimit = DigitalInput(LimitBotID)
-    private val topLimit = DigitalInput(LimitTopID)
+    private val botLimit = DigitalInput(RobotMap.LimitBotID)
+    private val topLimit = DigitalInput(RobotMap.LimitTopID)
 
     var targetControl = false
     var targSpeed = 0.0
@@ -78,9 +79,9 @@ object Wrist {
             SparkBase.PersistMode.kPersistParameters
         )
     }
-    override fun periodic() {
+    fun periodic() {
         if (botLimit.get()) {
-            resetPos()
+            resetAngle()
             setpoint = LOWER_LIMIT
         } else if (topLimit.get()) {
             setpoint = UPPER_LIMIT
@@ -90,12 +91,19 @@ object Wrist {
     fun getAngle() : Double {
         return pivotencoder.get()
     }
+    fun degreeAngle() : Double {
+        return ((getAngle() * 360) % 360)
+    }
+    fun radianConversion() : Double {
+        val conversionFactor = (Math.PI / 180)
+        return (degreeAngle() * conversionFactor)
+    }
 
     fun motorPeriodic() {
         val curTime = Timer.getFPGATimestamp()
         val dT = curTime - prevUpdateTime
         prevUpdateTime = curTime
-        theta = pivotencoder.getAngle() - last
+        theta = radianConversion() - last
         angVelocity = theta / dT
         angAccel = angVelocity / dT
         if (targetControl) {
@@ -108,7 +116,7 @@ object Wrist {
             currentState.velocity = 0.0
             pivotMotor.set(rawOutput.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         }
-        last = getAngle()
+        last = radianConversion()
     }
 
     fun voltMore(output : Double) {
@@ -121,8 +129,18 @@ object Wrist {
         pivotMotor.setVoltage(0.0)
     }
 
-    fun resetPos() {
-        return pivotencoder.reset()
+    fun resetAngle(): Double {
+        val zeroOffset = pivotencoder.get()
+        return zeroOffset  //not sure if this is good so don't use this
+    }
+
+    fun setGoal(newPos: Double) { //set limits in the if statement
+        if (newPos !in 0.0.. 10.0) return
+        setpoint = newPos
+        profileTimer.reset()
+        profileTimer.start()
+        currentState = TrapezoidProfile.State(pivotencoder.get(), 0.0)
+        goalState = TrapezoidProfile.State(setpoint, 0.0)
     }
 
 }
