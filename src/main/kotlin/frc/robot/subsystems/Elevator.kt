@@ -33,9 +33,11 @@ import frc.robot.RobotMap.ElevatorRightMasterID
 import frc.robot.RobotMap.ElevatorRightSlaveID
 import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
-
+import frc.robot.commands.elevator.StabilizeElevator
 object Elevator : SubsystemBase() {
-    private val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
+    /** Main motor, all other motors follow this one */
+    val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
+
     private val leftSlave = SparkMax(ElevatorLeftSlaveID, SparkLowLevel.MotorType.kBrushless)
 
     private val rightMaster = SparkMax(ElevatorRightMasterID, SparkLowLevel.MotorType.kBrushless)
@@ -43,20 +45,27 @@ object Elevator : SubsystemBase() {
 
     private var elevatorConfig: SparkMaxConfig = SparkMaxConfig()
 
-    private val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
+    /** Encoder on the elevator */
+    val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
+    /** Limit switch at the bottom of the elevator */
     private val botLimit = DigitalInput(LimitBotID)
+    /** Limit switch at the top of the elevator*/
     private val topLimit = DigitalInput(LimitTopID)
 
-
+    /** Max velocity & acceleration for [TrapezoidProfile]*/
     private val constraints = TrapezoidProfile.Constraints(MaxVel, MaxAccel)
+    /** Trapezoid Motion Profile, handles accelerating the elevator to max velocity, and decelerating it so that velocity = 0 when the elevator is at its target */
     var profile = TrapezoidProfile(constraints)
+    /** The state of the elevator at [TrapezoidProfile] */
     var currentState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
+    /** The desired state (position and velocity) of the elevator */
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
 
     val elevatorFeedforward = ElevatorFeedforward(kS, kG, kV)
     val elevatorPID = PIDController(kP,kI, kD)
 
     init {
+        // Init motor controls
         elevatorConfig
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .smartCurrentLimit(40)
@@ -92,60 +101,19 @@ object Elevator : SubsystemBase() {
 
         SmartDashboard.putNumber("position elev", getPos())
     }
-
+    /** Returns the elevator encoders distance*/
     fun getPos() : Double {
         return elevEncoder.distance
     }
 
     /** Run the motors toward [goalState].position at [targetSpeed] */
-    private fun closedLoopMotorControl(targetSpeed : Double) {
+    fun closedLoopMotorControl(targetSpeed : Double) {
         val outputPower = elevatorFeedforward.calculate(targetSpeed) + elevatorPID.calculate(getPos(), goalState.position)
+        if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
+        if(topLimit.get()) {outputPower.coerceAtMost(0.0)} // If touching top limit switch, stop moving up
         leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
     }
-    /** Command to move the elevator to a goal position, command finishes once the trapezoid profile has finished*/
-    class MoveElevator(val goalPosition : Double) : Command() {
-        val timer = Timer()
-        var targetSpeed : Double = 0.1
-        init {addRequirements(Elevator)}
-        override fun initialize() {
-            if (goalPosition !in LOWER_LIMIT..UPPER_LIMIT) return
-            timer.restart()
-            currentState = TrapezoidProfile.State(getPos(), elevEncoder.rate)
-            goalState = TrapezoidProfile.State(goalPosition, 0.0)
-        }
-
-        override fun execute() {
-            targetSpeed = profile.calculate(timer.get(), currentState, goalState).velocity
-            closedLoopMotorControl(targetSpeed)
-        }
-
-        override fun isFinished(): Boolean {
-            return targetSpeed == 0.0
-        }
-    }
-    /** Command to keep the elevator at the current goal position */
-    class StabilizeElevator() : Command() {
-        val timer = Timer()
-        init {addRequirements(Elevator)}
-        override fun initialize() {}
-
-        override fun execute() { closedLoopMotorControl(0.0) }
-
-        override fun isFinished(): Boolean { return false }
-    }
-    class DisableElevator() : Command() {
-        init {addRequirements(Elevator)}
-        override fun execute() { leftMaster.set(0.0) }
-        override fun isFinished(): Boolean { return false }
-    }
-    class VoltageMove(val volts : Double, val time : Double) : Command() {
-        val timer = Timer()
-        init {addRequirements(Elevator)}
-
-        override fun initialize() { timer.restart() }
-        override fun execute() { leftMaster.set(volts) }
-        override fun isFinished(): Boolean { return timer.hasElapsed(time) }
-    }
+    /** Resets the elevator encoder */
     fun resetPos() {
         return elevEncoder.reset()
     }
