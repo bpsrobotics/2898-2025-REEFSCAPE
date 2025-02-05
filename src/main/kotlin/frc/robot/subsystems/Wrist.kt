@@ -59,8 +59,8 @@ object Wrist {
     private val constraints = TrapezoidProfile.Constraints(0.0, 0.0)
     val timerThing = Timer()
     var m_profile = TrapezoidProfile(constraints)
-    var currentState = TrapezoidProfile.State(pivotencoder.get(), 0.0)
-    var goalState = TrapezoidProfile.State(pivotencoder.get(), 0.0)
+    var currentState = TrapezoidProfile.State(radianConversion(), 0.0)
+    var goalState = TrapezoidProfile.State(radianConversion(), 0.0)
 
     var prevUpdateTime = 0.0
 
@@ -109,7 +109,7 @@ object Wrist {
         if (targetControl) {
             targSpeed = m_profile.calculate(profileTimer.get(), currentState, goalState).velocity
             outputPower = armFF
-            outputPower += WristPID.calculate(pivotencoder.get(), goalState.position)
+            outputPower += WristPID.calculate(radianConversion(), goalState.position)
             pivotMotor.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         } else {
             currentState.position = getAngle()
@@ -135,11 +135,11 @@ object Wrist {
     }
 
     fun setGoal(newPos: Double) { //set limits in the if statement
-        if (newPos !in 0.0.. 10.0) return
-        setpoint = newPos
+        if (newPos !in 0.0.. 6.28) return
+        setpoint = newPos //newPos should be in radians, CONVERT TO RADIANS!!!!
         profileTimer.reset()
         profileTimer.start()
-        currentState = TrapezoidProfile.State(pivotencoder.get(), 0.0)
+        currentState = TrapezoidProfile.State(radianConversion(), 0.0)
         goalState = TrapezoidProfile.State(setpoint, 0.0)
     }
 
