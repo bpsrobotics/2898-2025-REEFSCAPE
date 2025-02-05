@@ -10,6 +10,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.MaxAccel
@@ -74,6 +75,7 @@ object Elevator : SubsystemBase() {
     init {
         elevatorConfig
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .smartCurrentLimit(40)
 
         leftMaster.configure(
             elevatorConfig,
@@ -107,6 +109,8 @@ object Elevator : SubsystemBase() {
             setpoint = UPPER_LIMIT
         }
         motorPeriodic()
+
+        SmartDashboard.putNumber("position elev", getPos())
     }
 
     fun getPos() : Double {
@@ -121,7 +125,7 @@ object Elevator : SubsystemBase() {
         accel = vel / dT
         if (targetControl) {
             targSpeed = profile.calculate(profileTimer.get(), currentState, goalState).velocity
-            outputPower = voltageFF
+            outputPower = elevFF.calculate(targSpeed)
             outputPower += elevPID.calculate(getPos(), goalState.position)
             leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
         } else {
@@ -136,7 +140,7 @@ object Elevator : SubsystemBase() {
         return elevEncoder.reset()
     }
 
-    fun voltMore(output : Double) {
+    fun voltMove(output : Double) {
         rawOutput = output
     }
 
@@ -147,6 +151,10 @@ object Elevator : SubsystemBase() {
         profileTimer.start()
         currentState = TrapezoidProfile.State(getPos(), vel)
         goalState = TrapezoidProfile.State(newPos, 0.0)
+    }
+
+    fun isMoving(): Boolean {
+        return targSpeed != 0.0
     }
 
 
