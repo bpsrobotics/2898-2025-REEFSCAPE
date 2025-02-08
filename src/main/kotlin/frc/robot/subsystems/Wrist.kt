@@ -30,7 +30,7 @@ import kotlin.math.PI
 
 object Wrist : SubsystemBase() {
     private val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
-    private val encoder = DutyCycleEncoder(PivotPosID, 2.0 * PI, PI)
+    val encoder = DutyCycleEncoder(PivotPosID, 2.0 * PI, PI)
     private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
     var setpoint = getPos()
