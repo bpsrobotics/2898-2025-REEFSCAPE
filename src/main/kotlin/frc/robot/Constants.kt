@@ -99,6 +99,10 @@ class Constants {
         const val ki = 0.0
         const val kd = 0.0
     }
+    object IntakeConstants {
+        const val ks = 0.0
+        const val kv = 0.0
+    }
 
 
     object OIConstants {
