@@ -43,8 +43,8 @@ class RobotContainer {
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { MathUtil.applyDeadband(translationY, 0.1) },
-            { MathUtil.applyDeadband(translationX, 0.1) },
+            { MathUtil.applyDeadband(-translationY, 0.1) },
+            { MathUtil.applyDeadband(-translationX, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
             { false }
@@ -79,8 +79,8 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
-        Wrist
-        Elevator
+//        Wrist
+//        Elevator
     }
 
     /**
