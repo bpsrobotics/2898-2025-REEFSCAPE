@@ -91,6 +91,13 @@ class Constants {
         //SOFT Stop limits
         const val UPPER_LIMIT = 0.0
         const val LOWER_LIMIT = 0.0
+        const val kg = 0.0
+        const val ks = 0.0
+        const val kv = 0.0
+        const val ka = 0.0 // we might not use this but it's good to have.
+        const val kp = 0.0
+        const val ki = 0.0
+        const val kd = 0.0
     }
 
 
