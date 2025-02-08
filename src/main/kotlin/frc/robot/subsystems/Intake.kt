@@ -62,7 +62,7 @@ object Intake : SubsystemBase() {
 
     fun intake(speed: Double){
         if (intakeState) {
-            if (buffer.calculate(currentAverage > IntakeConstants.CURRENT_WHEN_ROBOT_HAS_CORAL) && !hasCoral && !gracePeriod) {
+            if (buffer.calculate(currentAverage > IntakeConstants.CURRENT_WHEN_ROBOT_HAS_CORAL) && !hasCoral && !gracePeriod ) {
                 output = 0.0
                 bufferTimer.reset()
                 bufferTimer.start()

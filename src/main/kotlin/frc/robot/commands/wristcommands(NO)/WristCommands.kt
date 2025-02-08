@@ -1,4 +1,4 @@
-package frc.robot.commands.wristcommands
+package frc.robot.commands.`wristcommands(NO)`
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj.Timer
 import frc.robot.subsystems.Wrist
