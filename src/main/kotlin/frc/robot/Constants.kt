@@ -5,6 +5,7 @@
 
 package frc.robot
 
+import beaverlib.utils.Units.Electrical.Current
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -102,6 +103,8 @@ class Constants {
     object IntakeConstants {
         const val ks = 0.0
         const val kv = 0.0
+        const val STOP_BUFFER = 1.0
+        const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
     }
 
 
