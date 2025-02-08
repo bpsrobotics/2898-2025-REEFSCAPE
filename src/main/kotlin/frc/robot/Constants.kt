@@ -87,6 +87,20 @@ class Constants {
     }
 
     object PivotConstants {
+        //Max elev driver outputs
+        const val NEG_MAX_OUTPUT = -3.0
+        const val POS_MAX_OUTPUT = 3.0
+
+        const val ObstructionAngle = 0.4
+
+        const val kP = 0.0
+        const val kI = 0.0
+        const val kD = 0.0
+
+        const val kS = 0.0
+        const val kG = 0.0
+        const val kV = 0.0
+
         const val Max_Velocity = 1.0
         const val Max_Accel = 1.0
         //SOFT Stop limits

@@ -3,10 +3,12 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.commands.swerve
 
+import beaverlib.utils.Sugar.clamp
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Elevator
 import swervelib.SwerveController
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
