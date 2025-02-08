@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Wrist
 
 
 /**
@@ -77,6 +79,8 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
+        Wrist
+        Elevator
     }
 
     /**

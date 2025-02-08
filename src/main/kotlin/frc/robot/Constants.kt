@@ -61,7 +61,7 @@ class Constants {
         //FF constants
         const val kS = 0.0
         const val kV = 0.0
-        const val kG = 0.4
+        const val kG = 0.01
         const val kA = 0.0
 
         //Max elev driver outputs
@@ -73,8 +73,8 @@ class Constants {
         const val LOWER_LIMIT = 0.0
 
         //FIXME set to real heights later
-        enum class ElevatorState(val position: Double?) {
-            Custom(0.0),
+        enum class ElevatorState(val position: Double) {
+            Traverse(0.0),
             Stow(0.0),
             L2(0.1),
             L3(0.1),
@@ -86,7 +86,18 @@ class Constants {
     }
 
     object PivotConstants {
-
+        const val Max_Velocity = 1.0
+        const val Max_Accel = 1.0
+        //SOFT Stop limits
+        const val UPPER_LIMIT = 0.0
+        const val LOWER_LIMIT = 0.0
+        const val kg = 0.0
+        const val ks = 0.0
+        const val kv = 0.0
+        const val ka = 0.0 // we might not use this but it's good to have.
+        const val kp = 0.0
+        const val ki = 0.0
+        const val kd = 0.0
     }
 
 
