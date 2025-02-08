@@ -16,7 +16,7 @@ class WristCommands : Command() {
     }
 
     override fun initialize(){
-        if (Wrist.goalState !in Constants.PivotConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT) return
+        if (Wrist.goalState !in Constants.PivotConstants.LOWER_LIMIT..Constants.PivotConstants.UPPER_LIMIT) return
         timer.restart()
         Wrist.curState = TrapezoidProfile.State(Wrist.getPos(), Wrist.encoder.get()) //todo configure encoder rate
         Wrist.goalState = TrapezoidProfile.State(Wrist.goalState.position(), 0.0)
@@ -24,7 +24,6 @@ class WristCommands : Command() {
 
     override fun execute() {
         targetSpeed = Wrist.profile.calculate(timer.get(), Wrist.curState, Wrist.goalState).velocity
-        Elevator.closedLoopMotorControl(targetSpeed)
     }
 
     override fun isFinished(): Boolean {
