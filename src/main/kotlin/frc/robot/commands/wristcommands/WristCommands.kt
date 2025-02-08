@@ -4,22 +4,21 @@ import edu.wpi.first.wpilibj.Timer
 import frc.robot.subsystems.Wrist
 import frc.robot.Constants
 import edu.wpi.first.math.trajectory.TrapezoidProfile
-import frc.robot.subsystems.Elevator
 
 
 class WristCommands : Command() {
     val timer = Timer()
     var targetSpeed: Double = 0.0001
 
-    init {
-        // this.wristcommands = Wrist
-    }
+    /*init {
+        this.wristcommands = Wrist
+    }*/
 
     override fun initialize(){
-        if (Wrist.goalState !in Constants.PivotConstants.LOWER_LIMIT..Constants.PivotConstants.UPPER_LIMIT) return
+        if (Wrist.setpoint !in Constants.PivotConstants.LOWER_LIMIT..Constants.PivotConstants.UPPER_LIMIT) return
         timer.restart()
         Wrist.curState = TrapezoidProfile.State(Wrist.getPos(), Wrist.encoder.get()) //todo configure encoder rate
-        Wrist.goalState = TrapezoidProfile.State(Wrist.goalState.position(), 0.0)
+        Wrist.goalState = TrapezoidProfile.State(Wrist.goalState.position, 0.0)
     } // todo rework this to fit the movements of the wrist
 
     override fun execute() {
@@ -32,4 +31,3 @@ class WristCommands : Command() {
 
 
 }
-
