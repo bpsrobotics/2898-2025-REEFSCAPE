@@ -23,6 +23,7 @@ class WristCommands : Command() {
 
     override fun execute() {
         targetSpeed = Wrist.profile.calculate(timer.get(), Wrist.curState, Wrist.goalState).velocity
+        Wrist.feedbackController(targetSpeed)
     }
 
     override fun isFinished(): Boolean {
