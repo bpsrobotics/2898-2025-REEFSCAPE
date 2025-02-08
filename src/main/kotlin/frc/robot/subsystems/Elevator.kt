@@ -10,6 +10,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.MaxAccel
@@ -17,7 +19,6 @@ import frc.robot.Constants.ElevatorConstants.MaxVel
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.POS_MAX_OUTPUT
 import frc.robot.Constants.ElevatorConstants.UPPER_LIMIT
-import frc.robot.Constants.ElevatorConstants.kA
 import frc.robot.Constants.ElevatorConstants.kD
 import frc.robot.Constants.ElevatorConstants.kG
 import frc.robot.Constants.ElevatorConstants.kI
@@ -32,48 +33,42 @@ import frc.robot.RobotMap.ElevatorRightMasterID
 import frc.robot.RobotMap.ElevatorRightSlaveID
 import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
-
+import frc.robot.commands.elevator.StabilizeElevator
 object Elevator : SubsystemBase() {
-    private val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
+    /** Main motor, all other motors follow this one */
+    val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
+
     private val leftSlave = SparkMax(ElevatorLeftSlaveID, SparkLowLevel.MotorType.kBrushless)
 
     private val rightMaster = SparkMax(ElevatorRightMasterID, SparkLowLevel.MotorType.kBrushless)
     private val rightSlave = SparkMax(ElevatorRightSlaveID, SparkLowLevel.MotorType.kBrushless)
 
-    var elevatorConfig: SparkMaxConfig = SparkMaxConfig()
+    private var elevatorConfig: SparkMaxConfig = SparkMaxConfig()
 
-    private val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
+    /** Encoder on the elevator */
+    val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
+    /** Limit switch at the bottom of the elevator */
     private val botLimit = DigitalInput(LimitBotID)
+    /** Limit switch at the top of the elevator*/
     private val topLimit = DigitalInput(LimitTopID)
 
-
+    /** Max velocity & acceleration for [TrapezoidProfile]*/
     private val constraints = TrapezoidProfile.Constraints(MaxVel, MaxAccel)
-    val profileTimer = Timer()
+    /** Trapezoid Motion Profile, handles accelerating the elevator to max velocity, and decelerating it so that velocity = 0 when the elevator is at its target */
     var profile = TrapezoidProfile(constraints)
+    /** The state of the elevator at [TrapezoidProfile] */
     var currentState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
+    /** The desired state (position and velocity) of the elevator */
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
 
-    val elevFF = ElevatorFeedforward(kS, kG, kV)
-    val elevPID = PIDController(kP,kI, kD)
-
-    var prevUpdateTime = 0.0
-
-    var vel = 0.0
-    var accel = 0.0
-    var last = getPos()
-    var dP = 0.0
-    var voltageFF = kG + (kV * vel) + (kA * accel)
-
-    var targetControl = false
-    var targSpeed = 0.0
-    var setpoint = getPos()
-    var outputPower = 0.0
-    var rawOutput = 0.0
-
+    val elevatorFeedforward = ElevatorFeedforward(kS, kG, kV)
+    val elevatorPID = PIDController(kP,kI, kD)
 
     init {
+        // Init motor controls
         elevatorConfig
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .smartCurrentLimit(40)
 
         leftMaster.configure(
             elevatorConfig,
@@ -95,62 +90,31 @@ object Elevator : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
-
-
+        defaultCommand = StabilizeElevator()
     }
 
     override fun periodic() {
         if (botLimit.get()) {
-            resetPos()
-            setpoint = LOWER_LIMIT
+            //elevEncoder.reset() todo reset encoder
         } else if (topLimit.get()) {
-            setpoint = UPPER_LIMIT
         }
-        motorPeriodic()
-    }
 
+        SmartDashboard.putNumber("position elev", getPos())
+    }
+    /** Returns the elevator encoders distance*/
     fun getPos() : Double {
         return elevEncoder.distance
     }
-    fun motorPeriodic() {
-        val curTime = Timer.getFPGATimestamp()
-        val dT = curTime - prevUpdateTime
-        prevUpdateTime = curTime
-        dP = getPos() - last
-        vel = dP / dT
-        accel = vel / dT
-        if (targetControl) {
-            targSpeed = profile.calculate(profileTimer.get(), currentState, goalState).velocity
-            outputPower = voltageFF
-            outputPower += elevPID.calculate(getPos(), goalState.position)
-            leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
-        } else {
-            currentState.position = getPos()
-            currentState.velocity = 0.0
-            leftMaster.set(rawOutput.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
-        }
-        last = getPos()
-    }
 
+    /** Run the motors toward [goalState].position at [targetSpeed] */
+    fun closedLoopMotorControl(targetSpeed : Double) {
+        val outputPower = elevatorFeedforward.calculate(targetSpeed) + elevatorPID.calculate(getPos(), goalState.position)
+        if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
+        if(topLimit.get()) {outputPower.coerceAtMost(0.0)} // If touching top limit switch, stop moving up
+        leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
+    }
+    /** Resets the elevator encoder */
     fun resetPos() {
         return elevEncoder.reset()
     }
-
-    fun voltMore(output : Double) {
-        rawOutput = output
-    }
-
-    fun setGoal(newPos: Double) {
-        if (newPos !in LOWER_LIMIT..UPPER_LIMIT) return
-        setpoint = newPos
-        profileTimer.reset()
-        profileTimer.start()
-        currentState = TrapezoidProfile.State(getPos(), vel)
-        goalState = TrapezoidProfile.State(newPos, 0.0)
-    }
-
-
 }
-
-
-
