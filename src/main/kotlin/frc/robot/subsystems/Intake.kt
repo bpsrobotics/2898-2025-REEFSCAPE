@@ -12,11 +12,19 @@ import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import frc.robot.RobotMap
+import frc.robot.Constants.IntakeConstants.kv
+import frc.robot.Constants.IntakeConstants.ks
+import frc.robot.Constants.IntakeConstants.ka
+
 
 object Intake : SubsystemBase() {
     val intakeMotor = SparkMax(RobotMap.IntakeID, SparkLowLevel.MotorType.kBrushless)
     val IntakeConfig: SparkMaxConfig = SparkMaxConfig()
+
+    var voltage = 0.0
+    val flywheelFF = SimpleMotorFeedforward(ks, kv, ka)
 
     var hasCoral = false
     var output = 0.0
@@ -71,6 +79,9 @@ object Intake : SubsystemBase() {
             println("stopping intake")
             output = 0.0
         }
+    }
+    fun ffController (goalVelocity: Double) {
+        voltage = flywheelFF.calculate(goalVelocity)
     }
 
     fun outtake() {
