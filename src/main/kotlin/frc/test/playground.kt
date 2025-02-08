@@ -15,7 +15,7 @@ fun main() {
 
 
 
-    println(elevaff.calculate(-0.1))
+    println(elevaff.calculate(0.00))
 
 
 }

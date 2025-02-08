@@ -9,11 +9,8 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.MaxAccel
 import frc.robot.Constants.ElevatorConstants.MaxVel
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
@@ -62,7 +59,7 @@ object Elevator : SubsystemBase() {
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
 
     val elevatorFeedforward = ElevatorFeedforward(kS, kG, kV)
-    val elevatorPID = PIDController(kP,kI, kD)
+    val pid = PIDController(kP,kI, kD)
 
     init {
         // Init motor controls
@@ -90,16 +87,18 @@ object Elevator : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
+        elevEncoder.distancePerPulse = 1/1.889
         defaultCommand = StabilizeElevator()
     }
 
     override fun periodic() {
         if (botLimit.get()) {
-            //elevEncoder.reset() todo reset encoder
-        } else if (topLimit.get()) {
+            elevEncoder.reset()
         }
 
-        SmartDashboard.putNumber("position elev", getPos())
+        SmartDashboard.putNumber("/Elevator/Position", getPos())
+        SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
+
     }
     /** Returns the elevator encoders distance*/
     fun getPos() : Double {
@@ -108,13 +107,19 @@ object Elevator : SubsystemBase() {
 
     /** Run the motors toward [goalState].position at [targetSpeed] */
     fun closedLoopMotorControl(targetSpeed : Double) {
-        val outputPower = elevatorFeedforward.calculate(targetSpeed) + elevatorPID.calculate(getPos(), goalState.position)
+        val outputPower = elevatorFeedforward.calculate(targetSpeed) + pid.calculate(getPos())
         if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
-        if(topLimit.get()) {outputPower.coerceAtMost(0.0)} // If touching top limit switch, stop moving up
+        if(topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
         leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
     }
     /** Resets the elevator encoder */
     fun resetPos() {
         return elevEncoder.reset()
     }
+
+    /** Returns height percent from 0.0 to 1.0 **/
+    fun heightPercent() : Double {
+        return (getPos() / UPPER_LIMIT).clamp(0.0, 1.0)
+    }
+
 }

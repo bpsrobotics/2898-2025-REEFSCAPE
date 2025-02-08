@@ -13,7 +13,7 @@ class IntakeStop : Command() {
         }
 
         override fun execute() {
-            Intake.ffController(0.0)
+            Intake.intake(0.0)
         }
 
         override fun isFinished(): Boolean {
