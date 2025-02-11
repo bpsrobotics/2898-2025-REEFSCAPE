@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Filesystem
+import edu.wpi.first.wpilibj.util.Color
 import java.io.File
 
 /**
@@ -114,12 +115,15 @@ class Constants {
         const val ki = 0.0
         const val kd = 0.0
     }
+
     object IntakeConstants {
         const val ks = 0.0
         const val kv = 0.0
         const val ka = 0.0
         const val STOP_BUFFER = 1.0
         const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
+        val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
+        const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
     }
 
 
@@ -178,6 +182,4 @@ class Constants {
         const val PRESS_ACTIVATE_DURATION = 0.1
         const val INPUT_BUFFER_DURATION = 0.2
     }
-
-
 }
