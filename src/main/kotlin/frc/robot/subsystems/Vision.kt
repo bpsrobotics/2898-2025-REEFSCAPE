@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import beaverlib.utils.Sugar.degreesToRadians
 import edu.wpi.first.apriltag.AprilTag
 import edu.wpi.first.apriltag.AprilTagFieldLayout
 import edu.wpi.first.apriltag.AprilTagFields
@@ -17,17 +18,24 @@ import org.photonvision.targeting.PhotonPipelineResult
 
 
 val aprilTagFieldLayout = AprilTagFieldLayout(
-    mutableListOf(AprilTag(0, Pose3d(Translation3d(5.0,0.0,1.0), Rotation3d(0.0,0.0,0.0))
-    )),
+    mutableListOf(
+        AprilTag(1, Pose3d(Translation3d(0.0,0.0,0.488), Rotation3d(0.0,0.0,0.0))),
+        AprilTag(2, Pose3d(Translation3d(0.0, 2.0, 0.488), Rotation3d(0.0, 0.0, 0.0)))
+    ),
     10.0,10.0)
 
-val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2024Crescendo)
+val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape)
 
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
     Translation3d(-0.0762, 0.0, 0.5),
     Rotation3d(0.0, 0.0, 0.0)
 ) //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
+
+val robotToCam2 = Transform3d(
+    Translation3d(-0.0762, 0.0, 0.5),
+    Rotation3d(0.0, 0.0, (180.0).degreesToRadians())
+)
 
 /**
  * A MutableMap used specifically for managing Lambdas
@@ -64,11 +72,13 @@ data class Signal<Type>(
 
 object Vision : SubsystemBase() {
     val cam = PhotonCamera("Arducam_OV9281_USB_Camera")
+    val cam2 = PhotonCamera("USB_Camera")
     val cameraOffset = robotToCam
+    val cameraOffset2 = robotToCam2
     var results = mutableListOf<PhotonPipelineResult>()
     val listeners = Signal<PhotonPipelineResult>()
     var poseEstimator =
-        PhotonPoseEstimator(aprilTagFieldInGame, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
+        PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
     var previousPose = Pose2d()
 
     init {
@@ -76,6 +86,8 @@ object Vision : SubsystemBase() {
     }
     override fun periodic(){
         results = cam.allUnreadResults
+        results.addAll(cam2.allUnreadResults)
+
         SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
         if (!results.isEmpty()) {
             // Iterate through each of the results

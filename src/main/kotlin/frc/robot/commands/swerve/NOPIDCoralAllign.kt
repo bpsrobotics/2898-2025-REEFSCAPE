@@ -2,6 +2,7 @@ package frc.robot.commands.swerve
 import beaverlib.utils.Sugar.degreesToRadians
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -22,11 +23,11 @@ class NOPIDCoralAlign(
     val speedConsumer: (Transform2d) -> Unit
 ) : Command() {
     private var usedTarget : PhotonTrackedTarget? = null
-    private var distX = 0.0
-    private var distY = 0.0
     private var angleZ = 0.0
+    private var distToTag = Transform2d(0.0, 0.0, Rotation2d(0.0))
     private var yaw = 0.0
     private val runtime = Timer()
+    val movementPID = PIDController(1.0, 0.0,0.1)
 
     init {
 
@@ -40,16 +41,19 @@ class NOPIDCoralAlign(
             if (it.bestTarget != null) {
                 usedTarget = it.bestTarget
                 val trackedTarget = it.bestTarget.getBestCameraToTarget()
-                distY = trackedTarget.y
-                distX = trackedTarget.x
                 yaw = it.bestTarget.yaw
                 angleZ = trackedTarget.rotation.z.radiansToDegrees()
+                distToTag = Transform2d(trackedTarget.x, trackedTarget.y, Rotation2d(trackedTarget.rotation.z.radiansToDegrees()))
             }
 
         }
 
     }
 
+    fun trueRobotToTag(): Double {
+//        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
+        return distToTag.y
+    }
     override fun execute() {
 
         if (usedTarget != null) {
@@ -57,9 +61,13 @@ class NOPIDCoralAlign(
             val currentRotation = (swerveDrive.pose.rotation.degrees + 180)
             val tagPose = aprilTagFieldInGame.getTagPose(usedTarget!!.fiducialId).get()
             val desiredHeading =  tagPose.rotation.y + 180.0
+            val horizontalOffset = distToTag.y
+
+            movementPID.setpoint = horizontalOffset
+
             val angleVelocity = if (!currentRotation.within(8.0, desiredHeading)) { (desiredHeading - currentRotation)  * 0.1 } else { 0.0 }
             val horizontalVelocity =
-                if (!(distY).within(0.1, 0.0)) { -distY * 1.0 } else { 0.0 }
+                if (!(distToTag.y).within(0.1, 0.0)) { movementPID.calculate(trueRobotToTag()) } else { 0.0 }
 
 
             speedConsumer(
@@ -73,10 +81,11 @@ class NOPIDCoralAlign(
             SmartDashboard.putNumber("verticalVelocity", horizontalVelocity * sin(tagPose.rotation.y))
             SmartDashboard.putNumber("rotationalVelocity", angleVelocity)
             SmartDashboard.putNumber("currentrotation", currentRotation)
-            SmartDashboard.putNumber("distY", distY)
-            SmartDashboard.putBoolean("horizontal aligned", (distY + cos(currentRotation + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0))
+            SmartDashboard.putNumber("distY", distToTag.y)
+            SmartDashboard.putBoolean("horizontal aligned", (distToTag.y + cos(currentRotation + Vision.cameraOffset.rotation.y) * offsetDist).within(0.1, 0.0))
 
             SmartDashboard.putNumber("tagID", usedTarget!!.fiducialId.toDouble())
+            println(runtime.get())
 
 
         }

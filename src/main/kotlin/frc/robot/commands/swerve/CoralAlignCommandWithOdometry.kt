@@ -7,15 +7,13 @@ import edu.wpi.first.math.geometry.*
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
 import frc.robot.subsystems.aprilTagFieldInGame
+import org.photonvision.PhotonUtils
 import org.photonvision.targeting.PhotonTrackedTarget
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
+
 
 /**
  * Align with the best tag, using odometry to supplement when the camera has not seen a tag.
@@ -28,7 +26,7 @@ class CoralAlignCommandWithOdometry(
 ) : Command() {
 
     private lateinit var usedTarget : PhotonTrackedTarget
-    private var distToTag = Transform2d()
+    private var distToTag = 0.0
     private val runtime = Timer()
     val turningPID = TurningPID(0.1,0.01)
     val movementPID = PIDController(1.0, 0.0,0.1)
@@ -45,54 +43,59 @@ class CoralAlignCommandWithOdometry(
             if (it.bestTarget != null) {
                 usedTarget = it.bestTarget
                 val trackedTarget = usedTarget.getBestCameraToTarget()
-                distToTag = Transform2d(trackedTarget.x, trackedTarget.y, Rotation2d(trackedTarget.rotation.z))
+//                distToTag = Transform2d(trackedTarget.x, trackedTarget.y, Rotation2d(trackedTarget.rotation.z))
             }
 
         }
 
     }
     /** Returns the distance from the tag to the center of the robot (Accounting for camera offset) */
-    fun trueRobotToTag(): Double {
-        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
-    }
+//    fun trueRobotToTag(): Double {
+//        return (distToTag.y + cos(swerveDrive.pose.rotation.degrees + 180 + Vision.cameraOffset.rotation.y) * offsetDist)
+//    }
     /** Given a field relative postion, return a double relating to the horizontal distance left and right of the given tag pose */
 
-    fun fieldRelativeToTagRelative(tagPose : Pose3d, x : Double, y : Double) : Double {
-        return Translation2d(x * cos(tagPose.rotation.y), y*sin(tagPose.rotation.y)).norm
-    }
+//    fun fieldRelativeToTagRelative(tagPose : Pose3d, x : Double, y : Double) : Double {
+//        return Translation2d(x * cos(tagPose.rotation.y), y*sin(tagPose.rotation.y)).norm
+//    }
     /** Given a field relative postion, return a double relating to the horizontal distance left and right of the given tag pose */
-    fun fieldRelativeToTagRelative(tagPose : Pose3d, translation : Transform2d) : Double {
-        return Translation2d(translation.x * cos(tagPose.rotation.y), translation.y*sin(tagPose.rotation.y)).norm
-    }
+//    fun fieldRelativeToTagRelative(tagPose : Pose3d, translation : Transform2d) : Double {
+//        return Translation2d(translation.x * cos(tagPose.rotation.y), translation.y*sin(tagPose.rotation.y)).norm
+//    }
     /** Given a field relative postion, return a double relating to the horizontal distance left and right of the given tag pose */
-    fun tagRelativeToFieldRelative(tagPose : Pose3d, x : Double) : Translation2d {
-        return Translation2d(x * cos(tagPose.rotation.y), x * sin(tagPose.rotation.y))
-    }
+//    fun tagRelativeToFieldRelative(tagPose : Pose3d, x : Double) : Translation2d {
+//        return Translation2d(x * cos(tagPose.rotation.y), x * sin(tagPose.rotation.y))
+//    }
     override fun execute() {
         // If usedTarget is not initialized, the camera has not seen a tag yet, and should not begin alignment
         if (!::usedTarget.isInitialized) return
         val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
         //Update distance to tag with odometry update
-        distToTag = Transform2d(distToTag.x, distToTag.y - fieldRelativeToTagRelative(tagPose, (lastPose - swerveDrive.pose)), distToTag.rotation)
+//        distToTag = Transform2d(distToTag.x, distToTag.y - fieldRelativeToTagRelative(tagPose, (lastPose - swerveDrive.pose)), distToTag.rotation)
+        distToTag = sqrt(abs(swerveDrive.pose.x - tagPose.x)+abs(swerveDrive.pose.y - tagPose.y))
         val currentRotation = (swerveDrive.pose.rotation.degrees + 180) % 360
         val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
+        val headingOffset = desiredHeading - currentRotation
+        val translation = PhotonUtils.estimateCameraToTargetTranslation(
+            distToTag, Rotation2d.fromDegrees(headingOffset)
+        )
 
-        turningPID.setPoint = desiredHeading // Set the desired value for the turningPID to the desired heading facing the tag
-        movementPID.setpoint = horizontalOffset // Set the desired value for the distance from the tag (Typically 0)
+//        turningPID.setPoint = desiredHeading // Set the desired value for the turningPID to the desired heading facing the tag
+//        movementPID.setpoint = horizontalOffset // Set the desired value for the distance from the tag (Typically 0)
 
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
         val angleVelocity = if (!currentRotation.within(3.0, desiredHeading)) { turningPID.turnspeedOutput(currentRotation) } else { 0.0 }
         // Desired velocity vector, moves horizontally relative to the tag, but may be diagonal relative to the field
-        val velocity = if (!trueRobotToTag().within(0.1, horizontalOffset)) { tagRelativeToFieldRelative(tagPose, movementPID.calculate(trueRobotToTag())) } else { Translation2d() }
+//        val velocity = if (!trueRobotToTag().within(0.1, horizontalOffset)) { tagRelativeToFieldRelative(tagPose, movementPID.calculate(trueRobotToTag())) } else { Translation2d() }
 
         speedConsumer(
             Transform2d(
-                velocity,
+                translation,
                 Rotation2d(angleVelocity)
             )
         )
-        SmartDashboard.putNumber("horizontalVelocity", velocity.x)
-        SmartDashboard.putNumber("verticalVelocity", velocity.y)
+//        SmartDashboard.putNumber("horizontalVelocity", velocity.x)
+//        SmartDashboard.putNumber("verticalVelocity", velocity.y)
     }
 
 
