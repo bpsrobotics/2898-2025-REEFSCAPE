@@ -54,14 +54,14 @@ class Constants {
         const val MaxAccel = 2.0
 
         //PID constants
-        const val kP = 1.0
+        const val kP = 0.01
         const val kI = 0.0
         const val kD = 0.0
 
         //FF constants
         const val kS = 0.0
-        const val kV = 0.0
-        const val kG = 0.01
+        const val kV = 0.1
+        const val kG = 0.1
         const val kA = 0.0
 
         //Max elev driver outputs

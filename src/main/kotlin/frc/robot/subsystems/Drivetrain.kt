@@ -313,7 +313,7 @@ object  Drivetrain : SubsystemBase() {
      * @return The current pose of the robot.
      */
     fun getPose() : Pose2d {
-        return Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
+        return Pose2d(swerveDrive.pose.x, swerveDrive.pose.y, swerveDrive.pose.rotation)
     }
 
     /**
