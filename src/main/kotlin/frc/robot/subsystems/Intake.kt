@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.filter.LinearFilter
@@ -13,11 +14,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.wpilibj.I2C
+import edu.wpi.first.wpilibj.util.Color
+
 import frc.robot.RobotMap
 import frc.robot.Constants.IntakeConstants.kv
 import frc.robot.Constants.IntakeConstants.ks
 import frc.robot.Constants.IntakeConstants.ka
-
+import frc.robot.Constants.IntakeConstants.CORAL_COLOR
+import frc.robot.Constants.IntakeConstants.CORAL_COLOR_TOLERANCE
+import kotlin.math.absoluteValue
 
 object Intake : SubsystemBase() {
     val intakeMotor = SparkMax(RobotMap.IntakeID, SparkLowLevel.MotorType.kBrushless)
@@ -36,6 +42,10 @@ object Intake : SubsystemBase() {
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
 
+    // Color sensor values
+    val i2cPort = I2C.Port.kOnboard;
+    val colorSensor = ColorSensorV3(i2cPort);
+
     init {
         // Intake motor initialisation stuff
         IntakeConfig
@@ -50,6 +60,7 @@ object Intake : SubsystemBase() {
     }
 
     override fun periodic() {
+        // Coral input motor stuff
         SmartDashboard.putNumber("intake current", intakeMotor.outputCurrent)
         SmartDashboard.putBoolean("has coral", hasCoral)
         SmartDashboard.putNumber("intake output", output)
@@ -61,18 +72,18 @@ object Intake : SubsystemBase() {
     }
 
     fun intake(speed: Double){
+        updateColorSensor() // Also updates hasCoral
+
         if (intakeState) {
-            if (buffer.calculate(currentAverage > IntakeConstants.CURRENT_WHEN_ROBOT_HAS_CORAL) && !hasCoral && !gracePeriod ) {
+            if (buffer.calculate(hasCoral) && !gracePeriod) {
                 output = 0.0
                 bufferTimer.reset()
                 bufferTimer.start()
-                hasCoral = true
             } else {
                 if (gracePeriod) {
                     output = speed
                 } else {
                     output = speed
-                    hasCoral = false
                 }
             }
         } else {
@@ -87,4 +98,27 @@ object Intake : SubsystemBase() {
     fun outtake() {
         output = -0.4
     }
-}
+
+    fun updateColorSensor(){
+        // Get values from the color sensor
+        val detectedColor = colorSensor.getColor() // RGB value color sensor sees
+        val IR: Double = colorSensor.getIR().toDouble() // Infared light
+        val proximity = colorSensor.getProximity().toDouble() // Proximity of the color sensor
+
+        // Display the color sensor values on the SmartDashboard
+        SmartDashboard.putNumber("Red", detectedColor.red);
+        SmartDashboard.putNumber("Green", detectedColor.green);
+        SmartDashboard.putNumber("Blue", detectedColor.blue);
+        SmartDashboard.putNumber("IR (Not used)", IR);
+        SmartDashboard.putNumber("Proximity (Not used)", proximity)
+
+        hasCoral = isCoralInIntake(detectedColor)
+    }
+
+    fun isCoralInIntake(detectedColor: Color): Boolean {
+        if ((detectedColor.red - CORAL_COLOR.red).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+        if ((detectedColor.green - CORAL_COLOR.green).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+        if ((detectedColor.blue - CORAL_COLOR.blue).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+        return true
+        }
+    }
