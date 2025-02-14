@@ -91,6 +91,19 @@ object Intake : SubsystemBase() {
             output = 0.0
         }
     }
+    fun algaeIntake(speed: Double) {
+        IntakeConfig
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .smartCurrentLimit(20)
+            .inverted(true)
+
+        intakeMotor.configure(
+            IntakeConfig,
+            SparkBase.ResetMode.kResetSafeParameters,
+            SparkBase.PersistMode.kPersistParameters
+        )
+        output = speed //fixme; make sure this doesn't break the code
+    }
     fun ffController (goalVelocity: Double) {
         voltage = flywheelFF.calculate(goalVelocity)
     }

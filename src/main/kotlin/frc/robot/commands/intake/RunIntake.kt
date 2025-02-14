@@ -21,4 +21,7 @@ class RunIntake : Command() {
     fun inputStop(interrupted: Boolean) {
         Intake.intake(0.0)
     }
+    fun removeCoral() {
+        Intake.outtake()
+    }
 }
