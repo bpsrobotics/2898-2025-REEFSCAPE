@@ -134,4 +134,4 @@ object Intake : SubsystemBase() {
         if ((detectedColor.blue - CORAL_COLOR.blue).absoluteValue > CORAL_COLOR_TOLERANCE) return false
         return true
         }
-    }
+    } //todo: figure out how to make so that we can detect coral w/ no color sensor
