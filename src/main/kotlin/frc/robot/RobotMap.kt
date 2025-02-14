@@ -32,7 +32,6 @@ object RobotMap {
 
     const val PivotDriverID = 17
     const val EndEffectorID = 18
-    const val IntakeID = 40 // todo setup actual value
 
     // DIO IDs
 
@@ -41,8 +40,10 @@ object RobotMap {
     const val LimitBotID = 2
     const val LimitTopID = 3
     const val PivotPosID = 4
-    const val CoralCheckID = 5
-    const val IntakePosID = 99 // todo setup actual value
+
+    // I2C port
+
+    //the coral check thing
 
 
 }

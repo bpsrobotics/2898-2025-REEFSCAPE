@@ -23,7 +23,7 @@ class MoveElevator(val goalPosition : Double) : Command() {
 
     override fun execute() {
         targetSpeed = Elevator.profile.calculate(timer.get(), Elevator.currentState, Elevator.goalState).velocity
-        Elevator.closedLoopMotorControl(targetSpeed)
+        Elevator.closedLoopMotorControl(goalPosition)
     }
 
     override fun isFinished(): Boolean {

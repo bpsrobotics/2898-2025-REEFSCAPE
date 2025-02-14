@@ -76,7 +76,6 @@ class Constants {
 
         //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
-            Traverse(0.0),
             Stow(0.0),
             L2(0.1),
             L3(0.1),
@@ -107,13 +106,17 @@ class Constants {
         //SOFT Stop limits
         const val UPPER_LIMIT = 0.0
         const val LOWER_LIMIT = 0.0
-        const val kg = 0.0
-        const val ks = 0.0
-        const val kv = 0.0
-        const val ka = 0.0 // we might not use this but it's good to have.
-        const val kp = 0.0
-        const val ki = 0.0
-        const val kd = 0.0
+
+
+        enum class PivotState(val position: Double) {
+            Traverse(0.0),
+            Stow(0.0),
+            AngleBranch(0.1),
+            VerticalBranch(0.1),
+            Algae(0.1),
+            Processor(0.1)
+
+        }
     }
 
     object IntakeConstants {

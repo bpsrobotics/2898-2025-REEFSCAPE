@@ -6,6 +6,7 @@ import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.controller.ElevatorFeedforward
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
@@ -59,7 +60,7 @@ object Elevator : SubsystemBase() {
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
 
     val elevatorFeedforward = ElevatorFeedforward(kS, kG, kV)
-    val pid = PIDController(kP,kI, kD)
+    val pid = ProfiledPIDController(kP,kI, kD, constraints)
 
     init {
         // Init motor controls
@@ -73,12 +74,12 @@ object Elevator : SubsystemBase() {
             SparkBase.PersistMode.kPersistParameters
         )
         leftSlave.configure(
-            elevatorConfig.follow(leftMaster, true),
+            elevatorConfig.follow(leftMaster),
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
         rightMaster.configure(
-            elevatorConfig.follow(leftMaster),
+            elevatorConfig.follow(leftMaster, true),
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
@@ -105,9 +106,10 @@ object Elevator : SubsystemBase() {
         return elevEncoder.distance
     }
 
-    /** Run the motors toward [goalState].position at [targetSpeed] */
-    fun closedLoopMotorControl(targetSpeed : Double) {
-        val outputPower = elevatorFeedforward.calculate(targetSpeed) + pid.calculate(getPos())
+    /** Run the motors until elevator is at [targetPosition] */
+    fun closedLoopMotorControl(targetPosition: Double) {
+        pid.setGoal(targetPosition)
+        val outputPower = pid.calculate(getPos()) + elevatorFeedforward.calculate(pid.setpoint.velocity)
         if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
         if(topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
         leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))

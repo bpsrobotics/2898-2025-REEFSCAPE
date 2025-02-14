@@ -26,11 +26,8 @@ import frc.robot.Constants.IntakeConstants.CORAL_COLOR_TOLERANCE
 import kotlin.math.absoluteValue
 
 object Intake : SubsystemBase() {
-    val intakeMotor = SparkMax(RobotMap.IntakeID, SparkLowLevel.MotorType.kBrushless)
+    val intakeMotor = SparkMax(RobotMap.EndEffectorID, SparkLowLevel.MotorType.kBrushless)
     val IntakeConfig: SparkMaxConfig = SparkMaxConfig()
-
-    var voltage = 0.0
-    val flywheelFF = SimpleMotorFeedforward(ks, kv, ka)
 
     var hasCoral = false
     var output = 0.0
@@ -68,7 +65,6 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("intake timer ", bufferTimer.get())
         currentAverage = currentFilter.calculate(intakeMotor.outputCurrent)
 
-        intakeMotor.set(output)
     }
 
     fun intake(speed: Double){
@@ -90,10 +86,9 @@ object Intake : SubsystemBase() {
             println("stopping intake")
             output = 0.0
         }
+        intakeMotor.set(output)
     }
-    fun ffController (goalVelocity: Double) {
-        voltage = flywheelFF.calculate(goalVelocity)
-    }
+
 
     fun outtake() {
         output = -0.4
