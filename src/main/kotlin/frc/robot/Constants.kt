@@ -114,6 +114,15 @@ class Constants {
         const val kp = 0.0
         const val ki = 0.0
         const val kd = 0.0
+        enum class PivotState(val position: Double) {
+            Traverse(0.0),
+            Stow(0.0),
+            AngleBranch(0.1),
+            VerticalBranch(0.1),
+            Algae(0.1),
+            Processor(0.1)
+
+        }
     }
 
     object IntakeConstants {

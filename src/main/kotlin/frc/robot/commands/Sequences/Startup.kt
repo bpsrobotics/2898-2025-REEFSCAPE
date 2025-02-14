@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import frc.robot.Constants
 import frc.robot.commands.wrist.MoveWrist
 import frc.robot.commands.elevator.MoveElevator
+import frc.robot.subsystems.Elevator
 
 class Startup : Command() {
     val commandGroup = SequentialCommandGroup(
-        MoveWrist(Constants.PivotConstants.Traverse.position),
-        MoveElevator(Constants.ElevatorConstants.LOWER_LIMIT)
+        MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
+        MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position)
     )
 
     override fun initialize() {
@@ -19,6 +20,6 @@ class Startup : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return false //fixme finish this, there is no real error.
+        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.Stow.position)
     }
 }
