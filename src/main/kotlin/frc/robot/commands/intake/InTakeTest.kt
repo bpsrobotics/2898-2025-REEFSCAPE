@@ -19,7 +19,7 @@ class InTakeTest: Command() {
             Intake.output = 0.8 // postive and has more voltage to take in algae easier
         } else {
             if (!timer.hasElapsed(0.5)) {
-                Intake.output = 0.4 // negaive need less volate to spit out algae
+                Intake.output = 0.4 // negaive need less voltage to spit out algae
             }
         }
     }

@@ -7,13 +7,12 @@ import frc.robot.Constants
 import frc.robot.commands.wrist.MoveWrist
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.subsystems.Elevator
-import frc.robot.commands.intake.RunIntake
 
 class MoveL1 : Command() {
     val commandGroup = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
         MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position)
-        RunIntake(Constants.IntakeConstants.OUTTAKE) //todo fix this later to support intake(rough estimate rn)
+         //todo fix this later to support intake(rough estimate rn)
     )
 
     override fun initialize() {

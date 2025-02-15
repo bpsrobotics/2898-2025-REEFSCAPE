@@ -2,13 +2,11 @@ package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj.Timer
 import frc.robot.subsystems.Intake
-import frc.robot.Constants.IntakeConstants.MOI
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants.IntakeConstants.INTAKE
 import frc.robot.Constants.IntakeConstants.OUTTAKE
 
-
-class AlgaeIntakeOutake : Command(){
+class CoralIntake (): Command() {
     val timer = Timer()
     init { //addRequirements isn't working after import for some reason
         addRequirements(Intake)
@@ -19,7 +17,7 @@ class AlgaeIntakeOutake : Command(){
         timer.start()
     }
 
-    override fun execute() { //todo these values need to be changed for algae
+    override fun execute() { //todo these values need to be changed for coral
         if (!timer.hasElapsed(0.1)) {
             INTAKE // postive and has more voltage to take in algae easier
         } else {
@@ -30,7 +28,7 @@ class AlgaeIntakeOutake : Command(){
     }
 
     override fun isFinished(): Boolean {
-        return Intake.hasAlgae
+        return Intake.hasCoral
     }
     override fun end(interrupted: Boolean){
         Intake.intake(0.0)
