@@ -33,7 +33,6 @@ object Intake : SubsystemBase() {
     val flywheelFF = SimpleMotorFeedforward(ks, kv, ka)
 
     var hasCoral = false
-    val hasAlgae = false
     var output = 0.0
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
