@@ -14,7 +14,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.commands.Sequences.MoveL1
+import frc.robot.commands.Sequences.StartupL1
 import frc.robot.commands.Sequences.MoveL2
 import frc.robot.commands.Sequences.MoveL3
 import frc.robot.commands.Sequences.MoveL4
@@ -97,7 +97,7 @@ class RobotContainer {
 
         // MoveL# Sequences
         when {
-            OI.moveL1 -> MoveL1().schedule()
+            OI.moveL1 -> StartupL1().schedule()
             OI.moveL2 -> MoveL2().schedule()
             OI.moveL3 -> MoveL3().schedule()
             OI.moveL4 -> MoveL4().schedule()
