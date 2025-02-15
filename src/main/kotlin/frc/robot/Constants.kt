@@ -133,6 +133,7 @@ class Constants {
         const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
         val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
         const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
+        const val MOI = 142.577333333 //TODO fix value incase of errors(I think their are) C:(1/12 x 106.933 x (4^2)
     }
 
 

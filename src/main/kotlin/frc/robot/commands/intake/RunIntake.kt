@@ -6,17 +6,21 @@ import edu.wpi.first.wpilibj2.command.Command
 
 class RunIntake : Command() {
     val timer = Timer()
-    init {addRequirements(Intake)}
-
-    override fun initialize() {
-        Intake.intake(0.5)
+    init {
+        addRequirements(Intake)
     }
 
+    override fun initialize() {
+        Intake.intake(0.8)
+    }
+    /*
     override fun execute() {
         Intake.intake(0.5)
     }
+    */
+    //
     override fun isFinished(): Boolean {
-        return Intake.hasCoral
+        return Intake.hasAlgae
     }
     fun inputStop(interrupted: Boolean) {
         Intake.intake(0.0)

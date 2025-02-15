@@ -1,28 +1,37 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Intake
+import frc.robot.Constants.IntakeConstants.MOI
+import edu.wpi.first.wpilibj2.command.Command
 
-class AlgaeIntakeOutake: Command() {
+
+class AlgaeIntakeOutake {
     val timer = Timer()
-    init {addRequirements(Intake) }
-
-    override fun initialize() {
-        Intake.algaeIntake(0.0)
+    init { //addRequirements isn't working after import for some reason
+        addRequirements(Intake)
     }
 
-    override fun execute() {
-        Intake.algaeIntake(0.8)
+    override fun initialize() {
+        timer.reset()
+        timer.start()
+    }
+
+    override fun execute() { //todo these values need to be changed depending on how much voltage is needed
+        if (!timer.hasElapsed(0.1)) {
+            Intake.output
+            = 0.8 // postive and has more voltage to take in algae easier
+        } else {
+            if (!timer.hasElapsed(0.5)) {
+                Intake.output = -0.4 // negative need less voltage to spit out algae
+            }
+        }
     }
 
     override fun isFinished(): Boolean {
-        return Intake.hasCoral
+        return Intake.hasAlgae
     }
-    fun inputStop(interrupted: Boolean) {
+    override fun end(interrupted: Boolean){
         Intake.intake(0.0)
     }
-    fun removeCoral() {
-        Intake.outtake()
-    }
-} //todo: check if this is redundant or not
+}
