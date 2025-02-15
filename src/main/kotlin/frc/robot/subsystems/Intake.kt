@@ -118,6 +118,8 @@ object Intake : SubsystemBase() {
         val IR: Double = colorSensor.getIR().toDouble() // Infared light
         val proximity = colorSensor.getProximity().toDouble() // Proximity of the color sensor
 
+        val tooClose = 0.0 //todo actually check and configure this
+
         // Display the color sensor values on the SmartDashboard
         SmartDashboard.putNumber("Red", detectedColor.red);
         SmartDashboard.putNumber("Green", detectedColor.green);
@@ -125,7 +127,14 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("IR (Not used)", IR);
         SmartDashboard.putNumber("Proximity (Not used)", proximity)
 
-        hasCoral = isCoralInIntake(detectedColor)
+        if (proximity > tooClose) {
+            hasCoral = false
+        }
+        else {
+            hasCoral = false
+        }
+
+        //hasCoral = isCoralInIntake(detectedColor)
     }
 
     fun isCoralInIntake(detectedColor: Color): Boolean {
