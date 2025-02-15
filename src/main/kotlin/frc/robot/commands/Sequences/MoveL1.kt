@@ -12,7 +12,6 @@ class MoveL1 : Command() {
     val commandGroup = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
         MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position)
-         //todo fix this later to support intake(rough estimate rn)
     )
 
     override fun initialize() {

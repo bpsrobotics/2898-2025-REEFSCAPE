@@ -187,8 +187,4 @@ object OI : SubsystemBase() {
     override fun periodic(){
         Rumble.update()
     }
-
-
-
-
 }
