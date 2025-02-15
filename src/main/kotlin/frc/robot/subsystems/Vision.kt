@@ -15,12 +15,14 @@ import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.PhotonPoseEstimator.PoseStrategy
 import org.photonvision.targeting.PhotonPipelineResult
+import kotlin.math.abs
 
 
 val aprilTagFieldLayout = AprilTagFieldLayout(
     mutableListOf(
         AprilTag(1, Pose3d(Translation3d(0.0,0.0,0.488), Rotation3d(0.0,0.0,0.0))),
-        AprilTag(2, Pose3d(Translation3d(0.0, 2.0, 0.488), Rotation3d(0.0, 0.0, 0.0)))
+        AprilTag(2, Pose3d(Translation3d(0.0, 1.0, 0.488), Rotation3d(0.0, 0.0, 0.0))),
+        AprilTag(3, Pose3d(Translation3d(0.0, 2.0, 0.488), Rotation3d(0.0, 0.0, 0.0)))
     ),
     10.0,10.0)
 
@@ -106,10 +108,29 @@ object Vision : SubsystemBase() {
      */
     fun getRobotPosition(result: PhotonPipelineResult): Pose3d? {
         setReference(previousPose)
+
         val estimatedPose = poseEstimator.update(result) ?: return null
+
         if (estimatedPose.isEmpty) return null
         previousPose = estimatedPose.get().estimatedPose.toPose2d()
         return estimatedPose.get().estimatedPose
+
+    }
+
+    fun getValidID(result: PhotonPipelineResult): Int {
+        val validIDs = mutableListOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22)
+        var zAngle = 180.0
+        var bestTarget = 0
+        for (i in result.getTargets()){
+            if (i.fiducialId in validIDs){
+                val zAngleDiff = abs(180.0-i.getBestCameraToTarget().rotation.z)
+                if ( zAngleDiff < zAngle){
+                    bestTarget = i.fiducialId
+                    zAngle = zAngleDiff
+                }
+            }
+        }
+        return bestTarget
     }
 
     /**
@@ -124,7 +145,7 @@ object Vision : SubsystemBase() {
         val stdv = Matrix(Nat.N3(), Nat.N1())
         stdv.set(0,0, 3.0)
         stdv.set(1,0, 3.0)
-        stdv.set(2,0, 100000.0)
+        stdv.set(2,0, 3.0)
         return stdv
     }
 }

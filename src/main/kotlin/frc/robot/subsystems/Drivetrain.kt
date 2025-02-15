@@ -75,10 +75,15 @@ object  Drivetrain : SubsystemBase() {
         swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
         // Updates odometry whenever a new
         Vision.listeners.add ( "UpdateOdometry") {
-            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-            swerveDrive.addVisionMeasurement(Pose2d(-position.x, -position.y, position.rotation), it.timestampSeconds)
-            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+            if (it.multitagResult.isPresent) {
+                val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
+                swerveDrive.addVisionMeasurement(
+                    Pose2d(-position.x, -position.y, position.rotation),
+                    it.timestampSeconds
+                )
+                SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+                SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+            }
         }
 
 
