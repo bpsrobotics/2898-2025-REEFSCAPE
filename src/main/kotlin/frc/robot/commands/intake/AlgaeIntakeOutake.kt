@@ -19,8 +19,7 @@ class AlgaeIntakeOutake {
 
     override fun execute() { //todo these values need to be changed depending on how much voltage is needed
         if (!timer.hasElapsed(0.1)) {
-            Intake.output
-            = 0.8 // postive and has more voltage to take in algae easier
+            Intake.output = 0.8 // postive and has more voltage to take in algae easier
         } else {
             if (!timer.hasElapsed(0.5)) {
                 Intake.output = -0.4 // negative need less voltage to spit out algae
