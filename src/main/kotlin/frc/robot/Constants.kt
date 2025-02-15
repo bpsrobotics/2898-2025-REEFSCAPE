@@ -182,6 +182,7 @@ class Constants {
 
         //FIXME Operator Controls
         const val BASE_STAGE = 6
+        const val CORAL_L1 = 4
         const val CORAL_L2 = 5
         const val CORAL_L3 = 3
         const val CORAL_L4 = 11

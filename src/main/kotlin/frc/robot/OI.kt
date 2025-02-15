@@ -14,6 +14,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
+import frc.robot.Constants.ButtonConstants.CORAL_L1
+import frc.robot.Constants.ButtonConstants.CORAL_L2
+import frc.robot.Constants.ButtonConstants.CORAL_L3
+import frc.robot.Constants.ButtonConstants.CORAL_L4
+
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -91,6 +96,11 @@ object OI : SubsystemBase() {
     val rightTrigger
         get() = driverController.rightTriggerAxis
 
+    // Coral outake positions move to
+    val coralL1 = operatorController.getRawButton(CORAL_L1)
+    val coralL2 = operatorController.getRawButton(CORAL_L2)
+    val coralL3 = operatorController.getRawButton(CORAL_L3)
+    val coralL4 = operatorController.getRawButton(CORAL_L4)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
@@ -110,6 +120,7 @@ object OI : SubsystemBase() {
 
 //    val runIntake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0,-1) }
 //    val shooterOutake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0, 1) }
+
 
 
     enum class Direction {
