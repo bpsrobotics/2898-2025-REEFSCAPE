@@ -24,14 +24,14 @@ object RobotMap {
     const val RearRightTurningCanId = 4
 
     // Subsystem CAN IDs
-    const val ElevatorLeftMasterID = 13
-    const val ElevatorLeftSlaveID = 14
+    const val ElevatorLeftMasterID = 17
+    const val ElevatorLeftSlaveID = 18
 
     const val ElevatorRightMasterID = 15
     const val ElevatorRightSlaveID = 16
 
-    const val PivotDriverID = 17
-    const val EndEffectorID = 18
+    const val PivotDriverID = 13
+    const val EndEffectorID = 14
 
     // DIO IDs
 
@@ -44,6 +44,7 @@ object RobotMap {
     // I2C port
 
     //the coral check thing
+
 
 
 }

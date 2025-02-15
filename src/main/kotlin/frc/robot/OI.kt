@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.event.EventLoop
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
+import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
 import kotlin.math.pow
@@ -96,7 +97,8 @@ object OI : SubsystemBase() {
 
 
 
-    val highHat get() = operatorController.pov
+    val highHatForward = POVButton(operatorController, 0)
+    val highHatBack = POVButton(operatorController, 180)
     val hatVector get() = when (operatorController.pov) {
         0 -> Vector2(0.0,1.0)
         90 -> Vector2(1.0,0.0)

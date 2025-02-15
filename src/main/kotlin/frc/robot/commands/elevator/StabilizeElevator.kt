@@ -11,7 +11,7 @@ class StabilizeElevator() : Command() {
     override fun initialize() {}
 
     override fun execute() {
-        Elevator.closedLoopMotorControl(0.0)
+        Elevator.closedLoopPositionControl()
     }
 
     override fun isFinished(): Boolean { return false }

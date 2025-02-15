@@ -13,7 +13,7 @@ class IntakeStop : Command() {
         }
 
         override fun execute() {
-            Intake.intake(0.0)
+            Intake.runMotor(0.0)
         }
 
         override fun isFinished(): Boolean {

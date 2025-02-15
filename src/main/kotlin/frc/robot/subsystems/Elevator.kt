@@ -60,7 +60,8 @@ object Elevator : SubsystemBase() {
     var goalState = TrapezoidProfile.State(elevEncoder.distance, 0.0)
 
     val elevatorFeedforward = ElevatorFeedforward(kS, kG, kV)
-    val pid = ProfiledPIDController(kP,kI, kD, constraints)
+    val profiledPID = ProfiledPIDController(kP, kI,kD, constraints)
+    val pid = PIDController(kP,kI, kD)
 
     init {
         // Init motor controls
@@ -94,7 +95,7 @@ object Elevator : SubsystemBase() {
 
     override fun periodic() {
         if (botLimit.get()) {
-            elevEncoder.reset()
+            resetPos()
         }
 
         SmartDashboard.putNumber("/Elevator/Position", getPos())
@@ -106,13 +107,23 @@ object Elevator : SubsystemBase() {
         return elevEncoder.distance
     }
 
-    /** Run the motors until elevator is at [targetPosition] */
-    fun closedLoopMotorControl(targetPosition: Double) {
-        pid.setGoal(targetPosition)
-        val outputPower = pid.calculate(getPos()) + elevatorFeedforward.calculate(pid.setpoint.velocity)
+    fun setVoltage(voltage: Double) {
+        leftMaster.setVoltage(voltage)
+    }
+    /** Run the motors to hold the elevator at [getPos] position */
+    fun closedLoopPositionControl() {
+        val outputPower = elevatorFeedforward.calculate(0.0) + pid.calculate(getPos(), profiledPID.goal.position)
         if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
         if(topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
         leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
+    }
+
+    /** Run the Motors toward [targetPos] using a profiled pid controller **/
+    fun profiledPIDControl(targetPos : Double) {
+        profiledPID.setGoal(targetPos)
+        val pidOutput = profiledPID.calculate(getPos())
+        val ffOutput = elevatorFeedforward.calculate(profiledPID.setpoint.velocity)
+        leftMaster.setVoltage(pidOutput + ffOutput)
     }
     /** Resets the elevator encoder */
     fun resetPos() {

@@ -23,6 +23,7 @@ import frc.robot.Constants.IntakeConstants.ks
 import frc.robot.Constants.IntakeConstants.ka
 import frc.robot.Constants.IntakeConstants.CORAL_COLOR
 import frc.robot.Constants.IntakeConstants.CORAL_COLOR_TOLERANCE
+import frc.robot.commands.intake.RunIntake
 import kotlin.math.absoluteValue
 
 object Intake : SubsystemBase() {
@@ -34,7 +35,7 @@ object Intake : SubsystemBase() {
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
-    val buffer = Debouncer(0.04, Debouncer.DebounceType.kRising)
+    val buffer = Debouncer(0.1, Debouncer.DebounceType.kRising)
     val bufferTimer = Timer()
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
@@ -65,29 +66,29 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("intake timer ", bufferTimer.get())
         currentAverage = currentFilter.calculate(intakeMotor.outputCurrent)
 
-    }
-
-    fun intake(speed: Double){
         updateColorSensor() // Also updates hasCoral
 
-        if (intakeState) {
-            if (buffer.calculate(hasCoral) && !gracePeriod) {
-                output = 0.0
-                bufferTimer.reset()
-                bufferTimer.start()
-            } else {
-                if (gracePeriod) {
-                    output = speed
-                } else {
-                    output = speed
-                }
-            }
-        } else {
-            println("stopping intake")
+    }
+
+    fun runMotor(speed: Double){
+
+        if (!intakeState){
             output = 0.0
+            return
+        }
+        if (buffer.calculate(hasCoral) && !gracePeriod) {
+            output = 0.0
+            bufferTimer.restart()
+            return
+        }
+        if (gracePeriod && hasCoral) {
+            output = speed
+        } else {
+            output = speed
         }
         intakeMotor.set(output)
     }
+
 
 
     fun outtake() {
@@ -111,9 +112,11 @@ object Intake : SubsystemBase() {
     }
 
     fun isCoralInIntake(detectedColor: Color): Boolean {
-        if ((detectedColor.red - CORAL_COLOR.red).absoluteValue > CORAL_COLOR_TOLERANCE) return false
-        if ((detectedColor.green - CORAL_COLOR.green).absoluteValue > CORAL_COLOR_TOLERANCE) return false
-        if ((detectedColor.blue - CORAL_COLOR.blue).absoluteValue > CORAL_COLOR_TOLERANCE) return false
-        return true
+//        if ((detectedColor.red - CORAL_COLOR.red).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+//        if ((detectedColor.green - CORAL_COLOR.green).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+//        if ((detectedColor.blue - CORAL_COLOR.blue).absoluteValue > CORAL_COLOR_TOLERANCE) return false
+        if (colorSensor.proximity >= 100.0) {return true}
+        return false
+
         }
     }

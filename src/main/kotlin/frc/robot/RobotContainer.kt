@@ -19,6 +19,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.OI.hatVector
+import frc.robot.OI.highHatForward
+import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
@@ -50,9 +53,10 @@ class RobotContainer {
             { false }
         )
 
+
     val navXResetCommand: NavXReset = NavXReset()
 
-
+    val runIntakeCommand: RunIntake = RunIntake(0.0)
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
@@ -99,6 +103,7 @@ class RobotContainer {
 
 
         resetGyro.whileTrue(navXResetCommand)
+        highHatForward.whileTrue(runIntakeCommand)
 
     }
 
