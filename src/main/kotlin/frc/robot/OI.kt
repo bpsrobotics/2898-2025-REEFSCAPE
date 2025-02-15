@@ -7,9 +7,6 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj.event.BooleanEvent
-import edu.wpi.first.wpilibj.event.EventLoop
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
@@ -96,11 +93,11 @@ object OI : SubsystemBase() {
     val rightTrigger
         get() = driverController.rightTriggerAxis
 
-    // Coral outake positions move to
-    val coralL1 = operatorController.getRawButton(CORAL_L1)
-    val coralL2 = operatorController.getRawButton(CORAL_L2)
-    val coralL3 = operatorController.getRawButton(CORAL_L3)
-    val coralL4 = operatorController.getRawButton(CORAL_L4)
+    // Coral out take positions move to
+    val moveL1 = operatorController.getRawButton(CORAL_L1)
+    val moveL2 = operatorController.getRawButton(CORAL_L2)
+    val moveL3 = operatorController.getRawButton(CORAL_L3)
+    val moveL4 = operatorController.getRawButton(CORAL_L4)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
