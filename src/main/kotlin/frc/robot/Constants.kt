@@ -187,6 +187,7 @@ class Constants {
         const val CORAL_L2 = 5
         const val CORAL_L3 = 3
         const val CORAL_L4 = 11
+        const val CORAL_INTAKE = 7
 
         const val ALGAE_B1 = 8
         const val ALGAE_B2 = 9

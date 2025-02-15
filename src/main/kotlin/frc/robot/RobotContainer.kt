@@ -18,6 +18,7 @@ import frc.robot.commands.Sequences.MoveL1
 import frc.robot.commands.Sequences.MoveL2
 import frc.robot.commands.Sequences.MoveL3
 import frc.robot.commands.Sequences.MoveL4
+import frc.robot.commands.Sequences.MoveToIntake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
@@ -100,6 +101,7 @@ class RobotContainer {
             OI.moveL2 -> MoveL2().schedule()
             OI.moveL3 -> MoveL3().schedule()
             OI.moveL4 -> MoveL4().schedule()
+            OI.moveToIntake -> MoveToIntake().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)

@@ -15,6 +15,7 @@ import frc.robot.Constants.ButtonConstants.CORAL_L1
 import frc.robot.Constants.ButtonConstants.CORAL_L2
 import frc.robot.Constants.ButtonConstants.CORAL_L3
 import frc.robot.Constants.ButtonConstants.CORAL_L4
+import frc.robot.Constants.ButtonConstants.CORAL_INTAKE
 
 import kotlin.math.pow
 import kotlin.math.sign
@@ -98,6 +99,7 @@ object OI : SubsystemBase() {
     val moveL2 = operatorController.getRawButton(CORAL_L2)
     val moveL3 = operatorController.getRawButton(CORAL_L3)
     val moveL4 = operatorController.getRawButton(CORAL_L4)
+    val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
