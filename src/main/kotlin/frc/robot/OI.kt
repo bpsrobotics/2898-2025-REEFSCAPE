@@ -7,13 +7,15 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj.event.BooleanEvent
-import edu.wpi.first.wpilibj.event.EventLoop
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
+import frc.robot.Constants.ButtonConstants.CORAL_L1
+import frc.robot.Constants.ButtonConstants.CORAL_L2
+import frc.robot.Constants.ButtonConstants.CORAL_L3
+import frc.robot.Constants.ButtonConstants.CORAL_L4
+
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -91,6 +93,11 @@ object OI : SubsystemBase() {
     val rightTrigger
         get() = driverController.rightTriggerAxis
 
+    // Coral out take positions move to
+    val moveL1 = operatorController.getRawButton(CORAL_L1)
+    val moveL2 = operatorController.getRawButton(CORAL_L2)
+    val moveL3 = operatorController.getRawButton(CORAL_L3)
+    val moveL4 = operatorController.getRawButton(CORAL_L4)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
@@ -110,6 +117,7 @@ object OI : SubsystemBase() {
 
 //    val runIntake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0,-1) }
 //    val shooterOutake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0, 1) }
+
 
 
     enum class Direction {

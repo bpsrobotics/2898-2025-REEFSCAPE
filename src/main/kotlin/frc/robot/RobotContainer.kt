@@ -7,23 +7,20 @@ package frc.robot
 
 import com.pathplanner.lib.auto.AutoBuilder
 import frc.robot.OI.resetGyro
-import frc.robot.OI.rightTrigger
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
 import frc.robot.OI.turnX
-import frc.robot.subsystems.Drivetrain.getDriveSysIDCommand
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.commands.Sequences.MoveL1
+import frc.robot.commands.Sequences.MoveL2
+import frc.robot.commands.Sequences.MoveL3
+import frc.robot.commands.Sequences.MoveL4
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Elevator
-import frc.robot.subsystems.Wrist
 
 
 /**
@@ -97,9 +94,14 @@ class RobotContainer {
         // cancelling on release.
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
 
+        // MoveL# Sequences
+        when {
+            OI.moveL1 -> MoveL1().schedule()
+            OI.moveL2 -> MoveL2().schedule()
+            OI.moveL3 -> MoveL3().schedule()
+            OI.moveL4 -> MoveL4().schedule()
+        }
 
         resetGyro.whileTrue(navXResetCommand)
-
     }
-
 }
