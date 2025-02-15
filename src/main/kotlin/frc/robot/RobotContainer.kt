@@ -24,6 +24,7 @@ import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.StabilizeElevator
 import frc.robot.commands.intake.AlgaeIntakeOutake
+import frc.robot.commands.intake.CoralIntake
 import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
@@ -62,7 +63,7 @@ class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
 
-        NamedCommands.registerCommand("coralintake", RunIntake())
+        NamedCommands.registerCommand("coralintake", CoralIntake())
         NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))

@@ -134,6 +134,8 @@ class Constants {
         const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
         val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
         const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
+        const val INTAKE = 0.8
+        const val OUTTAKE = -0.4
     }
 
 
