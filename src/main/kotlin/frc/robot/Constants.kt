@@ -82,8 +82,8 @@ class Constants {
             L3(0.1),
             L4(0.1),
             A1(0.1),
-            A2(0.1)
-
+            A2(0.1),
+            Intake(0.1)
         }
     }
 
@@ -114,14 +114,15 @@ class Constants {
         const val kp = 0.0
         const val ki = 0.0
         const val kd = 0.0
+        // FIXME set to real positions later
         enum class PivotState(val position: Double) {
             Traverse(0.0),
             Stow(0.0),
             AngleBranch(0.1),
             VerticalBranch(0.1),
             Algae(0.1),
-            Processor(0.1)
-
+            Processor(0.1),
+            Intake(0.1)
         }
     }
 
@@ -133,9 +134,6 @@ class Constants {
         const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
         val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
         const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
-        const val MOI = 142.577333333 //TODO fix value incase of errors(I think their are) C:(1/12 x 106.933 x (4^2)
-        const val INTAKE = 0.8
-        const val OUTTAKE = -0.4
     }
 
 

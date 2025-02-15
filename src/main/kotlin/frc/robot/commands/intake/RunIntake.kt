@@ -1,21 +1,20 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Intake
+import edu.wpi.first.wpilibj2.command.Command
 
-class AlgaeIntakeOutake: Command() {
+class RunIntake : Command() {
     val timer = Timer()
-    init {addRequirements(Intake) }
+    init {addRequirements(Intake)}
 
     override fun initialize() {
-        Intake.algaeIntake(0.0)
+        Intake.intake(0.5)
     }
 
     override fun execute() {
-        Intake.algaeIntake(0.8)
+        Intake.intake(0.5)
     }
-
     override fun isFinished(): Boolean {
         return Intake.hasCoral
     }
@@ -25,4 +24,4 @@ class AlgaeIntakeOutake: Command() {
     fun removeCoral() {
         Intake.outtake()
     }
-} //todo: check if this is redundant or not
+}

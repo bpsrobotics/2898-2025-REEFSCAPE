@@ -13,7 +13,5 @@ class StabilizeWrist : Command() {
         Wrist.closedLoopControl(0.0)
     }
 
-    override fun isFinished(): Boolean {
-        return false
-    }
+    override fun isFinished(): Boolean { return false }
 }
