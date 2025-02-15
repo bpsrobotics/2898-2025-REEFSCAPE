@@ -6,6 +6,7 @@ package frc.robot
 //import com.team2898.robot.Constants.OperatorConstants
 
 import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.auto.NamedCommands
 import frc.robot.OI.resetGyro
 import frc.robot.OI.rightTrigger
 import frc.robot.OI.translationX
@@ -23,7 +24,14 @@ import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Wrist
+import frc.robot.commands.intake.CoralIntake
+import frc.robot.commands.intake.AlgaeIntakeOutake
+import frc.robot.commands.elevator.MoveElevator
+import frc.robot.commands.elevator.DisableElevator
+import frc.robot.commands.elevator.StabilizeElevator
+import frc.robot.commands.elevator.VoltageElevator
 
 
 /**
@@ -57,6 +65,15 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
+        NamedCommands.registerCommand("coralintake", CoralIntake())
+        NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
+        NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
+        NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
+        NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
+        NamedCommands.registerCommand("L4", MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position))
+        NamedCommands.registerCommand("disable", DisableElevator())
+        NamedCommands.registerCommand("stabilize", StabilizeElevator())
+
         initializeObjects()
 
         // Configure the trigger bindings
@@ -81,6 +98,7 @@ class RobotContainer {
         Drivetrain
 //        Wrist
 //        Elevator
+        Intake
     }
 
     /**
