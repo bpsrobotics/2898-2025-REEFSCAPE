@@ -32,7 +32,8 @@ import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.StabilizeElevator
 import frc.robot.commands.elevator.VoltageElevator
-
+import frc.robot.commands.wrist.MoveWrist
+import frc.robot.commands.wrist.StabilizeWrist
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -72,7 +73,9 @@ class RobotContainer {
         NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
         NamedCommands.registerCommand("L4", MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position))
         NamedCommands.registerCommand("disable", DisableElevator())
-        NamedCommands.registerCommand("stabilize", StabilizeElevator())
+        NamedCommands.registerCommand("elevstab", StabilizeElevator())
+        NamedCommands.registerCommand("wristmove", MoveWrist(Constants.PivotConstants.PivotState.Traverse.position))
+        NamedCommands.registerCommand("wristab", StabilizeWrist())
 
         initializeObjects()
 
@@ -96,8 +99,8 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
-//        Wrist
-//        Elevator
+        Wrist
+        Elevator
         Intake
     }
 
