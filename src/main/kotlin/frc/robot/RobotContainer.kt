@@ -26,12 +26,13 @@ import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Wrist
-import frc.robot.commands.intake.CoralIntake
+import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.intake.AlgaeIntakeOutake
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.StabilizeElevator
 import frc.robot.commands.elevator.VoltageElevator
+import frc.robot.commands.intake.IntakeMove
 import frc.robot.commands.wrist.MoveWrist
 import frc.robot.commands.wrist.StabilizeWrist
 
@@ -66,7 +67,7 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-        NamedCommands.registerCommand("coralintake", CoralIntake())
+        NamedCommands.registerCommand("coralintake", RunIntake())
         NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
