@@ -8,17 +8,17 @@ import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.wrist.MoveWrist
 import frc.robot.subsystems.Elevator
 
-class MoveL2 : Command() {
-    val L2CommandSequence = SequentialCommandGroup(
+class MoveToIntake: Command() {
+    val IntakeCommandSequence = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-        MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position),
-        MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
+        MoveElevator(Constants.ElevatorConstants.ElevatorState.Intake.position),
+        MoveWrist(Constants.PivotConstants.PivotState.Intake.position)
     )
     override fun initialize() {
-        ScheduleCommand(L2CommandSequence)
+        ScheduleCommand(IntakeCommandSequence)
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L2.position)
+        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.Intake.position)
     }
 }

@@ -82,8 +82,8 @@ class Constants {
             L3(0.1),
             L4(0.1),
             A1(0.1),
-            A2(0.1)
-
+            A2(0.1),
+            Intake(0.1)
         }
     }
 
@@ -114,14 +114,15 @@ class Constants {
         const val kp = 0.0
         const val ki = 0.0
         const val kd = 0.0
+        // FIXME set to real positions later
         enum class PivotState(val position: Double) {
             Traverse(0.0),
             Stow(0.0),
             AngleBranch(0.1),
             VerticalBranch(0.1),
             Algae(0.1),
-            Processor(0.1)
-
+            Processor(0.1),
+            Intake(0.1)
         }
     }
 
