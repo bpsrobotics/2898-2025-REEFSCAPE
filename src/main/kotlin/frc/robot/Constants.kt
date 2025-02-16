@@ -77,12 +77,12 @@ class Constants {
         //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
             Traverse(0.0),
-            Stow(0.0),
-            L2(0.1),
-            L3(0.1),
-            L4(0.1),
-            A1(0.1),
-            A2(0.1),
+            Stow(13.0),
+            L2(31.875),
+            L3(47.625),
+            L4(72.0),
+            A1(39.75),
+            A2(59.8125),
             Intake(0.1)
         }
     }
