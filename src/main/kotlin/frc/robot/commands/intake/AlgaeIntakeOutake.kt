@@ -15,7 +15,7 @@ class AlgaeIntakeOutake: Command() {
     }
 
     override fun execute() {
-        Intake.algaeIntake(OI.intakeSpeed)
+        Intake.algaeIntake(OI.intakeSpeed * 3)
     }
 
     override fun isFinished(): Boolean {

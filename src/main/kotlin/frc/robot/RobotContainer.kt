@@ -63,7 +63,7 @@ class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
 
-        NamedCommands.registerCommand("coralintake", CoralIntake())
+        NamedCommands.registerCommand("coralintake", RunIntake())
         NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))

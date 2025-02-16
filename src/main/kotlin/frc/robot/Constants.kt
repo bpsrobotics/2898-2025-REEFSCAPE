@@ -62,8 +62,8 @@ class Constants {
 
         //FF constants
         const val kS = 0.0
-        const val kV = 0.0
-        const val kG = 0.01
+        const val kV = 0.08
+        const val kG = 0.22
         const val kA = 0.0
 
         //Max elev driver outputs
