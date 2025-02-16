@@ -49,6 +49,8 @@ class Constants {
         // YAGSL `File` Configs
         val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve")
 
+        val MomentOfInertia = 4.09149392  // kg * m^2
+
     }
 
     object ElevatorConstants {
