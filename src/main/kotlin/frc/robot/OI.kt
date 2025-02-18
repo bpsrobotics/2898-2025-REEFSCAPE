@@ -16,6 +16,8 @@ import frc.robot.Constants.ButtonConstants.CORAL_L2
 import frc.robot.Constants.ButtonConstants.CORAL_L3
 import frc.robot.Constants.ButtonConstants.CORAL_L4
 import frc.robot.Constants.ButtonConstants.CORAL_INTAKE
+import frc.robot.Constants.ButtonConstants.ALGAE_B1
+import frc.robot.Constants.ButtonConstants.ALGAE_B2
 
 import kotlin.math.pow
 import kotlin.math.sign
@@ -100,6 +102,10 @@ object OI : SubsystemBase() {
     val moveL3 = operatorController.getRawButton(CORAL_L3)
     val moveL4 = operatorController.getRawButton(CORAL_L4)
     val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
+
+    // Algae branch positions move to
+    val moveA1 = operatorController.getRawButton(ALGAE_B1)
+    val moveA2 = operatorController.getRawButton(ALGAE_B2)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 

@@ -20,6 +20,8 @@ import frc.robot.commands.Sequences.MoveL2
 import frc.robot.commands.Sequences.MoveL3
 import frc.robot.commands.Sequences.MoveL4
 import frc.robot.commands.Sequences.MoveToIntake
+import frc.robot.commands.Sequences.MoveA1
+import frc.robot.commands.Sequences.MoveA2
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.StabilizeElevator
@@ -118,6 +120,11 @@ class RobotContainer {
             OI.moveL3 -> MoveL3().schedule()
             OI.moveL4 -> MoveL4().schedule()
             OI.moveToIntake -> MoveToIntake().schedule()
+        }
+        // MoveA# Sequences
+        when {
+            OI.moveA1 -> MoveA1().schedule()
+            OI.moveA2 -> MoveA2().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)
