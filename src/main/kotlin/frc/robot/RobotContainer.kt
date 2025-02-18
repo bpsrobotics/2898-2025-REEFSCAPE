@@ -6,32 +6,17 @@ package frc.robot
 //import com.team2898.robot.Constants.OperatorConstants
 
 import beaverlib.utils.geometry.Vector2
-import com.pathplanner.lib.auto.AutoBuilder
 
-import frc.robot.OI.intakeSpeed
-import frc.robot.OI.operatorTrigger
-import frc.robot.OI.resetGyro
-import frc.robot.OI.rightTrigger
-import frc.robot.OI.translationX
-import frc.robot.OI.translationY
-import frc.robot.OI.turnX
-import frc.robot.subsystems.Drivetrain.getDriveSysIDCommand
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.beaverlib.async.Promise
-import frc.robot.OI.process
 import frc.robot.commands.swerve.*
 import frc.robot.subsystems.Drivetrain
 import kotlin.math.pow
@@ -222,7 +207,7 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        coralAlign.whileTrue(CoralAlignCommandWithOdometry(teleopDrive.speedConsumer))
+        coralAlign.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, 0.1524))
 
 
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`

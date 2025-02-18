@@ -26,7 +26,7 @@ val aprilTagFieldLayout = AprilTagFieldLayout(
     ),
     10.0,10.0)
 
-val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape)
+val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded)
 
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
@@ -141,11 +141,11 @@ object Vision : SubsystemBase() {
         poseEstimator.setReferencePose(pose)
     }
 
-    fun getStandardDev(): Matrix<N3,N1>{
+    fun getStandardDev(rotationSTD: Double): Matrix<N3,N1>{
         val stdv = Matrix(Nat.N3(), Nat.N1())
         stdv.set(0,0, 3.0)
         stdv.set(1,0, 3.0)
-        stdv.set(2,0, 3.0)
+        stdv.set(2,0, rotationSTD)
         return stdv
     }
 }
