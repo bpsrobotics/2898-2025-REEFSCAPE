@@ -6,6 +6,7 @@ package frc.robot
 //import com.team2898.robot.Constants.OperatorConstants
 
 import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.auto.NamedCommands
 import frc.robot.OI.resetGyro
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
@@ -14,11 +15,17 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.commands.Sequences.MoveL1
+import frc.robot.commands.Sequences.StartupL1
 import frc.robot.commands.Sequences.MoveL2
 import frc.robot.commands.Sequences.MoveL3
 import frc.robot.commands.Sequences.MoveL4
 import frc.robot.commands.Sequences.MoveToIntake
+import frc.robot.commands.elevator.DisableElevator
+import frc.robot.commands.elevator.MoveElevator
+import frc.robot.commands.elevator.StabilizeElevator
+import frc.robot.commands.intake.AlgaeIntakeOutake
+import frc.robot.commands.intake.CoralIntake
+import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
@@ -55,6 +62,15 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
+
+        NamedCommands.registerCommand("coralintake", RunIntake())
+        NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
+        NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
+        NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
+        NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
+        NamedCommands.registerCommand("L4", MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position))
+        NamedCommands.registerCommand("disable", DisableElevator())
+        NamedCommands.registerCommand("stabilize", StabilizeElevator())
         initializeObjects()
 
         // Configure the trigger bindings
@@ -97,7 +113,7 @@ class RobotContainer {
 
         // MoveL# Sequences
         when {
-            OI.moveL1 -> MoveL1().schedule()
+            OI.moveL1 -> StartupL1().schedule()
             OI.moveL2 -> MoveL2().schedule()
             OI.moveL3 -> MoveL3().schedule()
             OI.moveL4 -> MoveL4().schedule()

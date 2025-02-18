@@ -11,8 +11,8 @@ import frc.robot.subsystems.Elevator
 class MoveL2 : Command() {
     val L2CommandSequence = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-        MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position),
-        MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
+        MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position)
+
     )
     override fun initialize() {
         ScheduleCommand(L2CommandSequence)

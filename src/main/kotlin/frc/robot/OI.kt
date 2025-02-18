@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
+import frc.robot.Constants.ButtonConstants.BASE_STAGE
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
-import frc.robot.Constants.ButtonConstants.CORAL_L1
 import frc.robot.Constants.ButtonConstants.CORAL_L2
 import frc.robot.Constants.ButtonConstants.CORAL_L3
 import frc.robot.Constants.ButtonConstants.CORAL_L4
@@ -95,7 +95,7 @@ object OI : SubsystemBase() {
         get() = driverController.rightTriggerAxis
 
     // Coral out take positions move to
-    val moveL1 = operatorController.getRawButton(CORAL_L1)
+    val moveL1 = operatorController.getRawButton(BASE_STAGE)
     val moveL2 = operatorController.getRawButton(CORAL_L2)
     val moveL3 = operatorController.getRawButton(CORAL_L3)
     val moveL4 = operatorController.getRawButton(CORAL_L4)

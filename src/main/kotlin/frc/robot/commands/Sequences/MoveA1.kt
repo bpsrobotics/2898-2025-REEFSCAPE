@@ -1,24 +1,24 @@
 package frc.robot.commands.Sequences
- // a simple startup protocol, or if u wanna move it back down to L1
+
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import frc.robot.Constants
-import frc.robot.commands.wrist.MoveWrist
 import frc.robot.commands.elevator.MoveElevator
+import frc.robot.commands.wrist.MoveWrist
 import frc.robot.subsystems.Elevator
 
-class MoveL1 : Command() {
-    val commandGroup = SequentialCommandGroup(
+class MoveA1 : Command() {
+    val A1CommandSequence = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-        MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position)
-    )
+        MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position)
 
+    )
     override fun initialize() {
-        ScheduleCommand(commandGroup)
+        ScheduleCommand(A1CommandSequence)
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.Stow.position)
+        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.A1.position)
     }
 }
