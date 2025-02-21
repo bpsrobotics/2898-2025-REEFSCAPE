@@ -23,7 +23,6 @@ class WristSysID : SubsystemBase(){
                     .voltage(Units.Volts.of(Wrist.armMotor.appliedOutput * Wrist.armMotor.busVoltage))
                     .angularPosition(Units.Rotations.of(Wrist.armMotor.encoder.position))
                     .current(Units.Amps.of(Wrist.armMotor.outputCurrent))
-                    .linearPosition(Units.Centimeters.of(Wrist.armMotor.encoder.position))
             },
             this
         )
