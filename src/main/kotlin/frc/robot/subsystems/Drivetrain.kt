@@ -48,9 +48,12 @@ object  Drivetrain : SubsystemBase() {
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
 
 
+
+
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
+
 
 //        try{
 //            config = RobotConfig.fromGUISettings();
@@ -76,16 +79,30 @@ object  Drivetrain : SubsystemBase() {
 //
         swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev(3.0))
         // Updates odometry whenever a new
-        Vision.listeners.add ( "UpdateOdometry") {
-            if (it.multitagResult.isPresent) {
-                val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-                swerveDrive.addVisionMeasurement(
-                    Pose2d(-position.x, -position.y, position.rotation),
-                    it.timestampSeconds
-                )
-                SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-                SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+        Vision.listeners.add ( "UpdateOdometry") { input, source ->
+            if (source == "cam1") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(-position.x, -position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
 
+                }
+            }
+            if (source == "cam2") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(-position.x, -position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+
+                }
             }
         }
 

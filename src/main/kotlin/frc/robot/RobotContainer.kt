@@ -8,10 +8,8 @@ package frc.robot
 import beaverlib.utils.geometry.Vector2
 
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -74,6 +72,7 @@ class RobotContainer {
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
     private val operatorController = Joystick(1)
+    var alliance = DriverStation.getAlliance().orElse(Alliance.Red)
 
     val quickTurnRight
         get() = process(commandDriverController.rightTriggerAxis, deadzone = true, square = true)
@@ -102,7 +101,8 @@ class RobotContainer {
 
     val driverY = JoystickButton(driverController, 4)
     val driverX = JoystickButton(driverController, 3)
-    val coralAlign = JoystickButton(driverController, 5)
+    val coralAlignLeft = JoystickButton(driverController, 1)
+    val coralAlignRight = JoystickButton(driverController, 2)
     val resetGyro= JoystickButton(driverController, 6)
     val climb = JoystickButton(operatorController, 12)
 
@@ -160,13 +160,12 @@ class RobotContainer {
 
     val operatorTrigger = JoystickButton(operatorController, 1)
 
-
-
+    val reverseDrive = if(alliance == Alliance.Red) {1.0} else (-1.0)
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { MathUtil.applyDeadband(translationY, 0.1) },
-            { MathUtil.applyDeadband(translationX, 0.1) },
+            { MathUtil.applyDeadband(translationY*reverseDrive, 0.1) },
+            { MathUtil.applyDeadband(translationX*reverseDrive, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
             { false }
@@ -190,6 +189,8 @@ class RobotContainer {
 
         configureBindings()
 
+        alliance = DriverStation.getAlliance().orElse(Alliance.Blue)
+
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
     }
     fun getAutonomousCommand(): Command{
@@ -207,7 +208,8 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        coralAlign.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, 0.1524))
+        coralAlignLeft.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+        coralAlignRight.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, -Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
 
 
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`

@@ -126,6 +126,10 @@ class Constants {
         const val INPUT_BUFFER_DURATION = 0.2
     }
 
+    object VisionConstants {
+        const val CORAL_OFFSET_FROM_CENTER = 0.1524
+    }
+
 
 
 }

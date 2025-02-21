@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
+import frc.robot.subsystems.aprilTagFieldInGame
 import frc.robot.subsystems.aprilTagFieldLayout
 import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.*
@@ -51,18 +52,20 @@ class CoralStationAlignCommand(
     }
 
     override fun execute() {
-//        val tagPose = aprilTagFieldInGame.getTagPose(usedTarget.fiducialId).get()
-        val tagPose = aprilTagFieldLayout.getTagPose(2).get()
+        val tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
+        SmartDashboard.putNumber("TrackedTagID", trackedTagID.toDouble())
+//        val tagPose = aprilTagFieldLayout.getTagPose(2).get()
         //Update distance to tag with odometry update
         distToTag = sqrt(
-            abs(-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z)*yOffset)).pow(2) + abs(-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z) *xOffset + cos(tagPose.rotation.z) * yOffset)).pow(2)
+            (-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset)).pow(2) + (-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset)).pow(2)
         )
+        if (distToTag>3.0) {return}
         val currentRotation = swerveDrive.pose.rotation.degrees
         val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
         val headingOffset = angleDist(realMod(desiredHeading, 360.0), realMod(currentRotation, 360.0))
 
-        movementPID.setpoint = (tagPose.x + cos(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z)*yOffset)
-        movementPID2.setpoint = (tagPose.y + sin(tagPose.rotation.z) *xOffset + cos(tagPose.rotation.z)*yOffset)
+        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset
+        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset
         val horizontalVelocity = -movementPID.calculate(-swerveDrive.pose.x)
         val verticalVelocity = -movementPID2.calculate(-swerveDrive.pose.y)
         val translation = Translation2d(horizontalVelocity, verticalVelocity)
@@ -92,11 +95,9 @@ class CoralStationAlignCommand(
         var reefPose = Pose2d(Translation2d(0.0,0.0), Rotation2d())
         var tags = mutableListOf<Int>()
         if (alliance == Alliance.Red){
-            reefPose = Pose2d(Translation2d(0.0,0.0), Rotation2d())
             tags = mutableListOf(1, 2)
 
         } else if(alliance == Alliance.Blue){
-            reefPose = Pose2d(Translation2d(0.0,0.0), Rotation2d())
             tags = mutableListOf(12, 13)
         }
         when{

@@ -44,13 +44,13 @@ val robotToCam2 = Transform3d(
  * Specified Type is used as the input for argument for listener Lambdas
  */
 data class Signal<Type>(
-    val listeners : MutableMap<String, (Type) -> Unit> = mutableMapOf()
+    val listeners : MutableMap<String, (Type, String) -> Unit> = mutableMapOf()
 ) {
     /**
      * Adds a listener with the given name. The function will be run whenever the parent object calls the update function
      * @param name String to denote the name of the listener, used to remove specific listeners later on
      * @param function The function to run when the listener updates */
-    fun add(name: String, function: (Type) -> Unit){
+    fun add(name: String, function: (Type, String) -> Unit){
         listeners.put(name, function)
     }
 
@@ -65,9 +65,9 @@ data class Signal<Type>(
      * Runs all active listeners with the given input
      * @param input The input for each of the listening functions
      * */
-    fun update(input : Type) {
-        listeners.forEach {
-            it.value(input)
+    fun update(input: Type, source: String) {
+        listeners.forEach { (_, listenerFunction) ->
+            listenerFunction(input, source)  // Pass source to the listener
         }
     }
 }
@@ -78,9 +78,12 @@ object Vision : SubsystemBase() {
     val cameraOffset = robotToCam
     val cameraOffset2 = robotToCam2
     var results = mutableListOf<PhotonPipelineResult>()
+    var results2 = mutableListOf<PhotonPipelineResult>()
     val listeners = Signal<PhotonPipelineResult>()
     var poseEstimator =
-        PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
+        PhotonPoseEstimator(aprilTagFieldInGame, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam)
+    var poseEstimator2 =
+        PhotonPoseEstimator(aprilTagFieldInGame, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam2)
     var previousPose = Pose2d()
 
     init {
@@ -88,14 +91,19 @@ object Vision : SubsystemBase() {
     }
     override fun periodic(){
         results = cam.allUnreadResults
-        results.addAll(cam2.allUnreadResults)
+        results2 = cam2.allUnreadResults
 
         SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
         if (!results.isEmpty()) {
             // Iterate through each of the results
             results.forEach { visionResult: PhotonPipelineResult ->
                 // Iterate through each of the listener functions, and call them passing the vision result as the input
-                listeners.update(visionResult)
+                listeners.update(visionResult, "cam1")
+            }
+
+            results2.forEach { visionResult: PhotonPipelineResult ->
+
+                listeners.update(visionResult, "cam2")
 
             }
         }
@@ -117,21 +125,16 @@ object Vision : SubsystemBase() {
 
     }
 
-    fun getValidID(result: PhotonPipelineResult): Int {
-        val validIDs = mutableListOf(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22)
-        var zAngle = 180.0
-        var bestTarget = 0
-        for (i in result.getTargets()){
-            if (i.fiducialId in validIDs){
-                val zAngleDiff = abs(180.0-i.getBestCameraToTarget().rotation.z)
-                if ( zAngleDiff < zAngle){
-                    bestTarget = i.fiducialId
-                    zAngle = zAngleDiff
-                }
-            }
-        }
-        return bestTarget
+    fun getRobotPositionFromSecondCamera(result: PhotonPipelineResult): Pose3d? {
+        setReference(previousPose)
+
+        val estimatedPose = poseEstimator2.update(result) ?: return null
+
+        if (estimatedPose.isEmpty) return null
+        previousPose = estimatedPose.get().estimatedPose.toPose2d()
+        return estimatedPose.get().estimatedPose
     }
+
 
     /**
      * Returns the estimated robot position given a PhotonPipelineResult
