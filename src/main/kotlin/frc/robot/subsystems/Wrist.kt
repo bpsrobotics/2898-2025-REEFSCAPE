@@ -29,7 +29,7 @@ import frc.robot.commands.wrist.StabilizeWrist
 import kotlin.math.PI
 
 object Wrist : SubsystemBase() {
-    private val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
+    val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
     private val encoder = DutyCycleEncoder(PivotPosID)
     private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
