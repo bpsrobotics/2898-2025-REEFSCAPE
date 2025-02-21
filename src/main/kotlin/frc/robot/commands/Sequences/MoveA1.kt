@@ -11,7 +11,8 @@ import frc.robot.subsystems.Elevator
 class MoveA1 : Command() {
     val A1CommandSequence = SequentialCommandGroup(
         MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-        MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position)
+        MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position),
+        MoveWrist(Constants.PivotConstants.PivotState.Algae.position)
 
     )
     override fun initialize() {
