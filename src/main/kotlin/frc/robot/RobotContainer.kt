@@ -7,6 +7,13 @@ package frc.robot
 
 import beaverlib.utils.geometry.Vector2
 
+import com.pathplanner.lib.auto.AutoBuilder
+import frc.robot.OI.resetGyro
+import frc.robot.OI.rightTrigger
+import frc.robot.OI.translationX
+import frc.robot.OI.translationY
+import frc.robot.OI.turnX
+import frc.robot.subsystems.Drivetrain.getDriveSysIDCommand
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
@@ -19,6 +26,8 @@ import frc.robot.commands.swerve.*
 import frc.robot.subsystems.Drivetrain
 import kotlin.math.pow
 import kotlin.math.sign
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Wrist
 
 
 /**
@@ -183,7 +192,7 @@ class RobotContainer {
 
         // Configure the trigger bindings
 
-        //autoCommandChooser = AutoBuilder.buildAutoChooser("6piece")
+        autoCommandChooser = AutoBuilder.buildAutoChooser("Left mid start")
 
         Drivetrain.defaultCommand = teleopDrive
 
@@ -200,6 +209,8 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
+//        Wrist
+//        Elevator
     }
 
     /**

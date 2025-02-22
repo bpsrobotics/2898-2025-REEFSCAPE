@@ -4,11 +4,13 @@
 package frc.robot.commands.swerve
 
 import edu.wpi.first.math.geometry.Transform2d
+import beaverlib.utils.Sugar.clamp
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Elevator
 import swervelib.SwerveController
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
@@ -72,8 +74,8 @@ class TeleopDriveCommand(
 
         // Drive using raw values.
         swerve.drive(
-            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed) + addSpeed.translation,
-            angVelocity * controller.config.maxAngularVelocity + addSpeed.rotation.degrees,
+            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed),
+            angVelocity * controller.config.maxAngularVelocity,
             driveMode()
         )
         SmartDashboard.putNumber("TranslationX", forwardVelocity*swerve.maximumSpeed+addSpeed.translation.x)
