@@ -73,6 +73,10 @@ object Wrist : SubsystemBase() {
         return p
     }
 
+    fun setVoltage(voltage: Double) {
+        armMotor.setVoltage(voltage)
+    }
+
     fun closedLoopControl(targetSpeed: Double) {
         val outputPower = feedForward.calculate(getPos(), targetSpeed) + pid.calculate(getPos(), goalState.position)
         armMotor.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
@@ -82,9 +86,7 @@ object Wrist : SubsystemBase() {
         return getPos() < ObstructionAngle
     }
 
-    fun setVoltage(voltage: Double) {
-        armMotor.setVoltage(voltage)
-    }
+
 
 
 }

@@ -2,7 +2,6 @@ package frc.robot.commands.elevator
 
 import beaverlib.utils.Units.Angular.radiansPerSecond
 import edu.wpi.first.units.Units.*
-import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.units.measure.MutAngle
 import edu.wpi.first.units.measure.MutAngularVelocity
 
