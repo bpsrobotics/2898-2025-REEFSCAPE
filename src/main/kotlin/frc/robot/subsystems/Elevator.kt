@@ -45,9 +45,9 @@ object Elevator : SubsystemBase() {
     /** Encoder on the elevator */
     val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
     /** Limit switch at the bottom of the elevator */
-    private val botLimit = DigitalInput(LimitBotID)
+    val botLimit = DigitalInput(LimitBotID)
     /** Limit switch at the top of the elevator*/
-    private val topLimit = DigitalInput(LimitTopID)
+    val topLimit = DigitalInput(LimitTopID)
 
     /** Max velocity & acceleration for [TrapezoidProfile]*/
     private val constraints = TrapezoidProfile.Constraints(MaxVel, MaxAccel)
@@ -103,6 +103,10 @@ object Elevator : SubsystemBase() {
     /** Returns the elevator encoders distance*/
     fun getPos() : Double {
         return elevEncoder.distance
+    }
+
+    fun setVoltage(voltage: Double) {
+        leftMaster.setVoltage(voltage)
     }
 
     /** Run the motors toward [goalState].position at [targetSpeed] */
