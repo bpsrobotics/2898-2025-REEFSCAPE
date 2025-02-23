@@ -56,7 +56,8 @@ class RobotContainer {
 
     val navXResetCommand: NavXReset = NavXReset()
 
-    val runIntakeCommand: RunIntake = RunIntake(0.0)
+    val runIntakeCommand: RunIntake = RunIntake({3.0})
+
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
@@ -84,7 +85,7 @@ class RobotContainer {
     private fun initializeObjects() {
         Drivetrain
 //        Wrist
-//        Elevator
+        Elevator
     }
 
     /**

@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
+import frc.robot.Constants.AutoConstants.Robot_Config
 import frc.robot.Constants.AutoConstants.RotationD
 import frc.robot.Constants.AutoConstants.RotationI
 import frc.robot.Constants.AutoConstants.RotationP
@@ -42,6 +43,7 @@ import frc.robot.Constants.AutoConstants.TranslationI
 import frc.robot.Constants.AutoConstants.TranslationP
 import frc.robot.Constants.DriveConstants.DriveKinematics
 import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
+import frc.robot.Robot
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
@@ -128,11 +130,11 @@ object  Drivetrain : SubsystemBase() {
             this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
             this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
+            PPHolonomicDriveController( // PPolonomicController is the built-in path following controller for holonomic drive trains
                 PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
                 PIDConstants(RotationP, RotationI, RotationD)
             ),
-            RobotConfig(60.0, 5.058014, ModuleConfig(0.1016, MaxSpeedMetersPerSecond, 1.0, DCMotor.getNEO(1), 6.75, 40.0, 4), 0.8636),  // The robot configuration
+            Constants.AutoConstants.Robot_Config,
             {
                 // Boolean supplier that controls when the path will be mirrored for the red alliance
                 // This will flip the path being followed to the red side of the field.

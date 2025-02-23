@@ -98,7 +98,7 @@ object OI : SubsystemBase() {
 
 
     val highHatForward = POVButton(operatorController, 0)
-    val highHatBack = POVButton(operatorController, 180)
+    val highHatBack = POVButton(operatorController, 180 )
     val hatVector get() = when (operatorController.pov) {
         0 -> Vector2(0.0,1.0)
         90 -> Vector2(1.0,0.0)
@@ -122,7 +122,7 @@ object OI : SubsystemBase() {
             RIGHT -> LEFT
             else  -> this
         }
-        fun toVector() = when (this) {
+        fun toVector() = when(this) {
             LEFT -> Vector2(-1.0,0.0)
             RIGHT -> Vector2(1.0,0.0)
             UP -> Vector2(0.0,1.0)

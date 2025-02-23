@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ElevatorFeedforward
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -32,6 +33,8 @@ import frc.robot.RobotMap.ElevatorRightSlaveID
 import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
 import frc.robot.commands.elevator.StabilizeElevator
+import frc.robot.commands.elevator.VoltageElevator
+
 object Elevator : SubsystemBase() {
     /** Main motor, all other motors follow this one */
     val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
@@ -46,9 +49,9 @@ object Elevator : SubsystemBase() {
     /** Encoder on the elevator */
     val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
     /** Limit switch at the bottom of the elevator */
-    private val botLimit = DigitalInput(LimitBotID)
+    val botLimit = DigitalInput(LimitBotID)
     /** Limit switch at the top of the elevator*/
-    private val topLimit = DigitalInput(LimitTopID)
+    val topLimit = DigitalInput(LimitTopID)
 
     /** Max velocity & acceleration for [TrapezoidProfile]*/
     private val constraints = TrapezoidProfile.Constraints(MaxVel, MaxAccel)
@@ -63,14 +66,15 @@ object Elevator : SubsystemBase() {
     val profiledPID = ProfiledPIDController(kP, kI,kD, constraints)
     val pid = PIDController(kP,kI, kD)
 
+
     init {
         // Init motor controls
         elevatorConfig
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .idleMode(SparkBaseConfig.IdleMode.kCoast)
             .smartCurrentLimit(40)
 
         leftMaster.configure(
-            elevatorConfig,
+            elevatorConfig.inverted(true),
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
@@ -85,12 +89,12 @@ object Elevator : SubsystemBase() {
             SparkBase.PersistMode.kPersistParameters
         )
         rightSlave.configure(
-            elevatorConfig.follow(rightMaster, true),
+            elevatorConfig.follow(leftMaster, true),
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
-        elevEncoder.distancePerPulse = 1/1.889
-        defaultCommand = StabilizeElevator()
+        elevEncoder.distancePerPulse = 1 / 1.889
+        defaultCommand = VoltageElevator({kG},50.0)
     }
 
     override fun periodic() {
