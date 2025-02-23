@@ -30,7 +30,7 @@ import kotlin.math.PI
 
 object Wrist : SubsystemBase() {
     val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
-    private val encoder = DutyCycleEncoder(PivotPosID)
+    val encoder = DutyCycleEncoder(PivotPosID)
     private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
     var setpoint = getPos()
@@ -82,12 +82,9 @@ object Wrist : SubsystemBase() {
         return getPos() < ObstructionAngle
     }
 
-
-
-
-
-
-
+    fun setVoltage(voltage: Double) {
+        armMotor.setVoltage(voltage)
+    }
 
 
 }

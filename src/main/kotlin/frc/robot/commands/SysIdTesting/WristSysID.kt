@@ -1,6 +1,10 @@
 package frc.robot.commands.elevator
 
+import beaverlib.utils.Units.Angular.radiansPerSecond
 import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.AngularVelocity
+import edu.wpi.first.units.measure.MutAngle
+import edu.wpi.first.units.measure.MutAngularVelocity
 
 import edu.wpi.first.units.measure.MutDistance
 import edu.wpi.first.units.measure.MutLinearVelocity
@@ -17,33 +21,37 @@ import frc.robot.subsystems.Elevator.botLimit
 import frc.robot.subsystems.Elevator.elevEncoder
 import frc.robot.subsystems.Elevator.leftMaster
 import frc.robot.subsystems.Elevator.topLimit
+import frc.robot.subsystems.Wrist
+import frc.robot.subsystems.Wrist.armMotor
+import frc.robot.subsystems.Wrist.deltaAngle
+import frc.robot.subsystems.Wrist.encoder
 
 class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() {
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
     private val d_appliedVoltage: MutVoltage = MutVoltage(0.0,0.0, Volts)
 
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
-    private val d_distance: MutDistance = MutDistance(0.0,0.0, Meters)
+    private val d_angle: MutAngle = MutAngle(0.0,0.0, Radians)
 
     // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
-    private val d_velocity: MutLinearVelocity = MutLinearVelocity(0.0,0.0, MetersPerSecond)
+    private val d_velocity: MutAngularVelocity = MutAngularVelocity(0.0,0.0, RadiansPerSecond)
     val routine = SysIdRoutine(
         SysIdRoutine.Config(),
         SysIdRoutine.Mechanism(
-            { volts: Voltage -> Elevator.setVoltage(volts.`in`(Volts))
+            { volts: Voltage -> Wrist.setVoltage(volts.`in`(Volts))
             },
-            { log: SysIdRoutineLog -> log.motor(leftMaster.deviceId.toString())
-                .voltage(d_appliedVoltage.mut_replace(Volts.of(leftMaster.busVoltage)))
-                .linearPosition(d_distance.mut_replace(Meters.of(Elevator.getPos())))
-                .linearVelocity(d_velocity.mut_replace(MetersPerSecond.of(elevEncoder.rate)))
+            { log: SysIdRoutineLog -> log.motor(armMotor.deviceId.toString())
+                .voltage(d_appliedVoltage.mut_replace(Volts.of(armMotor.busVoltage)))
+                .angularPosition(d_angle.mut_replace(Rotations.of(encoder.get())))
+                .angularVelocity(d_velocity.mut_replace(RadiansPerSecond.of(deltaAngle/0.1))) //fixme set a proper time instead of 0.1
             },
-            Elevator
+            Wrist
         )
     )
     lateinit var command: Command
 
     init {
-        addRequirements(Elevator)
+        addRequirements(Wrist)
     }
 
     override fun initialize() {
