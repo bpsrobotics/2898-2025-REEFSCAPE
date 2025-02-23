@@ -41,7 +41,7 @@ class RobotContainer {
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
 
-    fun rizz() : Boolean {
+    fun callIntake() : Boolean {
         if (useIntake == -1.0) {
             return true
         }
@@ -124,7 +124,7 @@ class RobotContainer {
             OI.moveToIntake -> MoveToIntake().schedule()
             OI.moveA1 -> MoveA1().schedule()
             OI.moveA2 -> MoveA2().schedule()
-            rizz() -> RunIntake().schedule()
+            callIntake() -> RunIntake().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)
