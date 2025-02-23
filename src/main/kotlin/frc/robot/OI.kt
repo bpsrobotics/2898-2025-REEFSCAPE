@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import frc.beaverlib.async.Promise
+import frc.robot.Constants.ButtonConstants.ALGAE_B1
+import frc.robot.Constants.ButtonConstants.ALGAE_B2
 import frc.robot.Constants.ButtonConstants.BASE_STAGE
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
 import frc.robot.Constants.ButtonConstants.CORAL_L2
@@ -100,6 +102,8 @@ object OI : SubsystemBase() {
     val moveL3 = operatorController.getRawButton(CORAL_L3)
     val moveL4 = operatorController.getRawButton(CORAL_L4)
     val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
+    val moveA1 = operatorController.getRawButton(ALGAE_B1)
+    val moveA2 = operatorController.getRawButton(ALGAE_B2)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 

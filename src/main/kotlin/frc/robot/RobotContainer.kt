@@ -15,11 +15,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.commands.Sequences.StartupL1
-import frc.robot.commands.Sequences.MoveL2
-import frc.robot.commands.Sequences.MoveL3
-import frc.robot.commands.Sequences.MoveL4
-import frc.robot.commands.Sequences.MoveToIntake
+import frc.robot.commands.Sequences.*
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.StabilizeElevator
@@ -118,6 +114,9 @@ class RobotContainer {
             OI.moveL3 -> MoveL3().schedule()
             OI.moveL4 -> MoveL4().schedule()
             OI.moveToIntake -> MoveToIntake().schedule()
+            OI.moveA1 -> MoveA1().schedule()
+            OI.moveA2 -> MoveA2().schedule()
+            0<1 -> RunIntake().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)
