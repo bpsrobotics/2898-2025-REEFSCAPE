@@ -10,19 +10,16 @@ class RunIntake : Command() {
     init {addRequirements(Intake)}
 
     override fun initialize() {
-        Intake.intake(0.5)
+        Intake.intake(0.0)
     }
 
     override fun execute() {
-        Intake.intake(OI.intakeSpeed * 3)
+        Intake.intake(OI.useIntake * 3)
     }
     override fun isFinished(): Boolean {
         return Intake.hasCoral
     }
     fun inputStop(interrupted: Boolean) {
         Intake.intake(0.0)
-    }
-    fun removeCoral() {
-        Intake.intake(OI.intakeSpeed)
     }
 }
