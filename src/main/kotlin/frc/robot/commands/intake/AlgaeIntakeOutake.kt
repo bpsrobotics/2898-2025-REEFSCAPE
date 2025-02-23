@@ -15,7 +15,7 @@ class AlgaeIntakeOutake: Command() {
     }
 
     override fun execute() {
-        Intake.algaeIntake(OI.intakeSpeed * 3)
+        Intake.algaeIntake(OI.useIntake * 3)
     }
 
     override fun isFinished(): Boolean {
@@ -24,7 +24,4 @@ class AlgaeIntakeOutake: Command() {
     fun inputStop(interrupted: Boolean) {
         Intake.intake(0.0)
     }
-    fun removeCoral() {
-        Intake.intake(OI.intakeSpeed * OI.intakeSpeed.sign)
-    }
-} //todo: check if this is redundant or not
+} //todo: check if this file is redundant or not

@@ -26,6 +26,7 @@ import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
+import kotlin.math.abs
 
 
 /**
@@ -42,7 +43,7 @@ class RobotContainer {
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
 
     fun rizz() : Boolean {
-        if (useIntake == -1.0) {
+        if (abs(useIntake) >= 0.0) {
             return true
         }
         else {return false}
