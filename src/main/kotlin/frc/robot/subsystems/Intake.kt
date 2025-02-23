@@ -131,7 +131,7 @@ object Intake : SubsystemBase() {
             hasCoral = false
         }
         else {
-            hasCoral = false
+            hasCoral = true
         }
 
         //hasCoral = isCoralInIntake(detectedColor)
