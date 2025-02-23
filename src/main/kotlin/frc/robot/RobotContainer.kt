@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import frc.robot.OI.useIntake
 import frc.robot.commands.Sequences.*
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
@@ -39,6 +40,13 @@ class RobotContainer {
     // Replace with CommandPS4Controller or CommandJoystick if needed
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
+
+    fun rizz() : Boolean {
+        if (useIntake == -1.0) {
+            return true
+        }
+        else {return false}
+    }
 
 
 
@@ -116,7 +124,7 @@ class RobotContainer {
             OI.moveToIntake -> MoveToIntake().schedule()
             OI.moveA1 -> MoveA1().schedule()
             OI.moveA2 -> MoveA2().schedule()
-            0<1 -> RunIntake().schedule()
+            rizz() -> RunIntake().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)

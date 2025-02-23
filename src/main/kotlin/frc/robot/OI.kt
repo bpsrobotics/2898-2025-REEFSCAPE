@@ -104,6 +104,7 @@ object OI : SubsystemBase() {
     val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
     val moveA1 = operatorController.getRawButton(ALGAE_B1)
     val moveA2 = operatorController.getRawButton(ALGAE_B2)
+    val useIntake = hatVector.y
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
