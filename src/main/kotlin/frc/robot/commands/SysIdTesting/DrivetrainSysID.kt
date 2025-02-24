@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Elevator.botLimit
 import frc.robot.subsystems.Elevator.topLimit
 import frc.robot.subsystems.Wrist
@@ -30,26 +31,19 @@ class DrivetrainSysID(val direction: Direction, val quasistaic: Boolean) : Comma
     // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
     private val d_velocity: MutAngularVelocity = MutAngularVelocity(0.0,0.0, RadiansPerSecond)
 
-    val routine = SysIdRoutine( //FIXME need to check log routine to see if some stuff is incorrect
+
+    val routine = SysIdRoutine(
         SysIdRoutine.Config(),
         SysIdRoutine.Mechanism(
-            { volts: Voltage -> Drivetrain.setRawMotorVoltage(volts.`in`(Volts))
+            { volts: Voltage -> swerveDrive.modules.forEach {
+                it.driveMotor.voltage = volts.`in`(Volt)
+                }
             },
-            // { volts: Voltage -> //anthony code
-            //                    swerveDrive.modules.forEach {
-            //                        it.driveMotor.voltage = volts.`in`(Volt)
-            //                    }
-            //                }
             { log: SysIdRoutineLog -> log.motor(armMotor.deviceId.toString())
-                .voltage(d_appliedVoltage.mut_replace(Volts.of(armMotor.busVoltage)))
-                .angularPosition(d_angle.mut_replace(Rotations.of(encoder.get())))
-                .angularVelocity(d_velocity.mut_replace(RadiansPerSecond.of(deltaAngle /0.1))) //fixme set a proper time instead of 0.1
+                swerveDrive.modules.forEach {
+                    Drivetrain.logDriveMotor(it, log)
+                }
             },
-            // { log: SysIdRoutineLog -> //anthony code
-            //                    swerveDrive.modules.forEach {
-            //                        logDriveMotor(it, log)
-            //                    }
-            //                }
             Drivetrain
         )
     )
