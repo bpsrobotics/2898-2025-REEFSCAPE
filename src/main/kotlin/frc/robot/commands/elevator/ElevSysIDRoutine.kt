@@ -42,10 +42,6 @@ class ElevSysIDRoutine(val direction: Direction, val quasistaic: Boolean) : Comm
     )
     lateinit var command: Command
 
-    init {
-        addRequirements(Elevator)
-    }
-
     override fun initialize() {
         if (quasistaic) {
             command = routine.quasistatic(direction)
