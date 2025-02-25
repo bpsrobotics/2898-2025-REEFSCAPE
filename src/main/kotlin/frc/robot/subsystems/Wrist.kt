@@ -59,7 +59,7 @@ object Wrist : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters)
 
-        encoder.setDutyCycleRange(0.0, 2.0 * PI)
+        encoder.setDutyCycleRange(0.0, 2.0 * PI) //todo, configure the range of the encoder.
         defaultCommand = StabilizeWrist()
     }
 
