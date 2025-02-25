@@ -42,8 +42,14 @@ class RobotContainer {
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
 
-    fun callIntake() : Boolean {
-        if (abs(useIntake) >= 0.0) {
+    fun callRunIntake() : Boolean {
+        if (useIntake == 1.0) {
+            return true
+        }
+        else {return false}
+    }
+    fun callAlgaeIntakeConfig() : Boolean {
+        if (useIntake == -1.0) {
             return true
         }
         else {return false}
@@ -125,7 +131,8 @@ class RobotContainer {
             OI.moveToIntake -> MoveToIntake().schedule()
             OI.moveA1 -> MoveA1().schedule()
             OI.moveA2 -> MoveA2().schedule()
-            callIntake() -> RunIntake().schedule()
+            callRunIntake()-> RunIntake().schedule()
+            callAlgaeIntakeConfig() -> AlgaeIntakeOutake().schedule()
         }
 
         resetGyro.whileTrue(navXResetCommand)

@@ -14,7 +14,7 @@ class RunIntake : Command() {
     }
 
     override fun execute() {
-        Intake.intake(OI.useIntake * 3)
+        Intake.intake(OI.intakeSpeed * 3)
     }
     override fun isFinished(): Boolean {
         return Intake.hasCoral
