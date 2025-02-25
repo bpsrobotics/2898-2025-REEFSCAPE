@@ -1,6 +1,5 @@
 package frc.robot.commands.SysIdTesting
 
-import edu.wpi.first.units.Measure
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Units.Volt
 import edu.wpi.first.units.measure.Voltage
@@ -10,11 +9,10 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
-import frc.robot.commands.elevator.VoltageElevator
 import frc.robot.subsystems.Elevator
 
 
-class ElevatorSysID : SubsystemBase() {
+class `ElevatorSysID(WORK IN PROGRESS)` : SubsystemBase() {
     val routine: SysIdRoutine = SysIdRoutine(
         SysIdRoutine.Config(),
         SysIdRoutine.Mechanism(
