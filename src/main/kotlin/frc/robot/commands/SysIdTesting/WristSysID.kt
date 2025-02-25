@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction
+import frc.robot.Constants
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.botLimit
 import frc.robot.subsystems.Elevator.elevEncoder
@@ -32,6 +33,16 @@ class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() 
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
     private val d_angle: MutAngle = MutAngle(0.0,0.0, Radians)
 
+    fun topLimitWrist() :Boolean {
+        if (encoder.get() == Constants.PivotConstants.UPPER_LIMIT)
+            return true
+        else {return false}
+    }
+    fun bottomLimitWrist() :Boolean{
+        if (encoder.get() == Constants.PivotConstants.LOWER_LIMIT)
+            return true
+        else {return false}
+    }
     // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
     private val d_velocity: MutAngularVelocity = MutAngularVelocity(0.0,0.0, RadiansPerSecond)
     val routine = SysIdRoutine(
@@ -65,9 +76,9 @@ class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() 
 
     override fun isFinished(): Boolean {
         if (direction == Direction.kForward) {
-            return topLimit.get()
+            return topLimitWrist()
         } else {
-            return botLimit.get()
+            return bottomLimitWrist()
         }
     }
 
@@ -75,4 +86,4 @@ class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() 
         command.cancel()
     }
 
-}
+} // fixme(if this code doesn't work, return back to the original SYSID model, should be in a previous git commit u prolly gotta scroll)
