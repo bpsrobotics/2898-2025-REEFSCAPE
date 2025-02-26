@@ -19,6 +19,7 @@ class StartupL1 : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.Stow.position)
+        return commandGroup.isFinished
+        //fixme return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.Stow.position)
     }
 }

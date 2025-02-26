@@ -20,6 +20,7 @@ class MoveA2 : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.A2.position)
+        return A2CommandSequence.isFinished
+        //fixme return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.A2.position)
     }
 }

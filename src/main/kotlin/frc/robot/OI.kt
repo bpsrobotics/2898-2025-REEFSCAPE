@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
@@ -74,7 +75,7 @@ object OI : SubsystemBase() {
         process(this, deadzone, square, cube)
 
     private val driverController = XboxController(0)
-    private val operatorController = Joystick(1)
+    private val operatorController = CommandJoystick(1)
 
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle
@@ -98,28 +99,27 @@ object OI : SubsystemBase() {
         get() = driverController.rightTriggerAxis
 
     // Coral out take positions move to
-    val moveL1 = operatorController.getRawButton(BASE_STAGE)
-    val moveL2 = operatorController.getRawButton(CORAL_L2)
-    val moveL3 = operatorController.getRawButton(CORAL_L3)
-    val moveL4 = operatorController.getRawButton(CORAL_L4)
-    val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
-    val moveA1 = operatorController.getRawButton(ALGAE_B1)
-    val moveA2 = operatorController.getRawButton(ALGAE_B2)
-    val useIntake = hatVector.y
+    val moveL1 = operatorController.button(BASE_STAGE)
+    val moveL2 = operatorController.button(CORAL_L2)
+    val moveL3 = operatorController.button(CORAL_L3)
+    val moveL4 = operatorController.button(CORAL_L4)
+    val moveToIntake = operatorController.button(CORAL_INTAKE)
+    val moveA1 = operatorController.button(ALGAE_B1)
+    val moveA2 = operatorController.button(ALGAE_B2)
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
 
 
-    val highHatForward = POVButton(operatorController, 0)
-    val highHatBack = POVButton(operatorController, 180 )
-    val hatVector get() = when (operatorController.pov) {
+    val highHatForward = operatorController.pov(0)
+    val highHatBack = operatorController.pov(180)
+    /*val hatVector get() = when (operatorController.pov) {
         0 -> Vector2(0.0,1.0)
         90 -> Vector2(1.0,0.0)
         180 -> Vector2(0.0,-1.0)
         270 -> Vector2(-1.0,0.0)
         else -> Vector2.zero()
-    }
+    }*/
 
 
     val intakeSpeed get() = operatorController.throttle
@@ -163,7 +163,7 @@ object OI : SubsystemBase() {
     }
 
     //    val operatorTrigger: BooleanEvent = operatorController.button(1, loop)
-    val operatorTrigger get() = operatorController.getRawButton(1)
+    //val operatorTrigger get() = operatorController.getRawButton(1)
     //    val operatorTriggerReleased: BooleanEvent = operatorTrigger.falling()
     object Rumble {
         private var isRumbling  = false

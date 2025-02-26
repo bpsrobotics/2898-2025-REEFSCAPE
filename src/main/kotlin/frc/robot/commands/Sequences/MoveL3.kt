@@ -19,6 +19,7 @@ class MoveL3: Command() {
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L3.position)
+        return L3CommandSequence.isFinished
+        //fixme return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L3.position)
     }
 }

@@ -13,25 +13,16 @@ import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.wpilibj.I2C
 import edu.wpi.first.wpilibj.util.Color
 
 import frc.robot.RobotMap
-import frc.robot.Constants.IntakeConstants.kv
-import frc.robot.Constants.IntakeConstants.ks
-import frc.robot.Constants.IntakeConstants.ka
-import frc.robot.Constants.IntakeConstants.CORAL_COLOR
-import frc.robot.Constants.IntakeConstants.CORAL_COLOR_TOLERANCE
-import frc.robot.commands.intake.RunIntake
-import kotlin.math.absoluteValue
 
 object Intake : SubsystemBase() {
     val intakeMotor = SparkMax(RobotMap.EndEffectorID, SparkLowLevel.MotorType.kBrushless)
     val IntakeConfig: SparkMaxConfig = SparkMaxConfig()
 
     var hasCoral = false
-    var output = 0.0
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
@@ -61,7 +52,7 @@ object Intake : SubsystemBase() {
         // Coral input motor stuff
         SmartDashboard.putNumber("intake current", intakeMotor.outputCurrent)
         SmartDashboard.putBoolean("has coral", hasCoral)
-        SmartDashboard.putNumber("intake output", output)
+        //SmartDashboard.putNumber("intake output", output)
         SmartDashboard.putNumber("current average", currentAverage)
         SmartDashboard.putNumber("intake timer ", bufferTimer.get())
         currentAverage = currentFilter.calculate(intakeMotor.outputCurrent)
@@ -70,9 +61,8 @@ object Intake : SubsystemBase() {
 
     }
 
-    fun runMotor(speed: Double){
-
-        if (!intakeState){
+    fun runMotor(speed: Double) {
+        /*if (!intakeState){
             output = 0.0
             return
         }
@@ -85,29 +75,8 @@ object Intake : SubsystemBase() {
             output = speed
         } else {
             output = speed
-        }
-        intakeMotor.set(output)
-    }
-
-    fun algaeIntake(speed: Double) {
-        IntakeConfig
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .smartCurrentLimit(20)
-            .inverted(true)
-
-        intakeMotor.configure(
-            IntakeConfig,
-            SparkBase.ResetMode.kResetSafeParameters,
-            SparkBase.PersistMode.kPersistParameters
-        )
-        output = speed //fixme; make sure this doesn't break the code
-    }
-    fun ffController (goalVelocity: Double) {
-        voltage = flywheelFF.calculate(goalVelocity)
-    }
-
-    fun outtake() {
-        output = -0.4
+        }*/
+        intakeMotor.set(speed)
     }
 
     fun updateColorSensor(){
@@ -125,12 +94,7 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("IR (Not used)", IR);
         SmartDashboard.putNumber("Proximity (Not used)", proximity)
 
-        if (proximity > tooClose) {
-            hasCoral = false
-        }
-        else {
-            hasCoral = true
-        }
+        hasCoral = proximity <= tooClose
 
         //hasCoral = isCoralInIntake(detectedColor)
     }
@@ -143,4 +107,5 @@ object Intake : SubsystemBase() {
         return false
 
         }
+    val coralInIntake get() = colorSensor.proximity >= 100.0
     } //todo: figure out how to make so that we can detect coral w/ no color sensor

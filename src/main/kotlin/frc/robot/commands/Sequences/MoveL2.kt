@@ -19,6 +19,7 @@ class MoveL2 : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L2.position)
+        return L2CommandSequence.isFinished
+        //fixme return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L2.position)
     }
 }

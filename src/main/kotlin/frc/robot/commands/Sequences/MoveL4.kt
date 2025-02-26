@@ -19,6 +19,7 @@ class MoveL4: Command() {
     }
 
     override fun isFinished(): Boolean {
-        return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L4.position)
+        return L4CommandSequence.isFinished
+        //fixme return Elevator.elevEncoder.equals(Constants.ElevatorConstants.ElevatorState.L4.position)
     }
 }

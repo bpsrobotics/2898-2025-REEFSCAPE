@@ -15,21 +15,18 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.OI.hatVector
+import frc.robot.OI.highHatBack
 import frc.robot.OI.highHatForward
-import frc.robot.commands.intake.RunIntake
-import frc.robot.OI.useIntake
 import frc.robot.commands.Sequences.*
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.StabilizeElevator
-import frc.robot.commands.intake.AlgaeIntakeOutake
-import frc.robot.commands.intake.CoralIntake
 import frc.robot.commands.intake.RunIntake
+import frc.robot.commands.intake.RunOuttake
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
-import kotlin.math.abs
+import frc.robot.subsystems.Elevator
 
 
 /**
@@ -45,21 +42,6 @@ class RobotContainer {
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
 
-    fun callRunIntake() : Boolean {
-        if (useIntake == 1.0) {
-            return true
-        }
-        else {return false}
-    }
-    fun callAlgaeIntakeConfig() : Boolean {
-        if (useIntake == -1.0) {
-            return true
-        }
-        else {return false}
-    }
-
-
-
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
             { MathUtil.applyDeadband(-translationY, 0.1) },
@@ -72,15 +54,14 @@ class RobotContainer {
 
     val navXResetCommand: NavXReset = NavXReset()
 
-    val runIntakeCommand: RunIntake = RunIntake({3.0})
 
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
 
-        NamedCommands.registerCommand("coralintake", RunIntake())
-        NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
+        NamedCommands.registerCommand("coralintake", RunIntake(0.2, 0.5)) //Todo set this properly
+        //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
         NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
@@ -128,20 +109,18 @@ class RobotContainer {
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
 
         // MoveL# Sequences
-        when {
-            OI.moveL1 -> StartupL1().schedule()
-            OI.moveL2 -> MoveL2().schedule()
-            OI.moveL3 -> MoveL3().schedule()
-            OI.moveL4 -> MoveL4().schedule()
-            OI.moveToIntake -> MoveToIntake().schedule()
-            OI.moveA1 -> MoveA1().schedule()
-            OI.moveA2 -> MoveA2().schedule()
-            callRunIntake()-> RunIntake().schedule()
-            callAlgaeIntakeConfig() -> AlgaeIntakeOutake().schedule()
-        }
 
         resetGyro.whileTrue(navXResetCommand)
-        highHatForward.whileTrue(runIntakeCommand)
+        highHatForward.whileTrue(RunIntake()) //TODO set values properly
+        highHatBack.whileTrue(RunOuttake(-0.2))
+        OI.moveL1.onTrue(StartupL1())
+        OI.moveL2.onTrue(MoveL2())
+        OI.moveL3.onTrue(MoveL3())
+        OI.moveL4.onTrue(MoveL4())
+        OI.moveToIntake.onTrue(MoveToIntake())
+        OI.moveA1.onTrue(MoveA1())
+        OI.moveA2.onTrue(MoveA2())
+
 
     }
 
