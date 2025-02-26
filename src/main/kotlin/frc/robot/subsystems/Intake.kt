@@ -89,7 +89,22 @@ object Intake : SubsystemBase() {
         intakeMotor.set(output)
     }
 
+    fun algaeIntake(speed: Double) {
+        IntakeConfig
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .smartCurrentLimit(20)
+            .inverted(true)
 
+        intakeMotor.configure(
+            IntakeConfig,
+            SparkBase.ResetMode.kResetSafeParameters,
+            SparkBase.PersistMode.kPersistParameters
+        )
+        output = speed //fixme; make sure this doesn't break the code
+    }
+    fun ffController (goalVelocity: Double) {
+        voltage = flywheelFF.calculate(goalVelocity)
+    }
 
     fun outtake() {
         output = -0.4
@@ -101,6 +116,8 @@ object Intake : SubsystemBase() {
         val IR: Double = colorSensor.getIR().toDouble() // Infared light
         val proximity = colorSensor.getProximity().toDouble() // Proximity of the color sensor
 
+        val tooClose = 0.0 //todo actually check and configure this
+
         // Display the color sensor values on the SmartDashboard
         SmartDashboard.putNumber("Red", detectedColor.red);
         SmartDashboard.putNumber("Green", detectedColor.green);
@@ -108,7 +125,14 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("IR (Not used)", IR);
         SmartDashboard.putNumber("Proximity (Not used)", proximity)
 
-        hasCoral = isCoralInIntake(detectedColor)
+        if (proximity > tooClose) {
+            hasCoral = false
+        }
+        else {
+            hasCoral = true
+        }
+
+        //hasCoral = isCoralInIntake(detectedColor)
     }
 
     fun isCoralInIntake(detectedColor: Color): Boolean {
@@ -119,4 +143,4 @@ object Intake : SubsystemBase() {
         return false
 
         }
-    }
+    } //todo: figure out how to make so that we can detect coral w/ no color sensor

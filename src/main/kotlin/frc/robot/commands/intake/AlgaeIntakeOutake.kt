@@ -1,25 +1,27 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj.Timer
-import frc.robot.subsystems.Intake
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.OI
+import frc.robot.subsystems.Intake
+import kotlin.math.sign
 
-class RunIntake : Command() {
+class AlgaeIntakeOutake: Command() {
     val timer = Timer()
-    init {addRequirements(Intake)}
+    init {addRequirements(Intake) }
 
     override fun initialize() {
-        Intake.intake(0.0)
+        Intake.algaeIntake(0.0)
     }
 
     override fun execute() {
-        Intake.intake(OI.intakeSpeed * 3)
+        Intake.algaeIntake(OI.intakeSpeed * 3)
     }
+
     override fun isFinished(): Boolean {
         return Intake.hasCoral
     }
     fun inputStop(interrupted: Boolean) {
         Intake.intake(0.0)
     }
-}
+} //todo: check if this file is redundant or not

@@ -33,8 +33,6 @@ import frc.robot.RobotMap.ElevatorRightSlaveID
 import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
 import frc.robot.commands.elevator.StabilizeElevator
-import frc.robot.commands.elevator.VoltageElevator
-
 object Elevator : SubsystemBase() {
     /** Main motor, all other motors follow this one */
     val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
@@ -66,7 +64,6 @@ object Elevator : SubsystemBase() {
     val profiledPID = ProfiledPIDController(kP, kI,kD, constraints)
     val pid = PIDController(kP,kI, kD)
 
-
     init {
         // Init motor controls
         elevatorConfig
@@ -93,8 +90,8 @@ object Elevator : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
-        elevEncoder.distancePerPulse = 1 / 1.889
-        defaultCommand = VoltageElevator({kG},50.0)
+        elevEncoder.distancePerPulse = 1/1.889
+        defaultCommand = StabilizeElevator()
     }
 
     override fun periodic() {

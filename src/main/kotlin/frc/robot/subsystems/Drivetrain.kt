@@ -51,6 +51,7 @@ import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
 import java.util.*
+import frc.robot.commands.SysIdTesting.DrivetrainSysID
 
 
 object  Drivetrain : SubsystemBase() {
@@ -205,7 +206,8 @@ object  Drivetrain : SubsystemBase() {
      * @param module The module to log.
      * @param log The SysIdRoutineLog to log to.
      */
-    private fun logDriveMotor(module: SwerveModule, log: SysIdRoutineLog){
+
+    fun logDriveMotor(module: SwerveModule, log: SysIdRoutineLog){
         log.motor(module.configuration.name)
             .voltage(Volt.of(module.driveMotor.voltage))
             .linearPosition(Meters.of(module.driveMotor.position))

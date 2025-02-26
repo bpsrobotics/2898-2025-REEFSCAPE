@@ -50,6 +50,8 @@ class Constants {
         // YAGSL `File` Configs
         val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve")
 
+        val MomentOfInertia = 4.09149392  // kg * m^2
+
     }
 
     object ElevatorConstants {
@@ -77,13 +79,14 @@ class Constants {
 
         //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
+            Traverse(0.0),
             Stow(0.0),
             L2(0.1),
             L3(0.1),
             L4(0.1),
             A1(0.1),
-            A2(0.1)
-
+            A2(0.1),
+            Intake(0.1)
         }
     }
 
@@ -107,16 +110,22 @@ class Constants {
         //SOFT Stop limits
         const val UPPER_LIMIT = 0.0
         const val LOWER_LIMIT = 0.0
-
-
+        const val kg = 0.0
+        const val ks = 0.0
+        const val kv = 0.0
+        const val ka = 0.0 // we might not use this but it's good to have.
+        const val kp = 0.0
+        const val ki = 0.0
+        const val kd = 0.0
+        // FIXME set to real positions later
         enum class PivotState(val position: Double) {
             Traverse(0.0),
             Stow(0.0),
             AngleBranch(0.1),
             VerticalBranch(0.1),
             Algae(0.1),
-            Processor(0.1)
-
+            Processor(0.1),
+            Intake(0.1)
         }
     }
 
@@ -128,6 +137,8 @@ class Constants {
         const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
         val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
         const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
+        const val INTAKE = 0.8
+        const val OUTTAKE = -0.4
     }
 
 
@@ -177,6 +188,7 @@ class Constants {
         const val CORAL_L2 = 5
         const val CORAL_L3 = 3
         const val CORAL_L4 = 11
+        const val CORAL_INTAKE = 7
 
         const val ALGAE_B1 = 8
         const val ALGAE_B2 = 9

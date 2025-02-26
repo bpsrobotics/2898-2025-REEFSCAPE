@@ -29,8 +29,8 @@ import frc.robot.commands.wrist.StabilizeWrist
 import kotlin.math.PI
 
 object Wrist : SubsystemBase() {
-    private val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
-    private val encoder = DutyCycleEncoder(PivotPosID)
+    val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
+    val encoder = DutyCycleEncoder(PivotPosID) // todo, configure the zero for this encoder
     private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
     var setpoint = getPos()
@@ -59,7 +59,7 @@ object Wrist : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters)
 
-        encoder.setDutyCycleRange(0.0, 2.0 * PI)
+        encoder.setDutyCycleRange(0.0, 2.0 * PI) //todo, configure the range of the encoder.
         defaultCommand = StabilizeWrist()
     }
 
@@ -73,6 +73,10 @@ object Wrist : SubsystemBase() {
         return p
     }
 
+    fun setVoltage(voltage: Double) {
+        armMotor.setVoltage(voltage)
+    }
+
     fun closedLoopControl(targetSpeed: Double) {
         val outputPower = feedForward.calculate(getPos(), targetSpeed) + pid.calculate(getPos(), goalState.position)
         armMotor.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
@@ -81,11 +85,6 @@ object Wrist : SubsystemBase() {
     fun isObstructing() : Boolean {
         return getPos() < ObstructionAngle
     }
-
-
-
-
-
 
 
 

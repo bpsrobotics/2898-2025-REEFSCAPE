@@ -7,14 +7,19 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj.event.BooleanEvent
-import edu.wpi.first.wpilibj.event.EventLoop
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
+import frc.robot.Constants.ButtonConstants.ALGAE_B1
+import frc.robot.Constants.ButtonConstants.ALGAE_B2
+import frc.robot.Constants.ButtonConstants.BASE_STAGE
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
+import frc.robot.Constants.ButtonConstants.CORAL_L2
+import frc.robot.Constants.ButtonConstants.CORAL_L3
+import frc.robot.Constants.ButtonConstants.CORAL_L4
+import frc.robot.Constants.ButtonConstants.CORAL_INTAKE
+
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -92,6 +97,15 @@ object OI : SubsystemBase() {
     val rightTrigger
         get() = driverController.rightTriggerAxis
 
+    // Coral out take positions move to
+    val moveL1 = operatorController.getRawButton(BASE_STAGE)
+    val moveL2 = operatorController.getRawButton(CORAL_L2)
+    val moveL3 = operatorController.getRawButton(CORAL_L3)
+    val moveL4 = operatorController.getRawButton(CORAL_L4)
+    val moveToIntake = operatorController.getRawButton(CORAL_INTAKE)
+    val moveA1 = operatorController.getRawButton(ALGAE_B1)
+    val moveA2 = operatorController.getRawButton(ALGAE_B2)
+    val useIntake = hatVector.y
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
@@ -112,6 +126,7 @@ object OI : SubsystemBase() {
 
 //    val runIntake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0,-1) }
 //    val shooterOutake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0, 1) }
+
 
 
     enum class Direction {
@@ -181,8 +196,4 @@ object OI : SubsystemBase() {
     override fun periodic(){
         Rumble.update()
     }
-
-
-
-
 }
