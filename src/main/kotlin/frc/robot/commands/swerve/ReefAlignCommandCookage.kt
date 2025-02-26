@@ -1,33 +1,34 @@
 package frc.robot.commands.swerve
 import beaverlib.controls.TurningPID
-import beaverlib.utils.Sugar.TAU
-import beaverlib.utils.Sugar.degreesToRadians
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.*
-import beaverlib.utils.Units.Linear.asInches
-import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.geometry.HedgeHogVector2
-import beaverlib.utils.geometry.Vector2
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.config.PIDConstants
+import com.pathplanner.lib.config.RobotConfig
+import com.pathplanner.lib.controllers.PPHolonomicDriveController
+import com.pathplanner.lib.path.GoalEndState
+import com.pathplanner.lib.path.PathConstraints
+import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.Constants
 import frc.robot.Engine.angleDistanceTo
 import frc.robot.Engine.angleDistanceWithin
 import frc.robot.Engine.standardPosition
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
-import frc.robot.subsystems.Vision
 import frc.robot.subsystems.aprilTagFieldInGame
-import frc.robot.subsystems.aprilTagFieldLayout
-import org.photonvision.targeting.PhotonTrackedTarget
 import java.util.*
-import kotlin.jvm.optionals.getOrElse
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.atan2
 
 
 /**
@@ -62,9 +63,28 @@ class ReefAlignCommandCookage(
         val offset = HedgeHogVector2(xOffset, yOffset)
         val goalPosition = HedgeHogVector2(tagPose.toPose2d()) + offset.rotateBy(tagPose.rotation.z)
 
+        val directionOfTravel = atan2(swerveDrive.pose.x - tagPose.x, swerveDrive.pose.y - tagPose.y)
+
         horizontalMovementPID.setpoint = goalPosition.x
         verticalMovementPID.setpoint = goalPosition.y
 
+        val waypoints = PathPlannerPath.waypointsFromPoses(
+            Pose2d(1.0, 1.0, Rotation2d.fromRadians(directionOfTravel)),
+            Pose2d(goalPosition.x, goalPosition.y, Rotation2d.fromRadians(directionOfTravel)),
+        )
+
+        val constraints = PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI)
+
+        val path = PathPlannerPath(
+            waypoints,
+            constraints,
+            null,  // The ideal starting state, this is only relevant for pre-planned paths, so can be null for on-the-fly paths.
+            GoalEndState(
+                0.0,
+                Rotation2d.fromDegrees(-90.0)
+            ) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
+        )
+        path.preventFlipping = true
     }
     override fun execute() {
 

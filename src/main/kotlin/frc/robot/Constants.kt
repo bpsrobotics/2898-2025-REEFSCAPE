@@ -5,6 +5,7 @@
 
 package frc.robot
 
+import com.pathplanner.lib.config.RobotConfig
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -119,6 +120,7 @@ class Constants {
 
     object AutoConstants {
 
+        val Robot_Config = RobotConfig.fromGUISettings()
         const val MaxAccelerationMetersPerSecondSquared = 3.0
         const val MaxAngularSpeedRadiansPerSecond = Math.PI
         const val MaxAngularSpeedRadiansPerSecondSquared = Math.PI
