@@ -100,7 +100,7 @@ object  Drivetrain : SubsystemBase() {
                 if (input.multitagResult.isPresent) {
                     val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
                     swerveDrive.addVisionMeasurement(
-                        Pose2d(-position.x, -position.y, position.rotation),
+                        Pose2d(position.x, position.y, position.rotation),
                         input.timestampSeconds
                     )
                     SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
@@ -112,7 +112,7 @@ object  Drivetrain : SubsystemBase() {
                 if (input.multitagResult.isPresent) {
                     val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
                     swerveDrive.addVisionMeasurement(
-                        Pose2d(-position.x, -position.y, position.rotation),
+                        Pose2d(position.x, position.y, position.rotation),
                         input.timestampSeconds
                     )
                     SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
@@ -133,7 +133,6 @@ object  Drivetrain : SubsystemBase() {
 
 
         SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
-        SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)
         SmartDashboard.putNumber("odometry/rotation", swerveDrive.odometryHeading.degrees)
 
         publisher.set(getPose())
@@ -337,7 +336,7 @@ object  Drivetrain : SubsystemBase() {
      * @return The current pose of the robot.
      */
     fun getPose() : Pose2d {
-        return Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
+        return Pose2d(swerveDrive.pose.x, swerveDrive.pose.y, swerveDrive.pose.rotation)
     }
 
     /**

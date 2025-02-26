@@ -92,7 +92,6 @@ class CoralStationAlignCommand(
     }
 
     fun idAutoSelect(robotPose: Pose2d, alliance: Alliance): Int{
-        var reefPose = Pose2d(Translation2d(0.0,0.0), Rotation2d())
         var tags = mutableListOf<Int>()
         if (alliance == Alliance.Red){
             tags = mutableListOf(1, 2)

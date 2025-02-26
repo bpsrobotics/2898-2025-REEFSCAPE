@@ -3,6 +3,7 @@ import beaverlib.controls.TurningPID
 import beaverlib.utils.Sugar.degreesToRadians
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.*
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.wpilibj.DriverStation
@@ -10,6 +11,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.Engine.angleDistanceTo
+import frc.robot.Engine.angleDistanceWithin
+import frc.robot.Engine.standardPosition
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
@@ -40,69 +44,60 @@ class ReefAlignCommand(
     val xOffset = 0.5
     val yOffset = horizontalOffset
     var trackedTagID = 0
+    var tagPose: Pose3d = Pose3d()
 
     override fun initialize(){
         runtime.restart()
         lastPose = swerveDrive.pose
         val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
         trackedTagID = idAutoSelect(swerveDrive.pose, alliance)
+        tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
+
+        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*yOffset
+        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z)*yOffset
+
 
     }
-    var tRoll = 0.0
-    var tPitch = 0.0
-    var tYaw = aprilTagFieldInGame.getTagPose(11).get().rotation.z
-    var x = 0.5
-    var y = 1.0
     override fun execute() {
-        val tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
         SmartDashboard.putNumber("trackedTagID", trackedTagID.toDouble())
-//        val tagPose = aprilTagFieldLayout.getTagPose(2).get()
-//        SmartDashboard.putNumber("targetPose/Roll", tRoll)
-//        SmartDashboard.putNumber("targetPose/Pitch", tPitch)
-//        SmartDashboard.putNumber("Yaw", tYaw)
-//        SmartDashboard.putNumber("x", x)
-//        SmartDashboard.putNumber("y", y)
-//        val tagPose = Pose3d(Translation3d(x, y, 0.488), Rotation3d(tRoll, tPitch, tYaw))
 
         //Update distance to target with odometry update
-        distToTag = sqrt(
-            (-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset)).pow(2) + (-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset)).pow(2)
-        )
+//        distToTag = sqrt(
+//            (-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset)).pow(2) + (-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset)).pow(2)
+//        )
 
-        val currentRotation = swerveDrive.pose.rotation.degrees
-        val desiredHeading = (tagPose.rotation.z.radiansToDegrees() + 180) % 360
-        val headingOffset = angleDist(desiredHeading, realMod(currentRotation, 360.0))
+        val currentRotation = swerveDrive.pose.rotation.radians.radians
+        val desiredHeading = (tagPose.rotation.z+PI).radians.standardPosition
+        val headingOffset = desiredHeading.angleDistanceTo(currentRotation.standardPosition)
 
         //calculate horizontalVelocity (speed moving side-ways to target)
-        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset
-        val horizontalVelocity = -movementPID.calculate(-swerveDrive.pose.x)
-
+        val horizontalVelocity = movementPID.calculate(swerveDrive.pose.x)
         //caluclate verticalVelocity (speed moving towards target)
-        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset
-        val verticalVelocity = -movementPID2.calculate(-swerveDrive.pose.y)
+        val verticalVelocity = movementPID2.calculate(swerveDrive.pose.y)
 
         val translation = Translation2d(horizontalVelocity, verticalVelocity)
-
-
 //        turningPID.setPoint = desiredHeading // Set the desired value for the turningPID to the desired heading facing the tag
  // Set the desired value for the distance from the tag (Typically 0)
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
 
-        val angleVelocity = if (!currentRotation.within(8.0, desiredHeading)) { -headingOffset * 0.05 } else { 0.0 }
+        val angleVelocity = if (!currentRotation.angleDistanceWithin(8.0.degrees, desiredHeading))
+        { (-headingOffset.asRadians *0.05).radiansPerSecond }
+        else { 0.0.radiansPerSecond }
 
         speedConsumer(
             Transform2d(
                 translation,
-                Rotation2d(angleVelocity.degreesToRadians())
+                Rotation2d(angleVelocity.asRadiansPerSecond)
             )
         )
-            SmartDashboard.putNumber("Dist to Tag", distToTag)
-            SmartDashboard.putNumber("Horizontal Velocity", translation.y)
-            SmartDashboard.putNumber("Vertical Velocity", translation.x)
+            SmartDashboard.putNumber("TagPoseX", tagPose.x)
+            SmartDashboard.putNumber("TagPoseY", tagPose.y)
+            SmartDashboard.putNumber("Horizontal SetPoint", tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*yOffset)
+            SmartDashboard.putNumber("Vertical SetPoint", tagPose.y + sin(tagPose.rotation.z)*xOffset - cos(tagPose.rotation.z)*yOffset)
             SmartDashboard.putNumber("Tag Heading", tagPose.rotation.z)
-            SmartDashboard.putNumber("Deired Heading", desiredHeading)
-            SmartDashboard.putNumber("currentHeading", realMod(currentRotation, 360.0))
-            SmartDashboard.putNumber("angle Velocity", angleVelocity)
+            SmartDashboard.putNumber("Deired Heading", desiredHeading.asDegrees)
+            SmartDashboard.putNumber("currentHeading", realMod(currentRotation.asDegrees, 360.0))
+            SmartDashboard.putNumber("angle Velocity", angleVelocity.asRotationsPerSecond)
 
     }
     //automatically finds the face of the reef that robot is closest to and returns the ID of the apriltag on that face of the reef
@@ -117,7 +112,7 @@ class ReefAlignCommand(
             reefPose = Pose2d(Translation2d(0.0,0.0), Rotation2d())
             tags = mutableListOf(20, 19, 18, 17, 22, 21)
         }
-        var currentAngle = atan2(-swerveDrive.pose.x - reefPose.x, -swerveDrive.pose.y - reefPose.y).radiansToDegrees()
+        var currentAngle = atan2(robotPose.x - reefPose.x, robotPose.y - reefPose.y).radiansToDegrees()
         if (currentAngle<0){
             currentAngle += 360
         }

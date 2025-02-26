@@ -156,15 +156,15 @@ class RobotContainer {
     }
 
     val alignmentPad get() = when(driverController.pov) {
-        0    -> frc.robot.OI.Direction.UP
-        45   -> frc.robot.OI.Direction.UPRIGHT
-        90   -> frc.robot.OI.Direction.RIGHT
-        135  -> frc.robot.OI.Direction.DOWNRIGHT
-        180  -> frc.robot.OI.Direction.DOWN
-        225  -> frc.robot.OI.Direction.DOWNLEFT
-        270  -> frc.robot.OI.Direction.LEFT
-        315  -> frc.robot.OI.Direction.UPLEFT
-        else -> frc.robot.OI.Direction.INACTIVE
+        0    -> Direction.UP
+        45   -> Direction.UPRIGHT
+        90   -> Direction.RIGHT
+        135  -> Direction.DOWNRIGHT
+        180  -> Direction.DOWN
+        225  -> Direction.DOWNLEFT
+        270  -> Direction.LEFT
+        315  -> Direction.UPLEFT
+        else -> Direction.INACTIVE
     }
 
     val operatorTrigger = JoystickButton(operatorController, 1)

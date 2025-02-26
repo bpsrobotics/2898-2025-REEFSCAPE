@@ -74,13 +74,13 @@ class TeleopDriveCommand(
 
         // Drive using raw values.
         swerve.drive(
-            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed),
-            angVelocity * controller.config.maxAngularVelocity,
+            Translation2d(forwardVelocity * swerve.maximumSpeed+addSpeed.translation.x, strafeVelocity * swerve.maximumSpeed+addSpeed.translation.y),
+            -angVelocity * controller.config.maxAngularVelocity+addSpeed.rotation.degrees,
             driveMode()
         )
         SmartDashboard.putNumber("TranslationX", forwardVelocity*swerve.maximumSpeed+addSpeed.translation.x)
         SmartDashboard.putNumber("TranslationY", strafeVelocity*swerve.maximumSpeed+addSpeed.translation.y)
-        SmartDashboard.putNumber("AngleVelocity", angVelocity * controller.config.maxAngularVelocity + addSpeed.rotation.degrees)
+        SmartDashboard.putNumber("AngleVelocity", -angVelocity * controller.config.maxAngularVelocity+addSpeed.rotation.radians)
         addSpeed = Transform2d()
     }
 

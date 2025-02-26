@@ -30,12 +30,12 @@ val aprilTagFieldInGame = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reef
 
     //AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 val robotToCam = Transform3d(
-    Translation3d(-0.0762, 0.0, 0.5),
+    Translation3d(0.1397, -0.3302, 0.5747),
     Rotation3d(0.0, 0.0, 0.0)
 ) //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
 
 val robotToCam2 = Transform3d(
-    Translation3d(-0.0762, 0.0, 0.5),
+    Translation3d(0.1206, -0.2858, 0.5556),
     Rotation3d(0.0, 0.0, (180.0).degreesToRadians())
 )
 
@@ -85,6 +85,7 @@ object Vision : SubsystemBase() {
     var poseEstimator2 =
         PhotonPoseEstimator(aprilTagFieldInGame, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam2)
     var previousPose = Pose2d()
+    var previousPose2 = Pose2d()
 
     init {
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
@@ -126,12 +127,12 @@ object Vision : SubsystemBase() {
     }
 
     fun getRobotPositionFromSecondCamera(result: PhotonPipelineResult): Pose3d? {
-        setReference(previousPose)
+        setReference(previousPose2)
 
         val estimatedPose = poseEstimator2.update(result) ?: return null
 
         if (estimatedPose.isEmpty) return null
-        previousPose = estimatedPose.get().estimatedPose.toPose2d()
+        previousPose2 = estimatedPose.get().estimatedPose.toPose2d()
         return estimatedPose.get().estimatedPose
     }
 
