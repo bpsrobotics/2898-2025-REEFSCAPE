@@ -5,10 +5,7 @@ package frc.robot.subsystems
 
 
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.commands.PathPlannerAuto
-import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.*
 import edu.wpi.first.math.controller.PIDController
@@ -17,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -34,16 +30,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
-import frc.robot.Constants.AutoConstants.Robot_Config
 import frc.robot.Constants.AutoConstants.RotationD
 import frc.robot.Constants.AutoConstants.RotationI
 import frc.robot.Constants.AutoConstants.RotationP
 import frc.robot.Constants.AutoConstants.TranslationD
 import frc.robot.Constants.AutoConstants.TranslationI
 import frc.robot.Constants.AutoConstants.TranslationP
-import frc.robot.Constants.DriveConstants.DriveKinematics
-import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
-import frc.robot.Robot
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
@@ -51,7 +43,6 @@ import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
 import java.util.*
-import frc.robot.commands.SysIdTesting.DrivetrainSysID
 
 
 object  Drivetrain : SubsystemBase() {
