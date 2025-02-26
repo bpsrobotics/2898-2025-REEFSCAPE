@@ -95,9 +95,9 @@ class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() 
 
     override fun isFinished(): Boolean {
         if (direction == Direction.kForward) {
-            return topLimitWrist() //todo, configure for when voltage goes above 35 volts.
+            return (topLimitWrist() || overVoltage())
         } else {
-            return bottomLimitWrist()
+            return (bottomLimitWrist() || overVoltage())
         }
     }
 
