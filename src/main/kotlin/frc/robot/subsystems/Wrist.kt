@@ -33,8 +33,6 @@ object Wrist : SubsystemBase() {
     val encoder = DutyCycleEncoder(PivotPosID) // todo, configure the zero for this encoder
     private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
-    var setpoint = getPos()
-
     var velocity = 0.0
     private val constraints = TrapezoidProfile.Constraints(Max_Velocity, Max_Accel)
     val encoderOffset = 0.0
@@ -52,6 +50,7 @@ object Wrist : SubsystemBase() {
 
 
     init {
+        pid.setpoint = getPos()
         wristConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
