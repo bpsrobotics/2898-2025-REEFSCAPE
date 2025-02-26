@@ -27,13 +27,14 @@ import frc.robot.subsystems.Wrist.armMotor
 import frc.robot.subsystems.Wrist.deltaAngle
 import frc.robot.subsystems.Wrist.encoder
 import kotlin.math.abs
+import kotlin.math.log
 
 class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() {
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
     private val d_appliedVoltage: MutVoltage = MutVoltage(0.0,0.0, Volts)
 
     var timer = 0.0
-    val sigmaTimer = Timer.getFPGATimestamp() //todo, rename what ever this is.
+    val timestamp = Timer.getFPGATimestamp()
 
     // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
     private val d_angle: MutAngle = MutAngle(0.0,0.0, Radians)
@@ -49,11 +50,11 @@ class WristSysID(val direction: Direction, val quasistaic: Boolean) : Command() 
         else {return false}
     }
     fun calculateTimeDifferential():Double {
-        val differenceTime = timer - sigmaTimer
-        timer = sigmaTimer
+        val differenceTime = timer - timestamp
+        timer = timestamp
         return abs(differenceTime)
     }
-    fun tooMuchVoltage():Boolean {
+    fun overVoltage():Boolean {
         if (armMotor.busVoltage >= 35.0) {
             return true
         }
