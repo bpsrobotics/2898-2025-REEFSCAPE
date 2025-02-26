@@ -28,7 +28,6 @@ import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
 
-
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the [Robot]
@@ -55,11 +54,8 @@ class RobotContainer {
     val navXResetCommand: NavXReset = NavXReset()
 
 
-
-
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-
         NamedCommands.registerCommand("coralintake", RunIntake(0.2, 0.5)) //Todo set this properly
         //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
@@ -79,10 +75,8 @@ class RobotContainer {
         configureBindings()
 
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
-
-
-
     }
+
     fun getAutonomousCommand(): Command{
         val path = autoCommandChooser.selected
         return path
@@ -120,8 +114,5 @@ class RobotContainer {
         OI.moveToIntake.onTrue(MoveToIntake())
         OI.moveA1.onTrue(MoveA1())
         OI.moveA2.onTrue(MoveA2())
-
-
     }
-
 }

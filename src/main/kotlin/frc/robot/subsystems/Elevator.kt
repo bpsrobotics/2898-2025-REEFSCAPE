@@ -135,5 +135,4 @@ object Elevator : SubsystemBase() {
     fun heightPercent() : Double {
         return (getPos() / UPPER_LIMIT).clamp(0.0, 1.0)
     }
-
 }

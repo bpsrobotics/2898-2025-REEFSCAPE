@@ -109,8 +109,6 @@ object OI : SubsystemBase() {
 
     val resetGyro = JoystickButton(driverController, RESET_GYRO)
 
-
-
     val highHatForward = operatorController.pov(0)
     val highHatBack = operatorController.pov(180)
     /*val hatVector get() = when (operatorController.pov) {
@@ -120,7 +118,6 @@ object OI : SubsystemBase() {
         270 -> Vector2(-1.0,0.0)
         else -> Vector2.zero()
     }*/
-
 
     val intakeSpeed get() = operatorController.throttle
 
@@ -193,6 +190,7 @@ object OI : SubsystemBase() {
             }
         }
     }
+
     override fun periodic(){
         Rumble.update()
     }

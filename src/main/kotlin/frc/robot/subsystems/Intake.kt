@@ -58,7 +58,6 @@ object Intake : SubsystemBase() {
         currentAverage = currentFilter.calculate(intakeMotor.outputCurrent)
 
         updateColorSensor() // Also updates hasCoral
-
     }
 
     fun runMotor(speed: Double) {
@@ -81,9 +80,9 @@ object Intake : SubsystemBase() {
 
     fun updateColorSensor(){
         // Get values from the color sensor
-        val detectedColor = colorSensor.getColor() // RGB value color sensor sees
-        val IR: Double = colorSensor.getIR().toDouble() // Infared light
-        val proximity = colorSensor.getProximity().toDouble() // Proximity of the color sensor
+        val detectedColor = colorSensor.color // RGB value color sensor sees
+        val IR: Double = colorSensor.ir.toDouble() // Infrared light
+        val proximity = colorSensor.proximity.toDouble() // Proximity of the color sensor
 
         val tooClose = 0.0 //todo actually check and configure this
 
@@ -92,9 +91,10 @@ object Intake : SubsystemBase() {
         SmartDashboard.putNumber("Green", detectedColor.green);
         SmartDashboard.putNumber("Blue", detectedColor.blue);
         SmartDashboard.putNumber("IR (Not used)", IR);
-        SmartDashboard.putNumber("Proximity (Not used)", proximity)
+        SmartDashboard.putNumber("Proximity", proximity)
 
         hasCoral = proximity <= tooClose
+        SmartDashboard.putBoolean("Has Coral", hasCoral)
 
         //hasCoral = isCoralInIntake(detectedColor)
     }
@@ -105,7 +105,6 @@ object Intake : SubsystemBase() {
 //        if ((detectedColor.blue - CORAL_COLOR.blue).absoluteValue > CORAL_COLOR_TOLERANCE) return false
         if (colorSensor.proximity >= 100.0) {return true}
         return false
-
         }
     val coralInIntake get() = colorSensor.proximity >= 100.0
     } //todo: figure out how to make so that we can detect coral w/ no color sensor

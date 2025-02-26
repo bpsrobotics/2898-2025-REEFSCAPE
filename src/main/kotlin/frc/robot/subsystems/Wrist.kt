@@ -51,6 +51,8 @@ object Wrist : SubsystemBase() {
 
     init {
         pid.setpoint = getPos()
+
+        // Wrist Motor Configuration
         wristConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
@@ -84,8 +86,4 @@ object Wrist : SubsystemBase() {
     fun isObstructing() : Boolean {
         return getPos() < ObstructionAngle
     }
-
-
-
-
 }
