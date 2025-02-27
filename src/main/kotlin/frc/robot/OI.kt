@@ -33,7 +33,7 @@ object OI : SubsystemBase() {
      * Threshold below which [process] will return 0.
      * 0.1 historically used, but optimal value unknown.
      */
-    private const val DEADZONE_THRESHOLD = 0.1
+
 
     /**
      * Utility function for controller axis, optional deadzone and square/cube for extra fine-grain control
@@ -47,7 +47,7 @@ object OI : SubsystemBase() {
         var output = 0.0
 
         if (deadzone) {
-            output = MathUtil.applyDeadband(input, DEADZONE_THRESHOLD)
+            output = MathUtil.applyDeadband(input, Constants.OIConstants.DEADZONE_THRESHOLD)
         }
 
         if (square) {
@@ -69,7 +69,15 @@ object OI : SubsystemBase() {
         process(this, deadzone, square, cube)
 
     private val driverController = XboxController(0)
+
     private val operatorController = Joystick(1)
+
+    // Left and right shoulder switches (the ones next to the trigger) for quickturn
+    val quickTurnRight
+        get() = process(driverController.rightTriggerAxis, deadzone = true, square = true)
+    val quickTurnLeft
+        get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
+
 
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle

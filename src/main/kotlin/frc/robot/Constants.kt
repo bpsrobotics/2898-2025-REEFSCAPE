@@ -5,8 +5,8 @@
 
 package frc.robot
 
-import beaverlib.utils.Units.Electrical.Current
 import com.pathplanner.lib.config.RobotConfig
+import beaverlib.utils.Units.Electrical.Current
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.trajectory.TrapezoidProfile
@@ -137,6 +137,7 @@ class Constants {
         const val DriveDeadband = 0.05
         const val SpeedMultiplierMin = 0.4
         const val SpeedMultiplierMax = 1.0
+        const val DEADZONE_THRESHOLD = 0.1
     }
 
     object AutoConstants {
@@ -186,4 +187,11 @@ class Constants {
         const val PRESS_ACTIVATE_DURATION = 0.1
         const val INPUT_BUFFER_DURATION = 0.2
     }
+
+    object VisionConstants {
+        const val CORAL_OFFSET_FROM_CENTER = 0.1524
+    }
+
+
+
 }

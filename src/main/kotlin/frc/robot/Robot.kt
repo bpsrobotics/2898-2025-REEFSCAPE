@@ -5,6 +5,7 @@ package frc.robot
 
 import com.fasterxml.jackson.databind.util.Named
 import com.pathplanner.lib.auto.NamedCommands
+import com.pathplanner.lib.commands.FollowPathCommand
 import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.wpilibj.DataLogManager
 import edu.wpi.first.wpilibj.TimedRobot
@@ -35,6 +36,7 @@ class Robot : TimedRobot() {
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         robotContainer = RobotContainer()
+        FollowPathCommand.warmupCommand().schedule();
 
 //        CameraServer.startAutomaticCapture()
 //        Climber

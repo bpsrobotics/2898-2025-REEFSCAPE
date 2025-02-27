@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.Trajectory
@@ -50,12 +51,12 @@ import swervelib.SwerveModule
 import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
+import kotlin.math.*
 import java.util.*
 
 
 object  Drivetrain : SubsystemBase() {
     var swerveDrive: SwerveDrive
-    private val visionDriveTest = false
 
     /** The maximum speed of the swerve drive */
     var maximumSpeed: Double = Units.feetToMeters(14.5)
@@ -63,12 +64,14 @@ object  Drivetrain : SubsystemBase() {
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
-    // Load the RobotConfig from the GUI settings. You should probably
-    // store this in your Constants file
-//    lateinit var config : RobotConfig;
+
+
+
+
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
+
 
 //        try{
 //            config = RobotConfig.fromGUISettings();
@@ -83,23 +86,43 @@ object  Drivetrain : SubsystemBase() {
             e.printStackTrace()
             throw RuntimeException("error creating swerve",e)
         }
+
         swerveDrive.setHeadingCorrection(false) // Heading correction should only be used while controlling the robot via angle.
         swerveDrive.setCosineCompensator(false) //!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-
-        if (visionDriveTest) {
-//                setupPhotonVision()
-            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
-            swerveDrive.stopOdometryThread()
-        }
+//        if (visionDriveTest) {
+////                setupPhotonVision()
+//            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+//            swerveDrive.stopOdometryThread()
+//        }
 //        setupPathPlanner()
-
-        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
+//
+        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev(3.0))
         // Updates odometry whenever a new
-        Vision.listeners.add ( "UpdateOdometry") {
-            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
-            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+        Vision.listeners.add ( "UpdateOdometry") { input, source ->
+            if (source == "cam1") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(position.x, position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+
+                }
+            }
+            if (source == "cam2") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(position.x, position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+
+                }
+            }
         }
 
         setupPathPlanner()
@@ -113,11 +136,12 @@ object  Drivetrain : SubsystemBase() {
 
 
         SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
-        SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)
+        SmartDashboard.putNumber("odometry/rotation", swerveDrive.odometryHeading.degrees)
 
         publisher.set(getPose())
 
         swerveStates.set(swerveDrive.states)
+
 
     }
 
@@ -457,6 +481,17 @@ object  Drivetrain : SubsystemBase() {
         return HeadingPID.calculate(measurement, setpoint)
     }
 
+    fun angleDist(a: Double, b: Double): Double {
+        val diff = b - a;
+        if (diff <= 180.0) return diff;
+        else return (diff % 180.0) - 180.0;
+    }
+
+    fun realMod(a: Double, b: Double): Double {
+        val mod = a % b;
+        if (mod >= 0) return mod;
+        else return mod + b;
+    }
 
 
 }
