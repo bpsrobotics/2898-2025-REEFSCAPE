@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.OI.highHatBack
 import frc.robot.OI.highHatForward
-import frc.robot.commands.Sequences.*
 import frc.robot.commands.elevator.DisableElevator
 import frc.robot.commands.elevator.MoveElevator
 import frc.robot.commands.elevator.StabilizeElevator
