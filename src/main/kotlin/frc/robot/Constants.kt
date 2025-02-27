@@ -66,7 +66,7 @@ class Constants {
         //FF constants
         const val kS = 0.0
         const val kV = 0.08
-        const val kG = 0.22
+        var kG = 0.22
         const val kA = 0.0
 
         //Max elev driver outputs
@@ -184,16 +184,16 @@ class Constants {
         const val RESET_GYRO = 6
 
         //FIXME Operator Controls
-        const val BASE_STAGE = 6
-        const val CORAL_L2 = 5
-        const val CORAL_L3 = 3
-        const val CORAL_L4 = 11
-        const val CORAL_INTAKE = 7
+        const val BASE_STAGE = 7
+        const val CORAL_L2 = 8
+        const val CORAL_L3 = 10
+        const val CORAL_L4 = 12
+        const val CORAL_INTAKE = "high_hat"
 
-        const val ALGAE_B1 = 8
-        const val ALGAE_B2 = 9
+        const val ALGAE_B1 = 9
+        const val ALGAE_B2 = 11
 
-        const val PROCESSOR = 10
+        const val ALGAE_TOGGLE = 1
 
         const val PRESS_ACTIVATE_DURATION = 0.1
         const val INPUT_BUFFER_DURATION = 0.2

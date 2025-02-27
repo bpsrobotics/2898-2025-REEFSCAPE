@@ -41,6 +41,8 @@ class RobotContainer {
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
 
+
+
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
             { MathUtil.applyDeadband(-translationY, 0.1) },
@@ -75,8 +77,10 @@ class RobotContainer {
         configureBindings()
 
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
-    }
 
+
+
+    }
     fun getAutonomousCommand(): Command{
         val path = autoCommandChooser.selected
         return path
@@ -105,14 +109,15 @@ class RobotContainer {
         // MoveL# Sequences
 
         resetGyro.whileTrue(navXResetCommand)
-        highHatForward.whileTrue(RunIntake()) //TODO set values properly
-        highHatBack.whileTrue(RunOuttake(-0.2))
-        OI.moveL1.onTrue(StartupL1())
-        OI.moveL2.onTrue(MoveL2())
-        OI.moveL3.onTrue(MoveL3())
-        OI.moveL4.onTrue(MoveL4())
-        OI.moveToIntake.onTrue(MoveToIntake())
-        OI.moveA1.onTrue(MoveA1())
-        OI.moveA2.onTrue(MoveA2())
+//        highHatForward.whileTrue(RunIntake()) //TODO set values properly
+//        highHatBack.whileTrue(RunOuttake(-0.2))
+//        OI.moveL1.onTrue(StartupL1())
+//        OI.moveL2.onTrue(MoveL2())
+//        OI.moveL3.onTrue(MoveL3())
+//        OI.moveL4.onTrue(MoveL4())
+//        OI.moveToIntake.onTrue(MoveToIntake())
+//        OI.moveA1.onTrue(MoveA1())
+//        OI.moveA2.onTrue(MoveA2())
     }
+
 }

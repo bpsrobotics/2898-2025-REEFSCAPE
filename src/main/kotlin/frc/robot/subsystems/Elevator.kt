@@ -33,6 +33,8 @@ import frc.robot.RobotMap.ElevatorRightSlaveID
 import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
 import frc.robot.commands.elevator.StabilizeElevator
+import frc.robot.commands.elevator.VoltageElevator
+
 object Elevator : SubsystemBase() {
     /** Main motor, all other motors follow this one */
     val leftMaster = SparkMax(ElevatorLeftMasterID, SparkLowLevel.MotorType.kBrushless)
@@ -67,7 +69,7 @@ object Elevator : SubsystemBase() {
     init {
         // Init motor controls
         elevatorConfig
-            .idleMode(SparkBaseConfig.IdleMode.kCoast)
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .smartCurrentLimit(40)
 
         leftMaster.configure(
@@ -91,7 +93,11 @@ object Elevator : SubsystemBase() {
             SparkBase.PersistMode.kPersistParameters
         )
         elevEncoder.distancePerPulse = 1/1.889
-        defaultCommand = StabilizeElevator()
+        SmartDashboard.putNumber("/Elevator/Position", getPos())
+        SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
+        SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
+        SmartDashboard.putNumber("/Elevator/Voltage", kG)
+        defaultCommand = VoltageElevator({ 0.1}, 50.0)
     }
 
     override fun periodic() {
@@ -101,6 +107,8 @@ object Elevator : SubsystemBase() {
 
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
+        SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
+        kG = SmartDashboard.getNumber("/Elevator/Voltage", kG)
 
     }
     /** Returns the elevator encoders distance*/

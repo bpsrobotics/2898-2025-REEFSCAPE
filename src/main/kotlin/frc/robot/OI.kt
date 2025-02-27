@@ -103,7 +103,7 @@ object OI : SubsystemBase() {
     val moveL2 = operatorController.button(CORAL_L2)
     val moveL3 = operatorController.button(CORAL_L3)
     val moveL4 = operatorController.button(CORAL_L4)
-    val moveToIntake = operatorController.button(CORAL_INTAKE)
+//    val moveToIntake = operatorController.button(CORAL_INTAKE)
     val moveA1 = operatorController.button(ALGAE_B1)
     val moveA2 = operatorController.button(ALGAE_B2)
 
