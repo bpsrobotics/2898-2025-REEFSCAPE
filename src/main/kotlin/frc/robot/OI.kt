@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
@@ -73,7 +74,7 @@ object OI : SubsystemBase() {
     fun Double.process(deadzone: Boolean = false, square: Boolean = false, cube: Boolean = false) =
         process(this, deadzone, square, cube)
 
-    private val driverController = XboxController(0)
+    private val driverController = CommandXboxController(0)
     private val operatorController = CommandJoystick(1)
 
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
@@ -105,7 +106,14 @@ object OI : SubsystemBase() {
     val moveA1 = operatorController.button(ALGAE_B1)
     val moveA2 = operatorController.button(ALGAE_B2)
 
-    val resetGyro = JoystickButton(driverController, RESET_GYRO)
+    val resetGyro = driverController.rightBumper()
+    val sysidFQ = driverController.x()
+    val sysidBQ = driverController.y()
+    val sysidFD = driverController.b()
+    val sysidBD = driverController.a()
+
+
+
 
     val highHatForward = operatorController.pov(0)
     val highHatBack = operatorController.pov(180)
@@ -145,17 +153,6 @@ object OI : SubsystemBase() {
         }
     }
 
-    val alignmentPad get() = when(driverController.pov) {
-        0    -> Direction.UP
-        45   -> Direction.UPRIGHT
-        90   -> Direction.RIGHT
-        135  -> Direction.DOWNRIGHT
-        180  -> Direction.DOWN
-        225  -> Direction.DOWNLEFT
-        270  -> Direction.LEFT
-        315  -> Direction.UPLEFT
-        else -> Direction.INACTIVE
-    }
 
     //    val operatorTrigger: BooleanEvent = operatorController.button(1, loop)
     //val operatorTrigger get() = operatorController.getRawButton(1)

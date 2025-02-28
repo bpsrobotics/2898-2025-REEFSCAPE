@@ -59,14 +59,14 @@ class Constants {
         const val MaxAccel = 2.0
 
         //PID constants
-        const val kP = 0.01
+        const val kP = 2.0
         const val kI = 0.0
         const val kD = 0.0
 
         //FF constants
         const val kS = 0.0
-        const val kV = 0.08
-        var kG = 0.22
+        const val kV = 0.1136
+        var kG = 0.025
         const val kA = 0.0
 
         //Max elev driver outputs
@@ -81,7 +81,7 @@ class Constants {
         enum class ElevatorState(val position: Double) {
             Traverse(0.0),
             Stow(0.0),
-            L2(0.1),
+            L2(0.7),
             L3(0.1),
             L4(0.1),
             A1(0.1),

@@ -1,6 +1,7 @@
 package frc.robot.subsystems
 
 import beaverlib.utils.Sugar.clamp
+import beaverlib.utils.Units.Linear.inches
 import com.revrobotics.spark.*
 import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
@@ -9,8 +10,10 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.units.measure.Voltage
+import edu.wpi.first.wpilibj.CounterBase
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.Encoder
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants.ElevatorConstants.MaxAccel
@@ -34,6 +37,7 @@ import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
 import frc.robot.commands.elevator.StabilizeElevator
 import frc.robot.commands.elevator.VoltageElevator
+import kotlin.math.PI
 
 object Elevator : SubsystemBase() {
     /** Main motor, all other motors follow this one */
@@ -47,7 +51,7 @@ object Elevator : SubsystemBase() {
     private var elevatorConfig: SparkMaxConfig = SparkMaxConfig()
 
     /** Encoder on the elevator */
-    val elevEncoder = Encoder(ElevatorID1, ElevatorID2)
+    val elevEncoder = Encoder(ElevatorID1, ElevatorID2, true, CounterBase.EncodingType.k1X)
     /** Limit switch at the bottom of the elevator */
     val botLimit = DigitalInput(LimitBotID)
     /** Limit switch at the top of the elevator*/
@@ -69,7 +73,7 @@ object Elevator : SubsystemBase() {
     init {
         // Init motor controls
         elevatorConfig
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .idleMode(SparkBaseConfig.IdleMode.kCoast)
             .smartCurrentLimit(40)
 
         leftMaster.configure(
@@ -92,23 +96,27 @@ object Elevator : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
-        elevEncoder.distancePerPulse = 1/1.889
+        // Configures encoder to return a distance of 1 meter for every 2048 pulses
+        elevEncoder.distancePerPulse = ( 2 * PI * 0.945 *2).inches.asMeters / 2048
+
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
-        SmartDashboard.putNumber("/Elevator/Voltage", kG)
-        defaultCommand = VoltageElevator({ 0.1}, 50.0)
+        SmartDashboard.putNumber("/Elevator/Voltage", -1.0)
+        defaultCommand = StabilizeElevator()
     }
 
+
     override fun periodic() {
-        if (botLimit.get()) {
+        if (!botLimit.get()) {
             resetPos()
         }
-
+        SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
-        kG = SmartDashboard.getNumber("/Elevator/Voltage", kG)
+//        kG = SmartDashboard.getNumber("/Elevator/Voltage", kG)
 
     }
     /** Returns the elevator encoders distance*/
@@ -131,7 +139,9 @@ object Elevator : SubsystemBase() {
     fun profiledPIDControl(targetPos : Double) {
         profiledPID.setGoal(targetPos)
         val pidOutput = profiledPID.calculate(getPos())
+        println("PID output $pidOutput")
         val ffOutput = elevatorFeedforward.calculate(profiledPID.setpoint.velocity)
+        println("FF $ffOutput")
         leftMaster.setVoltage(pidOutput + ffOutput)
     }
     /** Resets the elevator encoder */

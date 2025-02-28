@@ -69,13 +69,13 @@ object Vision : SubsystemBase() {
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
     }
     override fun periodic(){
-        results = cam.allUnreadResults
+       /* results = cam.allUnreadResults
         if (results.isEmpty()) return
         // Iterate through each of the results
         results.forEach { visionResult: PhotonPipelineResult ->
             // Iterate through each of the listener functions, and call them passing the vision result as the input
             listeners.update (visionResult)
-        }
+        }*/
     }
 
     /**

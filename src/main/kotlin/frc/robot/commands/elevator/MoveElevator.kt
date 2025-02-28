@@ -15,12 +15,13 @@ import frc.robot.subsystems.Wrist
 class MoveElevator(val goalPosition : Double) : Command() {
     init {addRequirements(Elevator)}
     override fun initialize() {
-        if (goalPosition !in Constants.ElevatorConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT || Wrist.isObstructing()) return
+//        if (goalPosition !in Constants.ElevatorConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT ) return
         profiledPID.reset(getPos())
         profiledPID.setTolerance(0.25)
     }
 
     override fun execute() {
+        println("goal position " + goalPosition)
         Elevator.profiledPIDControl(goalPosition)
     }
 

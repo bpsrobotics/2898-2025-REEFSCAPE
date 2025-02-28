@@ -9,9 +9,16 @@ import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.controller.ArmFeedforward
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.units.Units
+import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DutyCycleEncoder
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction
 import frc.robot.Constants.PivotConstants.Max_Accel
 import frc.robot.Constants.PivotConstants.Max_Velocity
 import frc.robot.Constants.PivotConstants.NEG_MAX_OUTPUT
@@ -26,6 +33,8 @@ import frc.robot.Constants.PivotConstants.kV
 import frc.robot.RobotMap.PivotDriverID
 import frc.robot.RobotMap.PivotPosID
 import frc.robot.commands.wrist.StabilizeWrist
+import frc.robot.subsystems.Elevator.elevEncoder
+import frc.robot.subsystems.Elevator.leftMaster
 import kotlin.math.PI
 
 object Wrist : SubsystemBase() {
@@ -85,5 +94,23 @@ object Wrist : SubsystemBase() {
 
     fun isObstructing() : Boolean {
         return getPos() < ObstructionAngle
+    }
+
+    val routine = SysIdRoutine(
+        SysIdRoutine.Config(),
+        SysIdRoutine.Mechanism(
+            { volts: Voltage -> Elevator.setVoltage(volts.`in`(Volts))
+            },
+            { log: SysIdRoutineLog -> log.motor(armMotor.deviceId.toString())
+                .voltage(Volts.of(armMotor.busVoltage))
+                .angularPosition(Radians.of(getPos()))
+                .angularVelocity(RadiansPerSecond.of(getPos() / deltaAngle))
+            },
+            this
+        )
+    )
+    fun SysIDWrist(direction: Direction, quasistaic: Boolean) : Command {
+        if(quasistaic) { return frc.robot.commands.elevator.routine.quasistatic(direction) }
+        else { return frc.robot.commands.elevator.routine.dynamic(direction) }
     }
 }

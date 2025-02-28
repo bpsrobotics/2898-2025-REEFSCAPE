@@ -85,16 +85,23 @@ object  Drivetrain : SubsystemBase() {
         }
 //        setupPathPlanner()
 
-        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
+//        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
         // Updates odometry whenever a new
-        Vision.listeners.add ( "UpdateOdometry") {
-            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
-            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
-        }
+//        Vision.listeners.add ( "UpdateOdometry") {
+//            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
+//            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
+//            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
+//            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+//        }
 
-        setupPathPlanner()
+//        try{
+//            setupPathPlanner()
+//        } catch (e : Exception) {
+//            // Handle exception as needed
+//            e.printStackTrace();
+//        }
+        swerveDrive.setMotorIdleMode(false)
+        //setupPathPlanner()
 
     }
 
@@ -113,6 +120,12 @@ object  Drivetrain : SubsystemBase() {
 
     }
 
+    val getAlliance : () -> Boolean = {
+        val alliance = DriverStation.getAlliance()
+        if (alliance.isPresent) alliance.get() == DriverStation.Alliance.Red
+        else false
+    }
+
     /**
      * Setup AutoBuilder for PathPlanner.
      */
@@ -127,16 +140,7 @@ object  Drivetrain : SubsystemBase() {
                 PIDConstants(RotationP, RotationI, RotationD)
             ),
             Constants.AutoConstants.Robot_Config,
-            {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-                val alliance = DriverStation.getAlliance()
-                if (alliance.isPresent) {
-                    return@configure alliance.get() == DriverStation.Alliance.Red
-                }
-                false
-            },
+            getAlliance,
              this// Reference to this subsystem to set requirements
         )
     }

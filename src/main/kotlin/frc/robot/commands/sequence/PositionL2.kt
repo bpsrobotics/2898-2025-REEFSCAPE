@@ -17,7 +17,11 @@ class PositionL2 : Command() {
         )
     )
     override fun initialize() {
-        ScheduleCommand(commandGroup)
+        commandGroup.schedule()
+    }
+
+    override fun execute() {
+        println("L2")
     }
 
     override fun isFinished(): Boolean {

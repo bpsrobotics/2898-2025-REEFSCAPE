@@ -63,8 +63,8 @@ class Robot : TimedRobot() {
 
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
     override fun autonomousInit() {
-        autoCommand = robotContainer.getAutonomousCommand()
-        autoCommand.let { autoCommand.schedule() }
+        //autoCommand = robotContainer.getAutonomousCommand()
+        //autoCommand.let { autoCommand.schedule() }
 
     }
 

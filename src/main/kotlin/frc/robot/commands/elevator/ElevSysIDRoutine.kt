@@ -17,6 +17,24 @@ import frc.robot.subsystems.Elevator.botLimit
 import frc.robot.subsystems.Elevator.elevEncoder
 import frc.robot.subsystems.Elevator.leftMaster
 import frc.robot.subsystems.Elevator.topLimit
+val routine = SysIdRoutine(
+    SysIdRoutine.Config(null, Volts.of(2.0), null),
+    SysIdRoutine.Mechanism(
+        { volts: Voltage -> Elevator.setVoltage(volts.`in`(Volts))
+        },
+        { log: SysIdRoutineLog -> log.motor(leftMaster.deviceId.toString())
+            .voltage(Volts.of(leftMaster.busVoltage))
+            .linearPosition(Meters.of(Elevator.getPos()))
+            .linearVelocity(MetersPerSecond.of(elevEncoder.rate))
+        },
+        Elevator
+    )
+)
+
+fun SysIDElev(direction: Direction, quasistaic: Boolean) : Command {
+    if(quasistaic) { return routine.quasistatic(direction) }
+    else { return routine.dynamic(direction) }
+}
 
 class ElevSysIDRoutine(val direction: Direction, val quasistaic: Boolean) : Command() {
     // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
@@ -45,10 +63,10 @@ class ElevSysIDRoutine(val direction: Direction, val quasistaic: Boolean) : Comm
     override fun initialize() {
         if (quasistaic) {
             command = routine.quasistatic(direction)
-            ScheduleCommand(command)
+            command.schedule()
         } else {
             command = routine.dynamic(direction)
-            ScheduleCommand(command)
+            command.schedule()
         }
     }
 

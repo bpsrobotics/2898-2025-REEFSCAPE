@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.commands.swerve
 
-import beaverlib.utils.Sugar.clamp
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
@@ -57,9 +56,9 @@ class TeleopDriveCommand(
         var strafeVelocity = vStrafe()
         var angVelocity = omega()
         val slowMode = slowMode()
-        SmartDashboard.putNumber("vX", forwardVelocity)
-        SmartDashboard.putNumber("vY", strafeVelocity)
-        SmartDashboard.putNumber("omega", angVelocity)
+//        SmartDashboard.putNumber("vX", forwardVelocity)
+//        SmartDashboard.putNumber("vY", strafeVelocity)
+//        SmartDashboard.putNumber("omega", angVelocity)
 
         if (slowMode) {
             forwardVelocity *= 0.6

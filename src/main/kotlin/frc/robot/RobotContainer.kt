@@ -7,7 +7,6 @@ package frc.robot
 
 import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.auto.NamedCommands
-import frc.robot.OI.resetGyro
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
 import frc.robot.OI.turnX
@@ -15,17 +14,23 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.OI.highHatBack
 import frc.robot.OI.highHatForward
-import frc.robot.commands.elevator.DisableElevator
-import frc.robot.commands.elevator.MoveElevator
-import frc.robot.commands.elevator.StabilizeElevator
+import frc.robot.OI.resetGyro
+import frc.robot.OI.sysidBD
+import frc.robot.OI.sysidBQ
+import frc.robot.OI.sysidFD
+import frc.robot.OI.sysidFQ
+import frc.robot.commands.elevator.*
 import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.intake.RunOuttake
+import frc.robot.commands.sequence.PositionL2
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Wrist.SysIDWrist
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -55,6 +60,7 @@ class RobotContainer {
     val navXResetCommand: NavXReset = NavXReset()
 
 
+
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
         NamedCommands.registerCommand("coralintake", RunIntake(0.2, 0.5)) //Todo set this properly
@@ -69,7 +75,7 @@ class RobotContainer {
 
         // Configure the trigger bindings
 
-        autoCommandChooser = AutoBuilder.buildAutoChooser("Left mid start")
+//        autoCommandChooser = AutoBuilder.buildAutoChooser("Basic")
 
         Drivetrain.defaultCommand = teleopDrive
 
@@ -108,10 +114,21 @@ class RobotContainer {
         // MoveL# Sequences
 
         resetGyro.whileTrue(navXResetCommand)
-//        highHatForward.whileTrue(RunIntake()) //TODO set values properly
-//        highHatBack.whileTrue(RunOuttake(-0.2))
+
+//        sysidFQ.whileTrue(SysIDWrist(SysIdRoutine.Direction.kForward, true))
+//        sysidBQ.whileTrue(SysIDWrist(SysIdRoutine.Direction.kReverse, true))
+//        sysidFD.whileTrue(SysIDWrist(SysIdRoutine.Direction.kForward, false))
+//        sysidBD.whileTrue(SysIDWrist(SysIdRoutine.Direction.kReverse, false))
+
+//        sysidFQ.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, true))
+//        sysidBQ.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, true))
+//        sysidFD.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, false))
+//        sysidBD.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, false))
+
+        highHatForward.whileTrue(RunIntake()) //TODO set values properly
+        highHatBack.whileTrue(RunOuttake(-0.2))
 //        OI.moveL1.onTrue(StartupL1())
-//        OI.moveL2.onTrue(MoveL2())
+        OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
 //        OI.moveL3.onTrue(MoveL3())
 //        OI.moveL4.onTrue(MoveL4())
 //        OI.moveToIntake.onTrue(MoveToIntake())
