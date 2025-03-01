@@ -73,7 +73,7 @@ object Elevator : SubsystemBase() {
     init {
         // Init motor controls
         elevatorConfig
-            .idleMode(SparkBaseConfig.IdleMode.kCoast)
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .smartCurrentLimit(40)
 
         leftMaster.configure(

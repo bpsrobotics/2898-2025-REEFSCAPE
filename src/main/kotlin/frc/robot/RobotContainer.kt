@@ -12,6 +12,7 @@ import frc.robot.OI.translationY
 import frc.robot.OI.turnX
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
@@ -30,6 +31,7 @@ import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Wrist
 import frc.robot.subsystems.Wrist.SysIDWrist
 
 /**
@@ -63,6 +65,8 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
+
+
         NamedCommands.registerCommand("coralintake", RunIntake(0.2, 0.5)) //Todo set this properly
         //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
@@ -84,7 +88,6 @@ class RobotContainer {
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
 
 
-
     }
     fun getAutonomousCommand(): Command{
         val path = autoCommandChooser.selected
@@ -93,7 +96,7 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
-//        Wrist
+        Wrist
         Elevator
     }
 
@@ -126,9 +129,13 @@ class RobotContainer {
 //        sysidBD.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, false))
 
         highHatForward.whileTrue(RunIntake()) //TODO set values properly
-        highHatBack.whileTrue(RunOuttake(-0.2))
-//        OI.moveL1.onTrue(StartupL1())
+//        highHatBack.whileTrue(RunOuttake(-0.2))
+        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
+        OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
+        OI.moveL4.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position))
+
+
 //        OI.moveL3.onTrue(MoveL3())
 //        OI.moveL4.onTrue(MoveL4())
 //        OI.moveToIntake.onTrue(MoveToIntake())

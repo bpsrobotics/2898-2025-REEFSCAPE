@@ -117,13 +117,13 @@ object OI : SubsystemBase() {
 
     val highHatForward = operatorController.pov(0)
     val highHatBack = operatorController.pov(180)
-    /*val hatVector get() = when (operatorController.pov) {
-        0 -> Vector2(0.0,1.0)
-        90 -> Vector2(1.0,0.0)
-        180 -> Vector2(0.0,-1.0)
-        270 -> Vector2(-1.0,0.0)
-        else -> Vector2.zero()
-    }*/
+//    val hatVector get() = when (operatorController.pov) {
+//        0 -> Vector2(0.0,1.0)
+//        90 -> Vector2(1.0,0.0)
+//        180 -> Vector2(0.0,-1.0)
+//        270 -> Vector2(-1.0,0.0)
+//        else -> Vector2.zero()
+//    }
 
     val intakeSpeed get() = operatorController.throttle
 

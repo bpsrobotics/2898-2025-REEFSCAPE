@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.I2C
 import edu.wpi.first.wpilibj.util.Color
 
 import frc.robot.RobotMap
+import frc.robot.commands.intake.StopIntake
 
 object Intake : SubsystemBase() {
     val intakeMotor = SparkMax(RobotMap.EndEffectorID, SparkLowLevel.MotorType.kBrushless)
@@ -26,7 +27,7 @@ object Intake : SubsystemBase() {
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
-    val buffer = Debouncer(0.1, Debouncer.DebounceType.kRising)
+    val buffer = Debouncer(0.02, Debouncer.DebounceType.kRising)
     val bufferTimer = Timer()
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
@@ -46,6 +47,7 @@ object Intake : SubsystemBase() {
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters
         )
+        defaultCommand = StopIntake()
     }
 
     override fun periodic() {
@@ -106,5 +108,5 @@ object Intake : SubsystemBase() {
         if (colorSensor.proximity >= 100.0) {return true}
         return false
         }
-    val coralInIntake get() = colorSensor.proximity >= 100.0
+    val coralInIntake get() = colorSensor.proximity <= 100.0
     } //todo: figure out how to make so that we can detect coral w/ no color sensor

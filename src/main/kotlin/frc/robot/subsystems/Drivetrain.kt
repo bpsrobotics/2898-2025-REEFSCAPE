@@ -125,7 +125,9 @@ object  Drivetrain : SubsystemBase() {
         if (alliance.isPresent) alliance.get() == DriverStation.Alliance.Red
         else false
     }
-
+    fun driveFieldOriented(speeds: ChassisSpeeds) {
+        swerveDrive.driveFieldOriented(speeds)
+    }
     /**
      * Setup AutoBuilder for PathPlanner.
      */
@@ -213,15 +215,15 @@ object  Drivetrain : SubsystemBase() {
      * Return SysID command for drive motors from YAGSL
      * @return A command that SysIDs the drive motors.
      */
-    fun sysIdDriveMotor(): Command? {
-        return SwerveDriveTest.generateSysIdCommand(
-            SwerveDriveTest.setDriveSysIdRoutine(
-                SysIdRoutine.Config(),
-                this,
-                swerveDrive, 12.0),
-            3.0, 5.0, 3.0
-        )
-    }
+//    fun sysIdDriveMotor(): Command? {
+//        return SwerveDriveTest.generateSysIdCommand(
+//            SwerveDriveTest.setDriveSysIdRoutine(
+//                SysIdRoutine.Config(),
+//                this,
+//                swerveDrive, 12.0),
+//            3.0, 5.0, 3.0
+//        )
+//    }
 
     /**
      * Return SysID command for angle motors from YAGSL

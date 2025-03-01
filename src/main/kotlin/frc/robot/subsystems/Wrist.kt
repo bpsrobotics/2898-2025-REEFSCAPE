@@ -14,6 +14,7 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.Voltage
 import edu.wpi.first.wpilibj.DutyCycleEncoder
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -36,11 +37,11 @@ import frc.robot.commands.wrist.StabilizeWrist
 import frc.robot.subsystems.Elevator.elevEncoder
 import frc.robot.subsystems.Elevator.leftMaster
 import kotlin.math.PI
+private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
 object Wrist : SubsystemBase() {
     val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
-    val encoder = DutyCycleEncoder(PivotPosID) // todo, configure the zero for this encoder
-    private val wristConfig : SparkMaxConfig = SparkMaxConfig()
+    val encoder = DutyCycleEncoder(PivotPosID, 2 * PI, 1.4 * PI) // todo, configure the zero for this encoder
 
     var velocity = 0.0
     private val constraints = TrapezoidProfile.Constraints(Max_Velocity, Max_Accel)
@@ -64,16 +65,19 @@ object Wrist : SubsystemBase() {
         // Wrist Motor Configuration
         wristConfig
             .smartCurrentLimit(40)
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
+            .idleMode(SparkBaseConfig.IdleMode.kCoast)
         armMotor.configure(wristConfig,
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters)
 
         encoder.setDutyCycleRange(0.0, 2.0 * PI) //todo, configure the range of the encoder.
         defaultCommand = StabilizeWrist()
+        SmartDashboard.putNumber("/wrist/pos", getPos())
+
     }
 
     override fun periodic() {
+        SmartDashboard.putNumber("/wrist/pos", getPos())
         deltaAngle = getPos() - lastPosition
         lastPosition = getPos()
     }

@@ -48,24 +48,24 @@ class Constants {
             Translation2d(-WheelBase / 2, -TrackWidth / 2)
         )
         // YAGSL `File` Configs
-        val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve")
+        val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve1")
 
         val MomentOfInertia = 4.09149392  // kg * m^2
 
     }
 
     object ElevatorConstants {
-        const val MaxVel = 2.0
+        const val MaxVel = 5.0
         const val MaxAccel = 2.0
 
         //PID constants
-        const val kP = 2.0
-        const val kI = 0.0
-        const val kD = 0.0
+        const val kP = 10.0
+        const val kI = 0.5
+        const val kD = 0.01
 
         //FF constants
-        const val kS = 0.0
-        const val kV = 0.1136
+        const val kS = 0.01
+        const val kV = 1.0136
         var kG = 0.025
         const val kA = 0.0
 
@@ -74,16 +74,16 @@ class Constants {
         const val POS_MAX_OUTPUT = 3.0
 
         //SOFT Stop limits
-        const val UPPER_LIMIT = 5000.0
+        const val UPPER_LIMIT = 1.45
         const val LOWER_LIMIT = 0.0
 
         //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
             Traverse(0.0),
             Stow(0.0),
-            L2(0.7),
-            L3(0.1),
-            L4(0.1),
+            L2(0.21),
+            L3(0.64),
+            L4(1.4),
             A1(0.1),
             A2(0.1),
             Intake(0.1)
@@ -102,7 +102,7 @@ class Constants {
         const val kD = 0.0
 
         const val kS = 0.0
-        const val kG = 0.0
+        const val kG = 0.2
         const val kV = 0.0
 
         const val Max_Velocity = 1.0
