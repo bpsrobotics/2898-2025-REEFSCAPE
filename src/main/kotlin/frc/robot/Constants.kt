@@ -59,13 +59,13 @@ class Constants {
         const val MaxAccel = 2.0
 
         //PID constants
-        const val kP = 10.0
-        const val kI = 0.5
+        const val kP = 15.0
+        const val kI = 1.0
         const val kD = 0.01
 
         //FF constants
         const val kS = 0.01
-        const val kV = 1.0136
+        const val kV = 1.5136
         var kG = 0.025
         const val kA = 0.0
 
@@ -79,14 +79,12 @@ class Constants {
 
         //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
-            Traverse(0.0),
             Stow(0.0),
             L2(0.21),
             L3(0.64),
             L4(1.4),
-            A1(0.1),
-            A2(0.1),
-            Intake(0.1)
+            A1(0.49),
+            A2(0.95),
         }
     }
 
@@ -110,13 +108,8 @@ class Constants {
         //SOFT Stop limits
         const val UPPER_LIMIT = 0.0
         const val LOWER_LIMIT = 0.0
-        const val kg = 0.0
-        const val ks = 0.0
-        const val kv = 0.0
-        const val ka = 0.0 // we might not use this but it's good to have.
-        const val kp = 0.0
-        const val ki = 0.0
-        const val kd = 0.0
+
+
         // FIXME set to real positions later
         enum class PivotState(val position: Double) {
             Traverse(0.0),
@@ -184,6 +177,13 @@ class Constants {
         const val RESET_GYRO = 6
 
         //FIXME Operator Controls
+
+        const val PIVOT_FW = 5
+        const val PIVOT_BW = 3
+
+        const val ELEV_FW = 6
+        const val ELEV_BW = 4
+
         const val BASE_STAGE = 7
         const val CORAL_L2 = 8
         const val CORAL_L3 = 10

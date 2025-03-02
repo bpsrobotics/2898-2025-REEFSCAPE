@@ -36,7 +36,7 @@ class Robot : TimedRobot() {
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         robotContainer = RobotContainer()
-        SmartDashboard.putBoolean("UseMovementAuto", false)
+        SmartDashboard.putBoolean("/Auto/UseMovementAuto", true)
 
 
 //        CameraServer.startAutomaticCapture()
@@ -66,10 +66,10 @@ class Robot : TimedRobot() {
 
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
     override fun autonomousInit() {
-        if( SmartDashboard.getBoolean("UseMovementAuto", false)) {
-            autoCommand = TopTenAutosThatMove()
-            autoCommand.schedule()
-        }
+//        if( SmartDashboard.getBoolean("/Auto/UseMovementAuto", false)) {
+        autoCommand = TopTenAutosThatMove()
+        autoCommand.schedule()
+
         //autoCommand = robotContainer.getAutonomousCommand()
         //autoCommand.let { autoCommand.schedule() }
 

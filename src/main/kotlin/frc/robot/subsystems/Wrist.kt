@@ -34,6 +34,8 @@ import frc.robot.Constants.PivotConstants.kV
 import frc.robot.RobotMap.PivotDriverID
 import frc.robot.RobotMap.PivotPosID
 import frc.robot.commands.wrist.StabilizeWrist
+import frc.robot.commands.wrist.StopWrist
+import frc.robot.commands.wrist.VoltageWrist
 import frc.robot.subsystems.Elevator.elevEncoder
 import frc.robot.subsystems.Elevator.leftMaster
 import kotlin.math.PI
@@ -65,14 +67,15 @@ object Wrist : SubsystemBase() {
         // Wrist Motor Configuration
         wristConfig
             .smartCurrentLimit(40)
-            .idleMode(SparkBaseConfig.IdleMode.kCoast)
+            .idleMode(SparkBaseConfig.IdleMode.kBrake)
         armMotor.configure(wristConfig,
             SparkBase.ResetMode.kResetSafeParameters,
             SparkBase.PersistMode.kPersistParameters)
 
-        encoder.setDutyCycleRange(0.0, 2.0 * PI) //todo, configure the range of the encoder.
-        defaultCommand = StabilizeWrist()
+        defaultCommand = StopWrist()
         SmartDashboard.putNumber("/wrist/pos", getPos())
+
+        defaultCommand = VoltageWrist(0.0)
 
     }
 
@@ -90,9 +93,13 @@ object Wrist : SubsystemBase() {
     fun setVoltage(voltage: Double) {
         armMotor.setVoltage(voltage)
     }
+    fun set(speed: Double) {
+        armMotor.set(speed)
+    }
 
     fun closedLoopControl(targetSpeed: Double) {
         val outputPower = feedForward.calculate(getPos(), targetSpeed) + pid.calculate(getPos(), goalState.position)
+        println(outputPower)
         armMotor.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
     }
 

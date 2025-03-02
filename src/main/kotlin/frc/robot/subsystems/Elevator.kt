@@ -37,6 +37,7 @@ import frc.robot.RobotMap.LimitBotID
 import frc.robot.RobotMap.LimitTopID
 import frc.robot.commands.elevator.StabilizeElevator
 import frc.robot.commands.elevator.VoltageElevator
+import frc.robot.commands.wrist.StopWrist
 import kotlin.math.PI
 
 object Elevator : SubsystemBase() {
@@ -74,7 +75,7 @@ object Elevator : SubsystemBase() {
         // Init motor controls
         elevatorConfig
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .smartCurrentLimit(40)
+            .smartCurrentLimit(30)
 
         leftMaster.configure(
             elevatorConfig.inverted(true),
@@ -99,10 +100,11 @@ object Elevator : SubsystemBase() {
         // Configures encoder to return a distance of 1 meter for every 2048 pulses
         elevEncoder.distancePerPulse = ( 2 * PI * 0.945 *2).inches.asMeters / 2048
 
+        SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
-        SmartDashboard.putNumber("/Elevator/Voltage", -1.0)
         defaultCommand = StabilizeElevator()
     }
 
@@ -139,9 +141,7 @@ object Elevator : SubsystemBase() {
     fun profiledPIDControl(targetPos : Double) {
         profiledPID.setGoal(targetPos)
         val pidOutput = profiledPID.calculate(getPos())
-        println("PID output $pidOutput")
         val ffOutput = elevatorFeedforward.calculate(profiledPID.setpoint.velocity)
-        println("FF $ffOutput")
         leftMaster.setVoltage(pidOutput + ffOutput)
     }
     /** Resets the elevator encoder */

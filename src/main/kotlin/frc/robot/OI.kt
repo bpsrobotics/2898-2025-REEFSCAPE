@@ -20,6 +20,10 @@ import frc.robot.Constants.ButtonConstants.RESET_GYRO
 import frc.robot.Constants.ButtonConstants.CORAL_L2
 import frc.robot.Constants.ButtonConstants.CORAL_L3
 import frc.robot.Constants.ButtonConstants.CORAL_L4
+import frc.robot.Constants.ButtonConstants.ELEV_BW
+import frc.robot.Constants.ButtonConstants.ELEV_FW
+import frc.robot.Constants.ButtonConstants.PIVOT_BW
+import frc.robot.Constants.ButtonConstants.PIVOT_FW
 
 import kotlin.math.pow
 import kotlin.math.sign
@@ -113,6 +117,11 @@ object OI : SubsystemBase() {
     val sysidBD = driverController.a()
 
 
+    val pivotFWStepper = operatorController.button(PIVOT_FW)
+    val pivotBWStepper = operatorController.button(PIVOT_BW)
+
+    val elevFWStepper = operatorController.button(ELEV_FW)
+    val elevBWStepper = operatorController.button(ELEV_BW)
 
 
     val highHatForward = operatorController.pov(0)

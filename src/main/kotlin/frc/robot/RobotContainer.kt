@@ -16,8 +16,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import frc.robot.OI.elevBWStepper
+import frc.robot.OI.elevFWStepper
 import frc.robot.OI.highHatBack
 import frc.robot.OI.highHatForward
+import frc.robot.OI.pivotBWStepper
+import frc.robot.OI.pivotFWStepper
 import frc.robot.OI.resetGyro
 import frc.robot.OI.sysidBD
 import frc.robot.OI.sysidBQ
@@ -29,8 +33,11 @@ import frc.robot.commands.intake.RunOuttake
 import frc.robot.commands.sequence.PositionL2
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
+import frc.robot.commands.wrist.MoveWrist
+import frc.robot.commands.wrist.VoltageWrist
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Elevator.getPos
 import frc.robot.subsystems.Wrist
 import frc.robot.subsystems.Wrist.SysIDWrist
 
@@ -128,8 +135,20 @@ class RobotContainer {
 //        sysidFD.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, false))
 //        sysidBD.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, false))
 
-        highHatForward.whileTrue(RunIntake()) //TODO set values properly
-//        highHatBack.whileTrue(RunOuttake(-0.2))
+        highHatForward.whileTrue(RunOuttake(2.0))
+        highHatBack.whileTrue(RunOuttake(-2.0))
+
+        elevFWStepper.onTrue(MoveElevatorBy( 0.02 ))
+        elevBWStepper.onTrue(MoveElevatorBy(-0.02))
+
+        pivotFWStepper.whileTrue(VoltageWrist(-0.05))
+
+        pivotBWStepper.whileTrue(VoltageWrist(0.05))
+
+
+        OI.moveA1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position))
+        OI.moveA2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.A2.position))
+
         OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
         OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))

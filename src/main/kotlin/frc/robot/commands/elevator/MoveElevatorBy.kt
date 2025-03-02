@@ -12,12 +12,15 @@ import frc.robot.subsystems.Wrist
 /** Command to move the elevator to a [goalPosition], finishes once the trapezoid profile has finished
  * @param goalPosition Position to move to.
  * */
-class MoveElevator(val goalPosition : Double) : Command() {
+class MoveElevatorBy(val goalDist : Double) : Command() {
+    var goalPosition = 0.0
     init {addRequirements(Elevator)}
     override fun initialize() {
 //        if (goalPosition !in Constants.ElevatorConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT ) return
         profiledPID.reset(getPos())
-        profiledPID.setTolerance(0.01)
+        profiledPID.setTolerance(0.05)
+        goalPosition = profiledPID.goal.position + goalDist
+
     }
 
     override fun execute() {
