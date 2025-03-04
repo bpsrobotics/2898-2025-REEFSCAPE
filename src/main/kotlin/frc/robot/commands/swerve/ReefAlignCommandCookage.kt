@@ -2,31 +2,24 @@ package frc.robot.commands.swerve
 import beaverlib.controls.TurningPID
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
-import beaverlib.utils.Units.Angular.*
+import beaverlib.utils.Units.Angular.AngleUnit
+import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Angular.radians
 import beaverlib.utils.geometry.HedgeHogVector2
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
-import com.pathplanner.lib.controllers.PPHolonomicDriveController
-import com.pathplanner.lib.path.GoalEndState
-import com.pathplanner.lib.path.PathConstraints
 import com.pathplanner.lib.path.PathPlannerPath
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.*
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
-import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.Constants
-import frc.robot.Engine.angleDistanceTo
-import frc.robot.Engine.angleDistanceWithin
+import edu.wpi.first.wpilibj2.command.Commands
 import frc.robot.Engine.standardPosition
-import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
+import frc.robot.subsystems.PathPlanner
 import frc.robot.subsystems.aprilTagFieldInGame
-import java.util.*
 import kotlin.math.PI
 import kotlin.math.atan2
 
@@ -41,91 +34,52 @@ class ReefAlignCommandCookage(
     val horizontalOffset : Double = 0.0
 ) : Command() {
 
-    private val runtime = Timer()
     val turningPID = TurningPID(0.1,0.01)
     val horizontalMovementPID = PIDController(1.5, 0.0,0.05)
     val verticalMovementPID = PIDController(1.5, 0.0, 0.05)
-
-    var lastPose : Pose2d = Pose2d()
     val xOffset = 0.5
     val yOffset = horizontalOffset
     var trackedTagID = 0
     var tagPose : Pose3d = Pose3d()
-
+    var desiredHeading = swerveDrive.pose.rotation.radians.radians.standardPosition
+    lateinit var path: PathPlannerPath
+    var command : Command = Commands.none()
 
     override fun initialize(){
-        runtime.restart()
-        lastPose = swerveDrive.pose
         val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
         trackedTagID = idAutoSelect(swerveDrive.pose, alliance)
         tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
+        desiredHeading = (tagPose.rotation.z + PI).radians.standardPosition
+
 
         val offset = HedgeHogVector2(xOffset, yOffset)
         val goalPosition = HedgeHogVector2(tagPose.toPose2d()) + offset.rotateBy(tagPose.rotation.z)
 
         val directionOfTravel = atan2(swerveDrive.pose.x - tagPose.x, swerveDrive.pose.y - tagPose.y)
 
-        horizontalMovementPID.setpoint = goalPosition.x
-        verticalMovementPID.setpoint = goalPosition.y
+//        val waypoints = PathPlannerPath.waypointsFromPoses(
+//            Pose2d(swerveDrive.pose.x, swerveDrive.pose.y, Rotation2d.fromRadians(directionOfTravel)),
+//            Pose2d(goalPosition.x, goalPosition.y, Rotation2d.fromRadians(directionOfTravel)),
+//        )
+//
+//        val constraints = PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI)
 
-        val waypoints = PathPlannerPath.waypointsFromPoses(
-            Pose2d(1.0, 1.0, Rotation2d.fromRadians(directionOfTravel)),
-            Pose2d(goalPosition.x, goalPosition.y, Rotation2d.fromRadians(directionOfTravel)),
-        )
-
-        val constraints = PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI)
-
-        val path = PathPlannerPath(
-            waypoints,
-            constraints,
-            null,  // The ideal starting state, this is only relevant for pre-planned paths, so can be null for on-the-fly paths.
-            GoalEndState(
-                0.0,
-                Rotation2d.fromDegrees(-90.0)
-            ) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
-        )
-        path.preventFlipping = true
+        path = PathPlanner.generatePath(Pose2d(goalPosition.x, goalPosition.y, Rotation2d.fromRadians(directionOfTravel)))
+        try {
+            // Create a path following command using AutoBuilder. This will also trigger event markers.
+            command = AutoBuilder.followPath(path)
+        } catch (e: Exception){
+            e.printStackTrace()
+            throw RuntimeException("error creating swerve",e)
+        }
     }
-    override fun execute() {
 
-        SmartDashboard.putNumber("trackedTagID", trackedTagID.toDouble())
-
-        //Update distance to target with odometry update
-
-        val currentRotation = swerveDrive.pose.rotation.radians.radians
-        val desiredHeading = (tagPose.rotation.z + PI).radians.standardPosition
-        val headingOffset = desiredHeading.angleDistanceTo(currentRotation.standardPosition) //todo test
-
-        //calculate horizontalVelocity (speed moving side-ways to target)
-        val horizontalVelocity = -horizontalMovementPID.calculate(-swerveDrive.pose.x)
-
-        //caluclate verticalVelocity (speed moving towards target)
-        val verticalVelocity = -verticalMovementPID.calculate(-swerveDrive.pose.y)
-
-        val translation = Translation2d(horizontalVelocity, verticalVelocity)
-
-
- // Set the desired value for the distance from the tag (Typically 0)
-        // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
-
-        val angleVelocity = if (!currentRotation.angleDistanceWithin(8.0.degrees, desiredHeading))
-            { (-headingOffset.asRadians *0.05).radiansPerSecond }
-        else { 0.0.radiansPerSecond }
-
-        speedConsumer(
-            Transform2d(
-                translation,
-                Rotation2d(angleVelocity.asRadiansPerSecond)
-            )
-        )
-            SmartDashboard.putNumber("Horizontal Velocity", translation.y)
-            SmartDashboard.putNumber("Vertical Velocity", translation.x)
-            SmartDashboard.putNumber("Tag Heading", tagPose.rotation.z)
-            SmartDashboard.putNumber("Deired Heading", desiredHeading.asDegrees)
-            SmartDashboard.putNumber("currentHeading", currentRotation.standardPosition.asDegrees)
-            SmartDashboard.putNumber("angle Velocity", angleVelocity.asRotationsPerSecond)
-
+    override fun isFinished(): Boolean {
+        return command.isFinished
     }
+
+
+
     //automatically finds the face of the reef that robot is closest to and returns the ID of the apriltag on that face of the reef
     fun idAutoSelect(robotPose: Pose2d, alliance: Alliance): Int{
         var reefPose = Pose2d()
@@ -167,15 +121,6 @@ class ReefAlignCommandCookage(
         else return mod + b;
     }
 
-    override fun isFinished(): Boolean {
-        return false
-    }
-
-    override fun end(interrupted: Boolean) {
-        SmartDashboard.putNumber("horizontalVelocity", 0.0)
-        SmartDashboard.putNumber("verticalVelocity", 0.0)
-        speedConsumer( Transform2d(0.0, 0.0, Rotation2d(0.0) ) )
-    }
 
 
 

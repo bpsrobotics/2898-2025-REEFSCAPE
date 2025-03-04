@@ -17,7 +17,7 @@ class PositionL4 : Command() {
         )
     )
     override fun initialize() {
-        ScheduleCommand(commandGroup)
+        commandGroup.schedule()
     }
 
     override fun isFinished(): Boolean {

@@ -61,7 +61,7 @@ object PathPlanner : SubsystemBase() {
         return false
     }
     fun generatePath(vararg pose2dWaypoints: Pose2d, maxVelocity : VelocityUnit = 3.0.metersPerSecond, maxAcceleration : Acceleration = 3.0.metersPerSecondSquared,
-    maxAngularVelocity : AngularVelocity = (2*PI).radiansPerSecond, maxAngularAcceleration: AngularAcceleration = (4* PI).radiansPerSecondSquared ) {
+    maxAngularVelocity : AngularVelocity = (2*PI).radiansPerSecond, maxAngularAcceleration: AngularAcceleration = (4* PI).radiansPerSecondSquared ): PathPlannerPath {
         // Create a list of waypoints from poses. Each pose represents one waypoint.
         // The rotation component of the pose should be the direction of travel. Do not use holonomic rotation.
         val waypoints = PathPlannerPath.waypointsFromPoses(
@@ -83,7 +83,7 @@ object PathPlanner : SubsystemBase() {
         )
         // Prevent the path from being flipped if the coordinates are already correct
         path.preventFlipping = true
-
+        return path
 
     }
     fun getAutonomousCommand(autoName : String): Command {
