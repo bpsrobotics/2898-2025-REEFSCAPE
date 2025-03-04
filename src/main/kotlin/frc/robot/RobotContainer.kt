@@ -5,15 +5,20 @@ package frc.robot
 
 //import com.team2898.robot.Constants.OperatorConstants
 
+import beaverlib.utils.geometry.Vector2
+
 import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.auto.NamedCommands
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
 import frc.robot.OI.turnX
 import edu.wpi.first.math.MathUtil
+import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.OI.elevBWStepper
@@ -35,7 +40,10 @@ import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.commands.wrist.MoveWrist
 import frc.robot.commands.wrist.VoltageWrist
+import frc.robot.commands.swerve.*
 import frc.robot.subsystems.Drivetrain
+import kotlin.math.pow
+import kotlin.math.sign
 import frc.robot.subsystems.Elevator
 import frc.robot.subsystems.Elevator.getPos
 import frc.robot.subsystems.Wrist
@@ -58,8 +66,8 @@ class RobotContainer {
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { MathUtil.applyDeadband(-translationY, 0.1) },
-            { MathUtil.applyDeadband(-translationX, 0.1) },
+            { MathUtil.applyDeadband(translationY*reverseDrive, 0.1) },
+            { MathUtil.applyDeadband(translationX*reverseDrive, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
             { false }
@@ -67,6 +75,9 @@ class RobotContainer {
 
 
     val navXResetCommand: NavXReset = NavXReset()
+
+    val runIntakeCommand: RunIntake = RunIntake({3.0})
+    val intakeSpeed get() = operatorController.throttle
 
 
 
@@ -92,7 +103,10 @@ class RobotContainer {
 
         configureBindings()
 
+        alliance = DriverStation.getAlliance().orElse(Alliance.Blue)
+
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
+
 
 
     }
@@ -113,6 +127,10 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
+        coralAlignLeft.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+        coralAlignRight.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, -Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+
+
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { m_exampleSubsystem.exampleCondition() }
         //        .onTrue(ExampleCommand(m_exampleSubsystem))
