@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
 import frc.robot.Constants.ButtonConstants.ALGAE_B1
 import frc.robot.Constants.ButtonConstants.ALGAE_B2
+import frc.robot.Constants.ButtonConstants.AUTO_INTAKE
 import frc.robot.Constants.ButtonConstants.BASE_STAGE
 import frc.robot.Constants.ButtonConstants.RESET_GYRO
 import frc.robot.Constants.ButtonConstants.CORAL_L2
@@ -115,6 +116,8 @@ object OI : SubsystemBase() {
     val sysidBQ = driverController.y()
     val sysidFD = driverController.b()
     val sysidBD = driverController.a()
+
+    val autoIntake = operatorController.button(AUTO_INTAKE)
 
 
     val pivotFWStepper = operatorController.button(PIVOT_FW)

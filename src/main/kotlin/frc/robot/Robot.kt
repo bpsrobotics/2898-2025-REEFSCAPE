@@ -40,7 +40,6 @@ class Robot : TimedRobot() {
 
 
 //        CameraServer.startAutomaticCapture()
-//        Climber
     }
 
     /**

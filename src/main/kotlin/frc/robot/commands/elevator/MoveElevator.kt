@@ -21,7 +21,7 @@ class MoveElevator(val goalPosition : Double) : Command() {
     }
 
     override fun execute() {
-        println("goal position " + goalPosition)
+        println("moving elev to  " + goalPosition)
         Elevator.profiledPIDControl(goalPosition)
     }
 

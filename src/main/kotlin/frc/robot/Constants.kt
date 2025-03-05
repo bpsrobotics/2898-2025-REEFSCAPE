@@ -6,13 +6,21 @@
 package frc.robot
 
 import beaverlib.utils.Units.Electrical.Current
+import beaverlib.utils.Units.Linear.feet
+import beaverlib.utils.Units.Linear.feetPerSecond
+import beaverlib.utils.Units.Linear.inches
+import beaverlib.utils.Units.lb
+import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.RobotConfig
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.util.Color
+import frc.robot.Constants.DriveConstants.DriveKinematics
+import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import java.io.File
 
 /**
@@ -33,18 +41,18 @@ class Constants {
 
 
     object DriveConstants {
-        val MaxSpeedMetersPerSecond = 4.5
+        val MaxSpeedMetersPerSecond = (15.1).feetPerSecond.asMetersPerSecond
         // Chassis configuration (left to right dist of center of the wheels)
-        val TrackWidth = Units.inchesToMeters(16.037)
+        val TrackWidth = Units.inchesToMeters(11.5)
 
         // Distance between centers of right and left wheels on robot (front to back dist)
-        val WheelBase = Units.inchesToMeters(9.8)
+        val WheelBase = Units.inchesToMeters(11.5)
 
         // Distance between front and back wheels on robot: CHANGE TO MATCH WITH ROBOT
-        val DriveKinematics = SwerveDriveKinematics(
+        val DriveKinematics = arrayOf(
             Translation2d(WheelBase / 2, TrackWidth / 2),
-            Translation2d(-WheelBase / 2, TrackWidth / 2),
             Translation2d(WheelBase / 2, -TrackWidth / 2),
+            Translation2d(-WheelBase / 2, TrackWidth / 2),
             Translation2d(-WheelBase / 2, -TrackWidth / 2)
         )
         // YAGSL `File` Configs
@@ -55,18 +63,19 @@ class Constants {
     }
 
     object ElevatorConstants {
-        const val MaxVel = 5.0
-        const val MaxAccel = 2.0
+        const val MaxVel = 1.0
+        const val MaxAccel = 1.0
 
         //PID constants
-        const val kP = 15.0
-        const val kI = 1.0
-        const val kD = 0.01
+        const val kP = 20.0
+        const val kI = 0.0
+        const val kD = 0.0
 
         //FF constants
-        const val kS = 0.01
-        const val kV = 1.5136
-        var kG = 0.025
+        const val kS = 0.025
+        const val kV = 3.0
+//            1.5136
+        const val kG = 0.375
         const val kA = 0.0
 
         //Max elev driver outputs
@@ -95,13 +104,14 @@ class Constants {
 
         const val ObstructionAngle = 0.4
 
-        const val kP = 0.0
+        const val kP = 1.75
         const val kI = 0.0
         const val kD = 0.0
 
-        const val kS = 0.0
-        const val kG = 0.2
-        const val kV = 0.0
+        const val kS = 0.05
+        const val kG = 0.55
+        const val kV = 0.84
+        // 0.84
 
         const val Max_Velocity = 1.0
         const val Max_Accel = 1.0
@@ -113,9 +123,9 @@ class Constants {
         // FIXME set to real positions later
         enum class PivotState(val position: Double) {
             Traverse(0.0),
-            Stow(0.0),
-            AngleBranch(0.1),
-            VerticalBranch(0.1),
+            Stow(1.9),
+            AngleBranch(1.4),
+            VerticalBranch(0.7),
             Algae(0.1),
             Processor(0.1),
             Intake(0.1)
@@ -144,7 +154,20 @@ class Constants {
     }
 
     object AutoConstants {
-        val Robot_Config = RobotConfig.fromGUISettings()
+        val Robot_Config = RobotConfig(
+            (120.0).lb.asKilograms,
+            MaxSpeedMetersPerSecond,
+            ModuleConfig(
+                (2.0).inches.asMeters,
+                MaxSpeedMetersPerSecond,
+                1.54,
+                DCMotor.getNEO(1).withReduction(6.75),
+                30.0,
+                1
+            ),
+            *DriveKinematics
+
+        )
         const val MaxAccelerationMetersPerSecondSquared = 3.0
         const val MaxAngularSpeedRadiansPerSecond = Math.PI
         const val MaxAngularSpeedRadiansPerSecondSquared = Math.PI
@@ -177,6 +200,8 @@ class Constants {
         const val RESET_GYRO = 6
 
         //FIXME Operator Controls
+
+        const val AUTO_INTAKE = 2
 
         const val PIVOT_FW = 5
         const val PIVOT_BW = 3
