@@ -98,21 +98,15 @@ object  Drivetrain : SubsystemBase() {
                         Pose2d(position.x, position.y, position.rotation),
                         input.timestampSeconds
                     )
-                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
-
                 }
             }
-            if (source == "cam2") {
+            else if (source == "cam2") {
                 if (input.multitagResult.isPresent) {
                     val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
                     swerveDrive.addVisionMeasurement(
                         Pose2d(position.x, position.y, position.rotation),
                         input.timestampSeconds
                     )
-                    SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-                    SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
-
                 }
             }
         }

@@ -75,8 +75,6 @@ data class Signal<Type>(
 object Vision : SubsystemBase() {
     val cam = PhotonCamera("Arducam_OV9281_USB_Camera")
     val cam2 = PhotonCamera("USB_Camera")
-    val cameraOffset = robotToCam
-    val cameraOffset2 = robotToCam2
     var results = mutableListOf<PhotonPipelineResult>()
     var results2 = mutableListOf<PhotonPipelineResult>()
     val listeners = Signal<PhotonPipelineResult>()
@@ -93,7 +91,6 @@ object Vision : SubsystemBase() {
     override fun periodic(){
         results = cam.allUnreadResults
         results2 = cam2.allUnreadResults
-
         SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
         if (!results.isEmpty()) {
             // Iterate through each of the results
@@ -121,9 +118,9 @@ object Vision : SubsystemBase() {
         val estimatedPose = poseEstimator.update(result) ?: return null
 
         if (estimatedPose.isEmpty) return null
-        previousPose = estimatedPose.get().estimatedPose.toPose2d()
-        return estimatedPose.get().estimatedPose
-
+        val pose = estimatedPose.get().estimatedPose
+        previousPose = pose.toPose2d()
+        return pose
     }
 
     fun getRobotPositionFromSecondCamera(result: PhotonPipelineResult): Pose3d? {
@@ -132,8 +129,9 @@ object Vision : SubsystemBase() {
         val estimatedPose = poseEstimator2.update(result) ?: return null
 
         if (estimatedPose.isEmpty) return null
-        previousPose2 = estimatedPose.get().estimatedPose.toPose2d()
-        return estimatedPose.get().estimatedPose
+        val pose = estimatedPose.get().estimatedPose
+        previousPose2 = pose.toPose2d()
+        return pose
     }
 
 

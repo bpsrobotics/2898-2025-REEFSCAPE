@@ -115,6 +115,8 @@ object OI : SubsystemBase() {
     val sysidBQ = driverController.y()
     val sysidFD = driverController.b()
     val sysidBD = driverController.a()
+    val coralAlignLeft = driverController.povLeft()
+    val coralAlignRight = driverController.povRight()
 
 
     val pivotFWStepper = operatorController.button(PIVOT_FW)

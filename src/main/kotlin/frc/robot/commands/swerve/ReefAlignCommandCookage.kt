@@ -34,9 +34,6 @@ class ReefAlignCommandCookage(
     val horizontalOffset : Double = 0.0
 ) : Command() {
 
-    val turningPID = TurningPID(0.1,0.01)
-    val horizontalMovementPID = PIDController(1.5, 0.0,0.05)
-    val verticalMovementPID = PIDController(1.5, 0.0, 0.05)
     val xOffset = 0.5
     val yOffset = horizontalOffset
     var trackedTagID = 0

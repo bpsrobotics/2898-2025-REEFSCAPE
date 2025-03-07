@@ -35,47 +35,32 @@ class ReefAlignCommand(
     val horizontalOffset : Double = 0.0
 ) : Command() {
 
-    private var distToTag = 0.0
-    private val runtime = Timer()
-    val turningPID = TurningPID(0.1,0.01)
     val movementPID = PIDController(1.5, 0.0,0.05)
     val movementPID2 = PIDController(1.5, 0.0, 0.05)
-    var lastPose : Pose2d = Pose2d()
     val xOffset = 0.5
-    val yOffset = horizontalOffset
     var trackedTagID = 0
     var tagPose: Pose3d = Pose3d()
+    var desiredHeading = swerveDrive.pose.rotation.radians.radians.standardPosition
 
     override fun initialize(){
-        runtime.restart()
-        lastPose = swerveDrive.pose
         val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
         trackedTagID = idAutoSelect(swerveDrive.pose, alliance)
         tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
 
-        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*yOffset
-        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z)*yOffset
-
+        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*horizontalOffset
+        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z)*horizontalOffset
+        desiredHeading = (tagPose.rotation.z+PI).radians.standardPosition
 
     }
     override fun execute() {
         SmartDashboard.putNumber("trackedTagID", trackedTagID.toDouble())
 
-        //Update distance to target with odometry update
-//        distToTag = sqrt(
-//            (-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset)).pow(2) + (-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset)).pow(2)
-//        )
-
         val currentRotation = swerveDrive.pose.rotation.radians.radians
-        val desiredHeading = (tagPose.rotation.z+PI).radians.standardPosition
         val headingOffset = desiredHeading.angleDistanceTo(currentRotation.standardPosition)
-
         //calculate horizontalVelocity (speed moving side-ways to target)
-        val horizontalVelocity = movementPID.calculate(swerveDrive.pose.x)
         //caluclate verticalVelocity (speed moving towards target)
-        val verticalVelocity = movementPID2.calculate(swerveDrive.pose.y)
 
-        val translation = Translation2d(horizontalVelocity, verticalVelocity)
+        val translation = Translation2d(movementPID.calculate(swerveDrive.pose.x), movementPID2.calculate(swerveDrive.pose.y))
 //        turningPID.setPoint = desiredHeading // Set the desired value for the turningPID to the desired heading facing the tag
  // Set the desired value for the distance from the tag (Typically 0)
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
@@ -90,14 +75,6 @@ class ReefAlignCommand(
                 Rotation2d(angleVelocity.asRadiansPerSecond)
             )
         )
-            SmartDashboard.putNumber("TagPoseX", tagPose.x)
-            SmartDashboard.putNumber("TagPoseY", tagPose.y)
-            SmartDashboard.putNumber("Horizontal SetPoint", tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*yOffset)
-            SmartDashboard.putNumber("Vertical SetPoint", tagPose.y + sin(tagPose.rotation.z)*xOffset - cos(tagPose.rotation.z)*yOffset)
-            SmartDashboard.putNumber("Tag Heading", tagPose.rotation.z)
-            SmartDashboard.putNumber("Deired Heading", desiredHeading.asDegrees)
-            SmartDashboard.putNumber("currentHeading", realMod(currentRotation.asDegrees, 360.0))
-            SmartDashboard.putNumber("angle Velocity", angleVelocity.asRotationsPerSecond)
 
     }
     //automatically finds the face of the reef that robot is closest to and returns the ID of the apriltag on that face of the reef

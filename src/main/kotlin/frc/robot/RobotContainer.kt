@@ -15,6 +15,7 @@ import frc.robot.OI.turnX
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.*
 import edu.wpi.first.wpilibj.DriverStation.Alliance
+import edu.wpi.first.wpilibj.DriverStation.getAlliance
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -61,8 +62,9 @@ class RobotContainer {
     // Replace with CommandPS4Controller or CommandJoystick if needed
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
+    val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
 
-
+    val reverseDrive = if(alliance == DriverStation.Alliance.Red) {-1.0} else {1.0}
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
@@ -76,9 +78,7 @@ class RobotContainer {
 
     val navXResetCommand: NavXReset = NavXReset()
 
-    val runIntakeCommand: RunIntake = RunIntake({3.0})
-    val intakeSpeed get() = operatorController.throttle
-
+//    val runIntakeCommand: RunIntake = RunIntake({3.0})
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
@@ -103,7 +103,6 @@ class RobotContainer {
 
         configureBindings()
 
-        alliance = DriverStation.getAlliance().orElse(Alliance.Blue)
 
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
 
@@ -127,8 +126,8 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
-        coralAlignLeft.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
-        coralAlignRight.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, -Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+        OI.coralAlignLeft.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+        OI.coralAlignRight.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, -Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
 
 
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`

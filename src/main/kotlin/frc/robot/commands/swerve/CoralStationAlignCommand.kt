@@ -3,6 +3,9 @@ import beaverlib.controls.TurningPID
 import beaverlib.utils.Sugar.degreesToRadians
 import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Angular.radians
+import beaverlib.utils.Units.Angular.radiansPerSecond
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.wpilibj.DriverStation
@@ -10,6 +13,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.Engine.angleDistanceTo
+import frc.robot.Engine.angleDistanceWithin
+import frc.robot.Engine.standardPosition
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Drivetrain.swerveDrive
 import frc.robot.subsystems.Vision
@@ -31,63 +37,46 @@ class CoralStationAlignCommand(
     val horizontalOffset : Double = 0.0
 ) : Command() {
 
-    private lateinit var usedTarget : PhotonTrackedTarget
-    private var distToTag = 0.0
-    private val runtime = Timer()
-    val turningPID = TurningPID(0.1,0.01)
-    val movementPID = PIDController(0.3, 0.0,0.05)
-    val movementPID2 = PIDController(0.3, 0.0, 0.05)
-    val offsetDist = sqrt(Vision.cameraOffset.x.pow(2) + Vision.cameraOffset.z.pow(2))
-    var lastPose : Pose2d = Pose2d()
+    val movementPID = PIDController(1.5, 0.0,0.05)
+    val movementPID2 = PIDController(1.5, 0.0, 0.05)
     val xOffset = 0.5
-    val yOffset = horizontalOffset
     var trackedTagID = 0
+    var tagPose: Pose3d = Pose3d()
+    var desiredHeading = swerveDrive.pose.rotation.radians.radians.standardPosition
 
     override fun initialize(){
-        runtime.restart()
-        lastPose = swerveDrive.pose
-        val alliance = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+        val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
         trackedTagID = idAutoSelect(swerveDrive.pose, alliance)
+        tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
+
+        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset - sin(tagPose.rotation.z)*horizontalOffset
+        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z)*horizontalOffset
+        desiredHeading = (tagPose.rotation.z+PI).radians.standardPosition
 
     }
-
     override fun execute() {
-        val tagPose = aprilTagFieldInGame.getTagPose(trackedTagID).get()
-        SmartDashboard.putNumber("TrackedTagID", trackedTagID.toDouble())
-//        val tagPose = aprilTagFieldLayout.getTagPose(2).get()
-        //Update distance to tag with odometry update
-        distToTag = sqrt(
-            (-swerveDrive.pose.x - (tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset)).pow(2) + (-swerveDrive.pose.y - (tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset)).pow(2)
-        )
-        if (distToTag>3.0) {return}
-        val currentRotation = swerveDrive.pose.rotation.degrees
-        val desiredHeading = tagPose.rotation.z.radiansToDegrees() + 180
-        val headingOffset = angleDist(realMod(desiredHeading, 360.0), realMod(currentRotation, 360.0))
+        SmartDashboard.putNumber("trackedTagID", trackedTagID.toDouble())
 
-        movementPID.setpoint = tagPose.x + cos(tagPose.rotation.z)*xOffset + cos(tagPose.rotation.z+PI/2)*yOffset
-        movementPID2.setpoint = tagPose.y + sin(tagPose.rotation.z)*xOffset + sin(tagPose.rotation.z+PI/2)*yOffset
-        val horizontalVelocity = -movementPID.calculate(-swerveDrive.pose.x)
-        val verticalVelocity = -movementPID2.calculate(-swerveDrive.pose.y)
-        val translation = Translation2d(horizontalVelocity, verticalVelocity)
+        val currentRotation = swerveDrive.pose.rotation.radians.radians
+        val headingOffset = desiredHeading.angleDistanceTo(currentRotation.standardPosition)
+        //calculate horizontalVelocity (speed moving side-ways to target)
+        //caluclate verticalVelocity (speed moving towards target)
 
-
+        val translation = Translation2d(movementPID.calculate(swerveDrive.pose.x), movementPID2.calculate(swerveDrive.pose.y))
 //        turningPID.setPoint = desiredHeading // Set the desired value for the turningPID to the desired heading facing the tag
         // Set the desired value for the distance from the tag (Typically 0)
         // Desired rotational velocity, 0 when the rotation is within 3 degrees of the desired heading
 
-        val angleVelocity = if (!currentRotation.within(8.0, desiredHeading)) { -headingOffset * 0.05 } else { 0.0 }
+        val angleVelocity = if (!currentRotation.angleDistanceWithin(8.0.degrees, desiredHeading))
+        { (-headingOffset.asRadians *0.05).radiansPerSecond }
+        else { 0.0.radiansPerSecond }
+
         speedConsumer(
             Transform2d(
                 translation,
-                Rotation2d(angleVelocity.degreesToRadians())
+                Rotation2d(angleVelocity.asRadiansPerSecond)
             )
         )
-        SmartDashboard.putNumber("Dist to Tag", distToTag)
-        SmartDashboard.putNumber("Horizontal Velocity", translation.y)
-        SmartDashboard.putNumber("Vertical Velocity", translation.x)
-        SmartDashboard.putNumber("Deired Heading", desiredHeading)
-        SmartDashboard.putNumber("currentHeading", currentRotation)
-        SmartDashboard.putNumber("angle Velocity", angleVelocity)
 
     }
 
