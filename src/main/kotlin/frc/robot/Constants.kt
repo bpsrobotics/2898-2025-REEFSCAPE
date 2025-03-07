@@ -5,7 +5,6 @@
 
 package frc.robot
 
-import beaverlib.utils.Units.Electrical.Current
 import beaverlib.utils.Units.Linear.feet
 import beaverlib.utils.Units.Linear.feetPerSecond
 import beaverlib.utils.Units.Linear.inches

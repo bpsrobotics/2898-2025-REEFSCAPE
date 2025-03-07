@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants
 import frc.robot.subsystems.Wrist.profiledPID
 import frc.robot.subsystems.Wrist
-import frc.robot.subsystems.Wrist.getPos
+import frc.robot.subsystems.Wrist.pos
 import kotlin.math.PI
 
 class MoveWrist(var goalPosition: Double) : Command() {
     val timer = Timer()
     init {addRequirements(Wrist)}
     override fun initialize() {
-        profiledPID.reset(getPos())
+        profiledPID.reset(pos)
         profiledPID.enableContinuousInput(-PI, PI)
         profiledPID.setTolerance(0.05)
 
