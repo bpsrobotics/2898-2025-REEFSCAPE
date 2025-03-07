@@ -52,19 +52,16 @@ object  Drivetrain : SubsystemBase() {
     private val visionDriveTest = false
 
     /** The maximum speed of the swerve drive */
-    var maximumSpeed: Double = Units.feetToMeters(14.5)
+    var maximumSpeed: Double = Units.feetToMeters(15.1)
 
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
-
-
-
-
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
-
 
 //        try{
 //            config = RobotConfig.fromGUISettings();
@@ -118,7 +115,6 @@ object  Drivetrain : SubsystemBase() {
 //            e.printStackTrace();
 //        }
         swerveDrive.setMotorIdleMode(false)
-        //setupPathPlanner()
 
     }
 
@@ -135,7 +131,6 @@ object  Drivetrain : SubsystemBase() {
 
         swerveStates.set(swerveDrive.states)
 
-
     }
 
     val getAlliance : () -> Boolean = {
@@ -145,24 +140,6 @@ object  Drivetrain : SubsystemBase() {
     }
     fun driveFieldOriented(speeds: ChassisSpeeds) {
         swerveDrive.driveFieldOriented(speeds)
-    }
-    /**
-     * Setup AutoBuilder for PathPlanner.
-     */
-    fun setupPathPlanner() {
-        AutoBuilder.configure(
-            this::getPose,  // Robot pose supplier
-            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPolonomicController is the built-in path following controller for holonomic drive trains
-                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-                PIDConstants(RotationP, RotationI, RotationD)
-            ),
-            Constants.AutoConstants.Robot_Config,
-            getAlliance,
-             this// Reference to this subsystem to set requirements
-        )
     }
 
     /**

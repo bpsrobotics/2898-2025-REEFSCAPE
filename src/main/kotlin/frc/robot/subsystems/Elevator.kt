@@ -100,10 +100,13 @@ object Elevator : SubsystemBase() {
         // Configures encoder to return a distance of 1 meter for every 2048 pulses
         elevEncoder.distancePerPulse = ( 2 * PI * 0.945 *2).inches.asMeters / 2048
 
+
         SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
         SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
         SmartDashboard.putNumber("/Elevator/Position", getPos())
+        SmartDashboard.putNumber("/Elevator/Targ_Position", profiledPID.setpoint.position)
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
+        SmartDashboard.putNumber("/Elevator/Targ_Vel", profiledPID.setpoint.velocity)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
         defaultCommand = StabilizeElevator()
     }
@@ -118,6 +121,8 @@ object Elevator : SubsystemBase() {
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
+        SmartDashboard.putNumber("/Elevator/Targ_Vel", profiledPID.setpoint.velocity)
+
 //        kG = SmartDashboard.getNumber("/Elevator/Voltage", kG)
 
     }
@@ -132,8 +137,8 @@ object Elevator : SubsystemBase() {
     /** Run the motors to hold the elevator at [getPos] position */
     fun closedLoopPositionControl() {
         val outputPower = elevatorFeedforward.calculate(0.0) + pid.calculate(getPos(), profiledPID.goal.position)
-        if (botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
-        if(topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
+        if (!botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
+        if(!topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
         leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
     }
 

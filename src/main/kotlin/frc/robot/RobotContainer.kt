@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import frc.robot.OI.autoIntake
 import frc.robot.OI.elevBWStepper
 import frc.robot.OI.elevFWStepper
 import frc.robot.OI.highHatBack
@@ -37,6 +38,7 @@ import frc.robot.commands.elevator.*
 import frc.robot.commands.intake.RunIntake
 import frc.robot.commands.intake.RunOuttake
 import frc.robot.commands.sequence.PositionL2
+import frc.robot.commands.sequence.PositionL4
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.commands.wrist.MoveWrist
@@ -152,15 +154,17 @@ class RobotContainer {
 //        sysidFD.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, false))
 //        sysidBD.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, false))
 
+        autoIntake.onTrue(RunIntake())
+
         highHatForward.whileTrue(RunOuttake(2.0))
         highHatBack.whileTrue(RunOuttake(-2.0))
 
         elevFWStepper.onTrue(MoveElevatorBy( 0.02 ))
         elevBWStepper.onTrue(MoveElevatorBy(-0.02))
 
-        pivotFWStepper.whileTrue(VoltageWrist(-0.05))
+        pivotFWStepper.onTrue(MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position))
 
-        pivotBWStepper.whileTrue(VoltageWrist(0.05))
+        pivotBWStepper.onTrue(MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position))
 
 
         OI.moveA1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position))
@@ -169,7 +173,7 @@ class RobotContainer {
         OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
         OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
-        OI.moveL4.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position))
+        OI.moveL4.onTrue(PositionL4())
 
 
 //        OI.moveL3.onTrue(MoveL3())

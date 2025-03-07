@@ -22,19 +22,20 @@ import frc.robot.commands.intake.StopIntake
 object Intake : SubsystemBase() {
     val intakeMotor = SparkMax(RobotMap.EndEffectorID, SparkLowLevel.MotorType.kBrushless)
     val IntakeConfig: SparkMaxConfig = SparkMaxConfig()
+    val i2cPort = I2C.Port.kMXP;
+    val colorSensor = ColorSensorV3(i2cPort)
 
-    var hasCoral = false
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
-    val buffer = Debouncer(0.02, Debouncer.DebounceType.kRising)
+    val buffer = Debouncer(0.08, Debouncer.DebounceType.kRising)
     val bufferTimer = Timer()
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
 
-    // Color sensor values
-    val i2cPort = I2C.Port.kOnboard;
-//    val colorSensor = ColorSensorV3(i2cPort);
+
+
+
 
     init {
         // Intake motor initialisation stuff
@@ -49,6 +50,8 @@ object Intake : SubsystemBase() {
         )
         defaultCommand = StopIntake()
     }
+
+    val hasCoral get() = colorSensor.proximity >= 100.0
 
     override fun periodic() {
         // Coral input motor stuff
@@ -108,5 +111,4 @@ object Intake : SubsystemBase() {
 //        if (colorSensor.proximity >= 100.0) {return true}
 //        return false
 //        }
-//    val coralInIntake get() = colorSensor.proximity >= 100.0
     } //todo: figure out how to make so that we can detect coral w/ no color sensor
