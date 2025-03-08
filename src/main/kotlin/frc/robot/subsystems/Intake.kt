@@ -28,7 +28,7 @@ object Intake : SubsystemBase() {
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
-    val buffer = Debouncer(0.08, Debouncer.DebounceType.kRising)
+    val buffer = Debouncer(0.04, Debouncer.DebounceType.kRising)
     val bufferTimer = Timer()
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
@@ -55,11 +55,11 @@ object Intake : SubsystemBase() {
 
     override fun periodic() {
         // Coral input motor stuff
-        SmartDashboard.putNumber("intake current", intakeMotor.outputCurrent)
+//        SmartDashboard.putNumber("intake current", intakeMotor.outputCurrent)
         SmartDashboard.putBoolean("has coral", hasCoral)
         //SmartDashboard.putNumber("intake output", output)
-        SmartDashboard.putNumber("current average", currentAverage)
-        SmartDashboard.putNumber("intake timer ", bufferTimer.get())
+//        SmartDashboard.putNumber("current average", currentAverage)
+//        SmartDashboard.putNumber("intake timer ", bufferTimer.get())
         currentAverage = currentFilter.calculate(intakeMotor.outputCurrent)
 
 //        updateColorSensor() // Also updates hasCoral

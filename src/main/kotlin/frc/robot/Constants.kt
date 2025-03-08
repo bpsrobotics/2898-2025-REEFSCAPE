@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.util.Color
 import frc.robot.Constants.DriveConstants.DriveKinematics
 import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import java.io.File
+import kotlin.math.PI
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -67,54 +68,54 @@ class Constants {
         const val MaxAccel = 1.0
 
         //PID constants
-        const val kP = 20.0
+        const val kP = 5.0
         const val kI = 0.0
-        const val kD = 0.0
+        const val kD = 1.0
 
         //FF constants
-        const val kS = 0.025
-        const val kV = 3.0
+        const val kS = 0.045
+        const val kV = 7.44
+        // 6.0
 //            1.5136
-        const val kG = 0.375
+        const val kG = 0.355
         const val kA = 0.0
 
         //Max elev driver outputs
-        const val NEG_MAX_OUTPUT = -3.0
-        const val POS_MAX_OUTPUT = 3.0
+        const val NEG_MAX_OUTPUT = -2.0
+        const val POS_MAX_OUTPUT = 5.0
 
         //SOFT Stop limits
         const val UPPER_LIMIT = 1.45
         const val LOWER_LIMIT = 0.0
 
-        //FIXME set to real heights later
         enum class ElevatorState(val position: Double) {
             Stow(0.0),
             L2(0.21),
             L3(0.64),
-            L4(1.4),
-            A1(0.49),
-            A2(0.95),
+            L4(1.425),
+            A1(0.45),
+            A2(0.9),
         }
     }
 
     object PivotConstants {
         //Max elev driver outputs
-        const val NEG_MAX_OUTPUT = -3.0
-        const val POS_MAX_OUTPUT = 3.0
+        const val NEG_MAX_OUTPUT = -1.75
+        const val POS_MAX_OUTPUT = 2.0
 
-        const val ObstructionAngle = 0.4
+        const val ObstructionAngle = 1.5
 
-        const val kP = 1.75
+        const val kP = 6.0
         const val kI = 0.0
-        const val kD = 0.0
+        const val kD = 0.5
 
-        const val kS = 0.05
-        const val kG = 0.55
-        const val kV = 0.84
+        const val kS = 0.11
+        const val kG = 0.51
+        const val kV = 0.64
         // 0.84
 
-        const val Max_Velocity = 1.0
-        const val Max_Accel = 1.0
+        const val Max_Velocity = PI
+        const val Max_Accel = PI
         //SOFT Stop limits
         const val UPPER_LIMIT = 0.0
         const val LOWER_LIMIT = 0.0
@@ -122,14 +123,41 @@ class Constants {
 
         // FIXME set to real positions later
         enum class PivotState(val position: Double) {
-            Traverse(0.0),
-            Stow(1.9),
+            Traverse(0.87),
+            Stow(1.78),
             AngleBranch(1.4),
-            VerticalBranch(0.7),
-            Algae(0.1),
-            Processor(0.1),
-            Intake(0.1)
-        }
+            VerticalBranch(0.6),
+            Algae(-0.95);
+
+            fun coralExtend() = when (this) {
+                Stow -> AngleBranch
+                AngleBranch -> Traverse
+                Traverse -> VerticalBranch
+                VerticalBranch -> VerticalBranch
+                Algae -> Algae
+            }
+            fun coralRetract() = when (this) {
+                Algae -> Algae
+                VerticalBranch -> Traverse
+                Traverse -> AngleBranch
+                AngleBranch -> Stow
+                Stow -> Stow
+            }
+            fun algaeExtend() = when (this) {
+                Stow -> Traverse
+                Traverse -> Algae
+                Algae -> Algae
+                VerticalBranch -> Algae
+                AngleBranch -> Traverse
+            }
+            fun algaeRetract() = when (this) {
+                Algae -> Traverse
+                Traverse -> Traverse
+                Stow -> Stow
+                VerticalBranch -> VerticalBranch
+                AngleBranch -> AngleBranch
+            }
+         }
     }
 
     object IntakeConstants {
@@ -200,8 +228,8 @@ class Constants {
         //Driver buttons
         const val RESET_GYRO = 6
 
-        //FIXME Operator Controls
-
+        //Operator Controls
+        const val TOGGLE_STATE = 1
         const val AUTO_INTAKE = 2
 
         const val PIVOT_FW = 5
@@ -217,8 +245,6 @@ class Constants {
 
         const val ALGAE_B1 = 9
         const val ALGAE_B2 = 11
-
-        const val ALGAE_TOGGLE = 1
 
         const val PRESS_ACTIVATE_DURATION = 0.1
         const val INPUT_BUFFER_DURATION = 0.2

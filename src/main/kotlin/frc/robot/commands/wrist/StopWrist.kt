@@ -10,7 +10,6 @@ class StopWrist : Command() {
     override fun initialize() {}
 
     override fun execute() {
-        println("stopped")
         Wrist.armMotor.stopMotor()
     }
 

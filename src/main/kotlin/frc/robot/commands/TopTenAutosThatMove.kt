@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import frc.robot.subsystems.Drivetrain
 
-class TopTenAutosThatMove(val time : Double = 15.0, val speed: Double = 0.3) : Command() {
+class TopTenAutosThatMove(val time : Double = 15.0, val speed: Double = 2.0) : Command() {
     val timer = Timer()
     init {
         addRequirements(Drivetrain)
@@ -16,7 +16,6 @@ class TopTenAutosThatMove(val time : Double = 15.0, val speed: Double = 0.3) : C
         timer.restart()
     }
     override fun execute() {
-        println("hi")
         Drivetrain.drive(ChassisSpeeds(speed * MaxSpeedMetersPerSecond, 0.0, 0.0))
     }
 

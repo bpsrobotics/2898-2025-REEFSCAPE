@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.commands.TopTenAutosThatMove
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Elevator.getPos
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -61,6 +63,7 @@ class Robot : TimedRobot() {
 
     /** This function is called once each time the robot enters Disabled mode.  */
     override fun disabledInit() {
+        Elevator.profiledPID.setGoal(getPos())
     }
     override fun disabledPeriodic() {}
 
@@ -70,8 +73,8 @@ class Robot : TimedRobot() {
         autoCommand = TopTenAutosThatMove()
         autoCommand.schedule()
 
-        //autoCommand = robotContainer.getAutonomousCommand()
-        //autoCommand.let { autoCommand.schedule() }
+//        autoCommand = robotContainer.getAutonomousCommand()
+//        autoCommand.let { autoCommand.schedule() }
 
     }
 

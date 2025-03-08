@@ -25,6 +25,7 @@ import frc.robot.Constants.ButtonConstants.ELEV_BW
 import frc.robot.Constants.ButtonConstants.ELEV_FW
 import frc.robot.Constants.ButtonConstants.PIVOT_BW
 import frc.robot.Constants.ButtonConstants.PIVOT_FW
+import frc.robot.Constants.ButtonConstants.TOGGLE_STATE
 
 import kotlin.math.pow
 import kotlin.math.sign
@@ -120,7 +121,7 @@ object OI : SubsystemBase() {
     val coralAlignRight = driverController.povRight()
 
     val autoIntake = operatorController.button(AUTO_INTAKE)
-
+    val toggleWrist = operatorController.button(TOGGLE_STATE)
 
     val pivotFWStepper = operatorController.button(PIVOT_FW)
     val pivotBWStepper = operatorController.button(PIVOT_BW)

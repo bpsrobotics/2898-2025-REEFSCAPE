@@ -89,22 +89,22 @@ object Vision : SubsystemBase() {
         poseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
     }
     override fun periodic(){
-        results = cam.allUnreadResults
-        results2 = cam2.allUnreadResults
-        SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
-        if (!results.isEmpty()) {
-            // Iterate through each of the results
-            results.forEach { visionResult: PhotonPipelineResult ->
-                // Iterate through each of the listener functions, and call them passing the vision result as the input
-                listeners.update(visionResult, "cam1")
-            }
-
-            results2.forEach { visionResult: PhotonPipelineResult ->
-
-                listeners.update(visionResult, "cam2")
-
-            }
-        }
+//        results = cam.allUnreadResults
+//        results2 = cam2.allUnreadResults
+//        SmartDashboard.putBoolean("resultsIsEmpty", results.isEmpty())
+//        if (!results.isEmpty()) {
+//            // Iterate through each of the results
+//            results.forEach { visionResult: PhotonPipelineResult ->
+//                // Iterate through each of the listener functions, and call them passing the vision result as the input
+//                listeners.update(visionResult, "cam1")
+//            }
+//
+//            results2.forEach { visionResult: PhotonPipelineResult ->
+//
+//                listeners.update(visionResult, "cam2")
+//
+//            }
+//        }
     }
 
     /**

@@ -75,7 +75,7 @@ object Elevator : SubsystemBase() {
         // Init motor controls
         elevatorConfig
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .smartCurrentLimit(30)
+            .smartCurrentLimit(25)
 
         leftMaster.configure(
             elevatorConfig.inverted(true),
@@ -100,6 +100,8 @@ object Elevator : SubsystemBase() {
         // Configures encoder to return a distance of 1 meter for every 2048 pulses
         elevEncoder.distancePerPulse = ( 2 * PI * 0.945 *2).inches.asMeters / 2048
 
+        profiledPID.reset(getPos())
+
 
         SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
         SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
@@ -122,6 +124,8 @@ object Elevator : SubsystemBase() {
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
         SmartDashboard.putNumber("/Elevator/Targ_Vel", profiledPID.setpoint.velocity)
+        SmartDashboard.putNumber("/Elevator/Targ_Position", profiledPID.setpoint.position)
+
 
 //        kG = SmartDashboard.getNumber("/Elevator/Voltage", kG)
 
@@ -144,9 +148,16 @@ object Elevator : SubsystemBase() {
 
     /** Run the Motors toward [targetPos] using a profiled pid controller **/
     fun profiledPIDControl(targetPos : Double) {
+        SmartDashboard.putNumber("/Elevator/Targ_Position", targetPos)
         profiledPID.setGoal(targetPos)
         val pidOutput = profiledPID.calculate(getPos())
         val ffOutput = elevatorFeedforward.calculate(profiledPID.setpoint.velocity)
+        SmartDashboard.putNumber("/Elevator/outputpower", pidOutput + ffOutput)
+        SmartDashboard.putNumber("/Elevator/outputpid", pidOutput )
+        SmartDashboard.putNumber("/Elevator/outputff", ffOutput)
+
+
+
         leftMaster.setVoltage(pidOutput + ffOutput)
     }
     /** Resets the elevator encoder */

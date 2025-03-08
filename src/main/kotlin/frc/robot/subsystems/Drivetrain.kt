@@ -87,26 +87,26 @@ object  Drivetrain : SubsystemBase() {
 //
         swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev(3.0))
         // Updates odometry whenever a new
-        Vision.listeners.add ( "UpdateOdometry") { input, source ->
-            if (source == "cam1") {
-                if (input.multitagResult.isPresent) {
-                    val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
-                    swerveDrive.addVisionMeasurement(
-                        Pose2d(position.x, position.y, position.rotation),
-                        input.timestampSeconds
-                    )
-                }
-            }
-            else if (source == "cam2") {
-                if (input.multitagResult.isPresent) {
-                    val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
-                    swerveDrive.addVisionMeasurement(
-                        Pose2d(position.x, position.y, position.rotation),
-                        input.timestampSeconds
-                    )
-                }
-            }
-        }
+//        Vision.listeners.add ( "UpdateOdometry") { input, source ->
+//            if (source == "cam1") {
+//                if (input.multitagResult.isPresent) {
+//                    val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
+//                    swerveDrive.addVisionMeasurement(
+//                        Pose2d(position.x, position.y, position.rotation),
+//                        input.timestampSeconds
+//                    )
+//                }
+//            }
+//            else if (source == "cam2") {
+//                if (input.multitagResult.isPresent) {
+//                    val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
+//                    swerveDrive.addVisionMeasurement(
+//                        Pose2d(position.x, position.y, position.rotation),
+//                        input.timestampSeconds
+//                    )
+//                }
+//            }
+//        }
 
 //        try{
 //            setupPathPlanner()
@@ -124,8 +124,8 @@ object  Drivetrain : SubsystemBase() {
     override fun periodic() {
 
 
-        SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
-        SmartDashboard.putNumber("odometry/rotation", swerveDrive.odometryHeading.degrees)
+//        SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
+//        SmartDashboard.putNumber("odometry/rotation", swerveDrive.odometryHeading.degrees)
 
         publisher.set(getPose())
 

@@ -9,6 +9,18 @@
           "data": {
             "pathName": "Line"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "PositionL4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "coralouttake"
+          }
         }
       ]
     }
