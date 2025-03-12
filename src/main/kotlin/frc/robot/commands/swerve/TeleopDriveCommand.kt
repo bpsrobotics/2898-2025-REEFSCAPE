@@ -3,8 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot.commands.swerve
 
+import edu.wpi.first.math.geometry.Transform2d
 import beaverlib.utils.Sugar.clamp
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
@@ -36,6 +38,9 @@ class TeleopDriveCommand(
     private val slowMode: () -> Boolean
     private val controller: SwerveController
     private val swerve: Drivetrain = Drivetrain
+    var addSpeed = Transform2d()
+    /** adds to the speed of the robot */
+    val speedConsumer: (Transform2d) -> Unit = { addSpeed += it}
 
     init {
         this.vForward = vForward
@@ -57,9 +62,9 @@ class TeleopDriveCommand(
         var strafeVelocity = vStrafe()
         var angVelocity = omega()
         val slowMode = slowMode()
-        SmartDashboard.putNumber("vX", forwardVelocity)
-        SmartDashboard.putNumber("vY", strafeVelocity)
-        SmartDashboard.putNumber("omega", angVelocity)
+//        SmartDashboard.putNumber("vX", forwardVelocity)
+//        SmartDashboard.putNumber("vY", strafeVelocity)
+//        SmartDashboard.putNumber("omega", angVelocity)
 
         if (slowMode) {
             forwardVelocity *= 0.6
@@ -68,11 +73,18 @@ class TeleopDriveCommand(
         }
 
         // Drive using raw values.
-        swerve.drive(
-            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed),
-            angVelocity * controller.config.maxAngularVelocity,
-            driveMode()
-        )
+//        swerve.drive(
+//            Translation2d(forwardVelocity * swerve.maximumSpeed+addSpeed.translation.x, strafeVelocity * swerve.maximumSpeed+addSpeed.translation.y),
+//            -angVelocity * controller.config.maxAngularVelocity+addSpeed.rotation.degrees,
+//            driveMode()
+//        )
+        addSpeed = Transform2d()
+//        swerve.drive(
+//            Translation2d(forwardVelocity * swerve.maximumSpeed, strafeVelocity * swerve.maximumSpeed),
+//            angVelocity * controller.config.maxAngularVelocity,
+//            true
+//        )
+        swerve.driveFieldOriented(ChassisSpeeds(forwardVelocity * swerve.maximumSpeed + addSpeed.translation.x, strafeVelocity * swerve.maximumSpeed + addSpeed.translation.y, angVelocity * swerve.maximumSpeed))
     }
 
     /** @suppress */

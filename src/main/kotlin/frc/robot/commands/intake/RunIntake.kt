@@ -1,25 +1,22 @@
 package frc.robot.commands.intake
 
 import edu.wpi.first.wpilibj.Timer
-import frc.robot.subsystems.Intake
 import edu.wpi.first.wpilibj2.command.Command
-import frc.robot.OI
+import frc.robot.subsystems.Intake
 
-class RunIntake : Command() {
-    val timer = Timer()
-    init {addRequirements(Intake)}
-
-    override fun initialize() {
-        Intake.intake(0.0)
+class RunIntake(val speed: Double = 0.35, val currentAverageThreshold : Double = 10.0) : Command() {//todo The current the motor draws when coral is intaked
+    val gracePeriod = Timer()
+    init {
+        addRequirements(Intake)
     }
-
+    override fun initialize() { gracePeriod.restart() }
     override fun execute() {
-        Intake.intake(OI.intakeSpeed * 3)
+        println("run intake $speed")
+        Intake.runMotor(speed)
     }
+
     override fun isFinished(): Boolean {
-        return Intake.hasCoral
-    }
-    fun inputStop(interrupted: Boolean) {
-        Intake.intake(0.0)
+//        return false
+        return Intake.buffer.calculate(Intake.hasCoral)
     }
 }

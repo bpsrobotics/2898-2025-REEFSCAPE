@@ -5,29 +5,52 @@ package frc.robot
 
 //import com.team2898.robot.Constants.OperatorConstants
 
+import beaverlib.utils.geometry.Vector2
+
 import com.pathplanner.lib.auto.AutoBuilder
 import com.pathplanner.lib.auto.NamedCommands
-import frc.robot.OI.resetGyro
 import frc.robot.OI.translationX
 import frc.robot.OI.translationY
 import frc.robot.OI.turnX
 import edu.wpi.first.math.MathUtil
+import edu.wpi.first.wpilibj.*
+import edu.wpi.first.wpilibj.DriverStation.Alliance
+import edu.wpi.first.wpilibj.DriverStation.getAlliance
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.robot.OI.useIntake
-import frc.robot.commands.Sequences.*
-import frc.robot.commands.elevator.DisableElevator
-import frc.robot.commands.elevator.MoveElevator
-import frc.robot.commands.elevator.StabilizeElevator
-import frc.robot.commands.intake.AlgaeIntakeOutake
-import frc.robot.commands.intake.CoralIntake
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import frc.robot.OI.autoIntake
+import frc.robot.OI.elevBWStepper
+import frc.robot.OI.elevFWStepper
+import frc.robot.OI.highHatBack
+import frc.robot.OI.highHatForward
+import frc.robot.OI.pivotBWStepper
+import frc.robot.OI.pivotFWStepper
+import frc.robot.OI.resetGyro
+import frc.robot.OI.sysidBD
+import frc.robot.OI.sysidBQ
+import frc.robot.OI.sysidFD
+import frc.robot.OI.sysidFQ
+import frc.robot.commands.elevator.*
 import frc.robot.commands.intake.RunIntake
+import frc.robot.commands.intake.RunOuttake
+import frc.robot.commands.sequence.PositionL2
+import frc.robot.commands.sequence.PositionL4
 import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
+import frc.robot.commands.wrist.MoveWrist
+import frc.robot.commands.wrist.VoltageWrist
+import frc.robot.commands.swerve.*
 import frc.robot.subsystems.Drivetrain
-import kotlin.math.abs
-
+import kotlin.math.pow
+import kotlin.math.sign
+import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.Elevator.getPos
+import frc.robot.subsystems.Wrist
+import frc.robot.subsystems.Wrist.SysIDWrist
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,41 +64,31 @@ class RobotContainer {
     // Replace with CommandPS4Controller or CommandJoystick if needed
 
     private var autoCommandChooser: SendableChooser<Command> = SendableChooser()
+    val alliance = DriverStation.getAlliance().orElse(Alliance.Red)
 
-    fun callRunIntake() : Boolean {
-        if (useIntake == 1.0) {
-            return true
-        }
-        else {return false}
-    }
-    fun callAlgaeIntakeConfig() : Boolean {
-        if (useIntake == -1.0) {
-            return true
-        }
-        else {return false}
-    }
-
-
+    val reverseDrive = if(alliance == DriverStation.Alliance.Red) {-1.0} else {1.0}
 
     val teleopDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { MathUtil.applyDeadband(-translationY, 0.1) },
-            { MathUtil.applyDeadband(-translationX, 0.1) },
+            { MathUtil.applyDeadband(translationY*reverseDrive, 0.1) },
+            { MathUtil.applyDeadband(translationX*reverseDrive, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
             { false }
         )
 
+
     val navXResetCommand: NavXReset = NavXReset()
 
-
+//    val runIntakeCommand: RunIntake = RunIntake({3.0})
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
 
-        NamedCommands.registerCommand("coralintake", RunIntake())
-        NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
+
+        NamedCommands.registerCommand("coralintake", RunIntake(0.2, 0.5)) //Todo set this properly
+        //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
         NamedCommands.registerCommand("L1", MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
         NamedCommands.registerCommand("L2", MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
         NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
@@ -86,11 +99,12 @@ class RobotContainer {
 
         // Configure the trigger bindings
 
-        autoCommandChooser = AutoBuilder.buildAutoChooser("Left mid start")
+//        autoCommandChooser = AutoBuilder.buildAutoChooser("Basic")
 
         Drivetrain.defaultCommand = teleopDrive
 
         configureBindings()
+
 
         //SmartDashboard.putData("Auto mode", autoCommandChooser)
 
@@ -104,8 +118,8 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
-//        Wrist
-//        Elevator
+        Wrist
+        Elevator
     }
 
     /**
@@ -114,6 +128,10 @@ class RobotContainer {
      * predicate, or via the named factories in [ ]'s subclasses for [ ]/[ PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller] controllers or [Flight][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
     private fun configureBindings() {
+        OI.coralAlignLeft.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+        OI.coralAlignRight.whileTrue(ReefAlignCommand(teleopDrive.speedConsumer, -Constants.VisionConstants.CORAL_OFFSET_FROM_CENTER))
+
+
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { m_exampleSubsystem.exampleCondition() }
         //        .onTrue(ExampleCommand(m_exampleSubsystem))
@@ -123,18 +141,46 @@ class RobotContainer {
         //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand())
 
         // MoveL# Sequences
-        when {
-            OI.moveL1 -> StartupL1().schedule()
-            OI.moveL2 -> MoveL2().schedule()
-            OI.moveL3 -> MoveL3().schedule()
-            OI.moveL4 -> MoveL4().schedule()
-            OI.moveToIntake -> MoveToIntake().schedule()
-            OI.moveA1 -> MoveA1().schedule()
-            OI.moveA2 -> MoveA2().schedule()
-            callRunIntake()-> RunIntake().schedule()
-            callAlgaeIntakeConfig() -> AlgaeIntakeOutake().schedule()
-        }
 
         resetGyro.whileTrue(navXResetCommand)
+
+//        sysidFQ.whileTrue(SysIDWrist(SysIdRoutine.Direction.kForward, true))
+//        sysidBQ.whileTrue(SysIDWrist(SysIdRoutine.Direction.kReverse, true))
+//        sysidFD.whileTrue(SysIDWrist(SysIdRoutine.Direction.kForward, false))
+//        sysidBD.whileTrue(SysIDWrist(SysIdRoutine.Direction.kReverse, false))
+
+//        sysidFQ.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, true))
+//        sysidBQ.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, true))
+//        sysidFD.whileTrue(SysIDElev(SysIdRoutine.Direction.kForward, false))
+//        sysidBD.whileTrue(SysIDElev(SysIdRoutine.Direction.kReverse, false))
+
+        autoIntake.onTrue(RunIntake())
+
+        highHatForward.whileTrue(RunOuttake(2.0))
+        highHatBack.whileTrue(RunOuttake(-2.0))
+
+        elevFWStepper.onTrue(MoveElevatorBy( 0.02 ))
+        elevBWStepper.onTrue(MoveElevatorBy(-0.02))
+
+        pivotFWStepper.onTrue(MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position))
+
+        pivotBWStepper.onTrue(MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position))
+
+
+        OI.moveA1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position))
+        OI.moveA2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.A2.position))
+
+        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
+        OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
+        OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
+        OI.moveL4.onTrue(PositionL4())
+
+
+//        OI.moveL3.onTrue(MoveL3())
+//        OI.moveL4.onTrue(MoveL4())
+//        OI.moveToIntake.onTrue(MoveToIntake())
+//        OI.moveA1.onTrue(MoveA1())
+//        OI.moveA2.onTrue(MoveA2())
     }
+
 }

@@ -5,10 +5,7 @@ package frc.robot.subsystems
 
 
 import com.pathplanner.lib.auto.AutoBuilder
-import com.pathplanner.lib.commands.PathPlannerAuto
-import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.PIDConstants
-import com.pathplanner.lib.config.RobotConfig
 import com.pathplanner.lib.controllers.PPHolonomicDriveController
 import edu.wpi.first.math.*
 import edu.wpi.first.math.controller.PIDController
@@ -16,8 +13,8 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.Trajectory
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -40,16 +37,14 @@ import frc.robot.Constants.AutoConstants.RotationP
 import frc.robot.Constants.AutoConstants.TranslationD
 import frc.robot.Constants.AutoConstants.TranslationI
 import frc.robot.Constants.AutoConstants.TranslationP
-import frc.robot.Constants.DriveConstants.DriveKinematics
-import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.SwerveModule
 import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity
+import kotlin.math.*
 import java.util.*
-import frc.robot.commands.SysIdTesting.DrivetrainSysID
 
 
 object  Drivetrain : SubsystemBase() {
@@ -57,14 +52,13 @@ object  Drivetrain : SubsystemBase() {
     private val visionDriveTest = false
 
     /** The maximum speed of the swerve drive */
-    var maximumSpeed: Double = Units.feetToMeters(14.5)
+    var maximumSpeed: Double = Units.feetToMeters(15.1)
 
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().
     getStructArrayTopic("SwerveStates/swerveStates", SwerveModuleState.struct).publish()
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
-//    lateinit var config : RobotConfig;
     init {
         // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
@@ -84,24 +78,43 @@ object  Drivetrain : SubsystemBase() {
         }
         swerveDrive.setHeadingCorrection(false) // Heading correction should only be used while controlling the robot via angle.
         swerveDrive.setCosineCompensator(false) //!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-
-        if (visionDriveTest) {
-//                setupPhotonVision()
-            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
-            swerveDrive.stopOdometryThread()
-        }
+//        if (visionDriveTest) {
+////                setupPhotonVision()
+//            // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+//            swerveDrive.stopOdometryThread()
+//        }
 //        setupPathPlanner()
-
-        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev())
+//
+        swerveDrive.setVisionMeasurementStdDevs(Vision.getStandardDev(3.0))
         // Updates odometry whenever a new
-        Vision.listeners.add ( "UpdateOdometry") {
-            val position: Pose2d = Vision.getRobotPosition(it)?.toPose2d() ?: return@add
-            swerveDrive.addVisionMeasurement(position, it.timestampSeconds)
-            SmartDashboard.putNumberArray("odometry/visionTranslation", doubleArrayOf(position.x, position.y))
-            SmartDashboard.putNumber("odometry/visionRotation", position.rotation.degrees)
+        Vision.listeners.add ( "UpdateOdometry") { input, source ->
+            if (source == "cam1") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPosition(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(position.x, position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                }
+            }
+            else if (source == "cam2") {
+                if (input.multitagResult.isPresent) {
+                    val position: Pose2d = Vision.getRobotPositionFromSecondCamera(input)?.toPose2d() ?: return@add
+                    swerveDrive.addVisionMeasurement(
+                        Pose2d(position.x, position.y, position.rotation),
+                        input.timestampSeconds
+                    )
+                }
+            }
         }
 
-        setupPathPlanner()
+//        try{
+//            setupPathPlanner()
+//        } catch (e : Exception) {
+//            // Handle exception as needed
+//            e.printStackTrace();
+//        }
+        swerveDrive.setMotorIdleMode(false)
 
     }
 
@@ -112,7 +125,7 @@ object  Drivetrain : SubsystemBase() {
 
 
         SmartDashboard.putNumberArray("odometry/translation", doubleArrayOf(swerveDrive.pose.x, swerveDrive.pose.y))
-        SmartDashboard.putNumber("odometry/rotation", swerveDrive.pose.rotation.degrees)
+        SmartDashboard.putNumber("odometry/rotation", swerveDrive.odometryHeading.degrees)
 
         publisher.set(getPose())
 
@@ -120,32 +133,13 @@ object  Drivetrain : SubsystemBase() {
 
     }
 
-    /**
-     * Setup AutoBuilder for PathPlanner.
-     */
-    fun setupPathPlanner() {
-        AutoBuilder.configure(
-            this::getPose,  // Robot pose supplier
-            this::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            PPHolonomicDriveController( // PPHolonomicController is the built-in path following controller for holonomic drive trains
-                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
-                PIDConstants(RotationP, RotationI, RotationD)
-            ),
-            RobotConfig(60.0, 5.058014, ModuleConfig(0.1016, MaxSpeedMetersPerSecond, 1.0, DCMotor.getNEO(1), 6.75, 40.0, 4), 0.8636),  // The robot configuration
-            {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-                val alliance = DriverStation.getAlliance()
-                if (alliance.isPresent) {
-                    return@configure alliance.get() == DriverStation.Alliance.Red
-                }
-                false
-            },
-             this// Reference to this subsystem to set requirements
-        )
+    val getAlliance : () -> Boolean = {
+        val alliance = DriverStation.getAlliance()
+        if (alliance.isPresent) alliance.get() == DriverStation.Alliance.Red
+        else false
+    }
+    fun driveFieldOriented(speeds: ChassisSpeeds) {
+        swerveDrive.driveFieldOriented(speeds)
     }
 
     /**
@@ -216,15 +210,15 @@ object  Drivetrain : SubsystemBase() {
      * Return SysID command for drive motors from YAGSL
      * @return A command that SysIDs the drive motors.
      */
-    fun sysIdDriveMotor(): Command? {
-        return SwerveDriveTest.generateSysIdCommand(
-            SwerveDriveTest.setDriveSysIdRoutine(
-                SysIdRoutine.Config(),
-                this,
-                swerveDrive, 12.0),
-            3.0, 5.0, 3.0
-        )
-    }
+//    fun sysIdDriveMotor(): Command? {
+//        return SwerveDriveTest.generateSysIdCommand(
+//            SwerveDriveTest.setDriveSysIdRoutine(
+//                SysIdRoutine.Config(),
+//                this,
+//                swerveDrive, 12.0),
+//            3.0, 5.0, 3.0
+//        )
+//    }
 
     /**
      * Return SysID command for angle motors from YAGSL
@@ -315,7 +309,7 @@ object  Drivetrain : SubsystemBase() {
      * @return The current pose of the robot.
      */
     fun getPose() : Pose2d {
-        return Pose2d(-swerveDrive.pose.x, -swerveDrive.pose.y, swerveDrive.pose.rotation)
+        return Pose2d(swerveDrive.pose.x, swerveDrive.pose.y, swerveDrive.pose.rotation)
     }
 
     /**
@@ -457,6 +451,17 @@ object  Drivetrain : SubsystemBase() {
         return HeadingPID.calculate(measurement, setpoint)
     }
 
+    fun angleDist(a: Double, b: Double): Double {
+        val diff = b - a;
+        if (diff <= 180.0) return diff;
+        else return (diff % 180.0) - 180.0;
+    }
+
+    fun realMod(a: Double, b: Double): Double {
+        val mod = a % b;
+        if (mod >= 0) return mod;
+        else return mod + b;
+    }
 
 
 }
