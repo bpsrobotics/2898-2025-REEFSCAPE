@@ -20,7 +20,7 @@ import kotlin.math.abs
 
 // bro this aint working but screw it lol, just a demo and not meant to be taken seriously
 object TheFabledStateSpace : SubsystemBase() {
-    val timer = 0.0
+    var timer = 0.0
     val dt = Timer.getFPGATimestamp()
     val momentOfInertia = 0.032 //kg/m^2
     val gearingRatio = 1.0
@@ -33,6 +33,7 @@ object TheFabledStateSpace : SubsystemBase() {
      val m_loop : LinearSystemLoop<N1, N1, N1> = LinearSystemLoop(flywheelPlant, m_controller, m_observer, 12.0, 0.02)
     fun timeDiff() :Double {
         val diff = abs(timer - dt)
+        timer = dt
         return diff
     }
     fun getRate() : Double {
