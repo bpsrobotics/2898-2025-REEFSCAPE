@@ -22,6 +22,7 @@ import kotlin.math.abs
 object TheFabledStateSpace : SubsystemBase() {
     var timer = 0.0
     val dt = Timer.getFPGATimestamp()
+    var input = 0.0
     val momentOfInertia = 0.032 //kg/m^2
     val gearingRatio = 1.0
      val m_encoder = DutyCycleEncoder(0)
@@ -40,13 +41,14 @@ object TheFabledStateSpace : SubsystemBase() {
         val rate = m_encoder.get() / timeDiff()
         return rate
     }
-    fun setNewVoltage(goalSpeed: Double) {
-        m_loop.setNextR(goalSpeed)
 
-         m_loop.correct(VecBuilder.fill(getRate()))
-         m_loop.predict(0.020)
+    override fun periodic() {
+        m_loop.setNextR(input)
 
-         val voltage = m_loop.getU(0)
-         m_motor.setVoltage(voltage)
-     }
+        m_loop.correct(VecBuilder.fill(getRate()))
+        m_loop.predict(0.020)
+
+        val voltage = m_loop.getU(0)
+        m_motor.setVoltage(voltage)
+    }
 }
