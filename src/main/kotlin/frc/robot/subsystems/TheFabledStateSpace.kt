@@ -48,6 +48,10 @@ object TheFabledStateSpace : SubsystemBase() {
         m_loop.correct(VecBuilder.fill(getRate()))
         m_loop.predict(0.020)
 
+//        val voltage = m_loop.getU(0)
+//        m_motor.setVoltage(voltage)
+    }
+    fun setNewVoltage() {
         val voltage = m_loop.getU(0)
         m_motor.setVoltage(voltage)
     }

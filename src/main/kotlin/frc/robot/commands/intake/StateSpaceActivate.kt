@@ -7,10 +7,12 @@ import frc.robot.subsystems.TheFabledStateSpace
 class StateSpaceActivate: Command() {
     override fun initialize() {
         addRequirements(TheFabledStateSpace)
-        TheFabledStateSpace.setNewVoltage(0.0)
+        TheFabledStateSpace.input = 0.0
+        TheFabledStateSpace.setNewVoltage()
     }
     override fun execute() {
-        TheFabledStateSpace.setNewVoltage(OI.intakeSpeed)
+        TheFabledStateSpace.input = OI.intakeSpeed
+        TheFabledStateSpace.setNewVoltage()
     }
 
     override fun isFinished(): Boolean {
