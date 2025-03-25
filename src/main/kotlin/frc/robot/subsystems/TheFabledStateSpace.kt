@@ -3,9 +3,7 @@ package frc.robot.subsystems
 import com.revrobotics.spark.SparkLowLevel
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import com.revrobotics.spark.SparkMax
-import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.Nat
-import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.*
 import edu.wpi.first.math.controller.LinearQuadraticRegulator
 import edu.wpi.first.math.estimator.KalmanFilter
 import edu.wpi.first.math.numbers.N1
@@ -27,6 +25,8 @@ object TheFabledStateSpace : SubsystemBase() {
     val gearingRatio = 1.0
      val m_encoder = DutyCycleEncoder(0)
     val m_motor = SparkMax(2, SparkLowLevel.MotorType.kBrushless)
+    var desiredVel = 0.0
+    var desiredAccel = 0.0
 
     val flywheelPlant: LinearSystem<N1, N1, N1> = LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), momentOfInertia, gearingRatio)
     val m_observer : KalmanFilter<N1, N1, N1> = KalmanFilter(Nat.N1(), Nat.N1(), flywheelPlant, VecBuilder.fill(0.0), VecBuilder.fill(0.0), 0.02)
@@ -41,6 +41,17 @@ object TheFabledStateSpace : SubsystemBase() {
         val rate = m_encoder.get() / timeDiff()
         return rate
     }
+    fun getAcceleration() : Double {
+        val accel = getRate() / timeDiff()
+        return accel
+    } //this fun kinda redundant but im keeping it for now
+    fun twoStateFF(): Matrix<N1, N1> {
+        // ok so basically we taking u = B.pseudoinverse(accel. - AMatrix*velocityOrRate)
+        val VelVec = VecBuilder.fill(desiredVel)
+        val AccelVec = VecBuilder.fill(desiredAccel)
+        val feedforward = flywheelPlant.b.inv().times(AccelVec.minus(flywheelPlant.a.times(VelVec)))
+        return feedforward
+    }
 
     override fun periodic() {
         m_loop.setNextR(input)
@@ -52,7 +63,7 @@ object TheFabledStateSpace : SubsystemBase() {
 //        m_motor.setVoltage(voltage)
     }
     fun setNewVoltage() {
-        val voltage = m_loop.getU(0)
+        val voltage = m_loop.getU(0) + twoStateFF().get(0,0)
         m_motor.setVoltage(voltage)
     }
 }
