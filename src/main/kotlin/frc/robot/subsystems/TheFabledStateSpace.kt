@@ -47,10 +47,13 @@ object TheFabledStateSpace : SubsystemBase() {
     } //this fun kinda redundant but im keeping it for now
     fun twoStateFF(): Matrix<N1, N1> {
         // ok so basically we taking u = B.pseudoinverse(accel. - AMatrix*velocityOrRate)
-        val VelVec = VecBuilder.fill(desiredVel)
-        val AccelVec = VecBuilder.fill(desiredAccel)
-        val feedforward = flywheelPlant.b.inv().times(AccelVec.minus(flywheelPlant.a.times(VelVec)))
-        return feedforward
+        val VelVec = VecBuilder.fill(getRate())
+        val RkPlusOne = VelVec.times(getAcceleration().times(timeDiff()))
+        val noInvKff = flywheelPlant.b.transpose().times(VecBuilder.fill(0.0)).times(m_controller.r)
+        val realKff = noInvKff.inv().times(flywheelPlant.b.transpose().times(VecBuilder.fill(0.0)))
+        val unfinishedUff = RkPlusOne.minus(flywheelPlant.a.times(getRate()))
+        val Uff = realKff.times(unfinishedUff)
+        return Uff
     }
 
     override fun periodic() {
