@@ -142,6 +142,8 @@ class Constants {
         const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
         const val INTAKE = 0.8
         const val OUTTAKE = -0.4
+        const val INTAKERADIUS = 0.0
+        const val mass = 0.0
     }
 
 

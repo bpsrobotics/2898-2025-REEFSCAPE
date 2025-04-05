@@ -14,14 +14,17 @@ import edu.wpi.first.math.system.plant.LinearSystemId
 import edu.wpi.first.wpilibj.DutyCycleEncoder
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
+import frc.robot.Constants
 import kotlin.math.abs
+import frc.robot.Constants.IntakeConstants.INTAKERADIUS
+import frc.robot.Constants.IntakeConstants.mass
 
 // bro this aint working but screw it lol, just a demo and not meant to be taken seriously
 object TheFabledStateSpace : SubsystemBase() {
     var timer = 0.0
     val dt = Timer.getFPGATimestamp()
     var input = 0.0
-    val momentOfInertia = 0.032 //kg/m^2
+    val momentOfInertia = 0.75 * (INTAKERADIUS * INTAKERADIUS) * mass //kg/m^2
     val gearingRatio = 1.0
      val m_encoder = DutyCycleEncoder(0)
     val m_motor = SparkMax(2, SparkLowLevel.MotorType.kBrushless)
