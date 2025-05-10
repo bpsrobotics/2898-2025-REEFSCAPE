@@ -106,7 +106,7 @@ object Wrist : SubsystemBase() {
         armMotor.set(speed)
     }
 
-    fun closedLoopPositionControl(targetSpeed: Double) {
+    fun closedLoopPositionControl() {
         val outputPower = feedForward.calculate(pos, 0.0) + pid.calculate(pos, profiledPID.goal.position)
         SmartDashboard.putNumber("/wrist/output_power", outputPower)
         armMotor.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))

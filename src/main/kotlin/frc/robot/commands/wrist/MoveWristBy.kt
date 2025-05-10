@@ -16,17 +16,18 @@ import kotlin.math.PI
 
 class MoveWristBy(var goalPosition: Double) : Command() {
     val timer = Timer()
+    var newGoal = pos
     init {addRequirements(Wrist)}
     override fun initialize() {
         profiledPID.reset(pos, rate)
         profiledPID.enableContinuousInput(-PI, PI)
         profiledPID.setTolerance(0.07)
-        goalPosition += pos
+        newGoal = goalPosition + profiledPID.setpoint.position
     }
 
     override fun execute() {
-        Wrist.profiledPIDControl(goalPosition)
-        SmartDashboard.putNumber("targ_pos", profiledPID.setpoint.position)
+        Wrist.profiledPIDControl(newGoal)
+        SmartDashboard.putNumber("/wrist/targ_pos", goalPosition)
 
 
     }

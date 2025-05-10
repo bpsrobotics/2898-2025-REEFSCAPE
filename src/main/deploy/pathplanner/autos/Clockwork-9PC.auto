@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "PlaceSequence"
+            "name": "L4"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "named",
           "data": {
-            "name": "GetCoralStationPiece"
+            "name": "autointake"
           }
         },
         {
@@ -139,6 +139,12 @@
         {
           "type": "path",
           "data": {
+            "pathName": "C-CSBottom"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "B-CSBottom"
           }
         },
@@ -161,15 +167,15 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "C-CSBottom"
+            "name": "GetCoralStationPiece"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "GetCoralStationPiece"
+            "name": "coralouttake"
           }
         },
         {

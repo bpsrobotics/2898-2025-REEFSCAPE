@@ -35,12 +35,9 @@ import frc.robot.commands.swerve.NavXReset
 import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.commands.swerve.*
 import frc.robot.commands.wrist.*
-import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.*
 import kotlin.math.pow
 import kotlin.math.sign
-import frc.robot.subsystems.Elevator
-import frc.robot.subsystems.Intake
-import frc.robot.subsystems.Wrist
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -81,20 +78,31 @@ class RobotContainer {
         NamedCommands.registerCommand("L1", Stow())
         NamedCommands.registerCommand("L2", PositionL2())
         NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
-        NamedCommands.registerCommand("L4", PositionL4())
-        NamedCommands.registerCommand("disable", DisableElevator())
+        NamedCommands.registerCommand("L4", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
+            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
+            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position)
+        ))
+        NamedCommands.registerCommand("PlaceSequence", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
+            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
+            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
+            RunOuttake(0.8, 0.5)
+        ))
+        NamedCommands.registerCommand("autointake", RunIntake())
+        NamedCommands.registerCommand("GetCoralStationPiece", SequentialCommandGroup(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position),
+            MoveWrist(Constants.PivotConstants.PivotState.Stow.position),
+            RunIntake()
+        ))
         NamedCommands.registerCommand("stabilize", StabilizeElevator())
         initializeObjects()
-
         // Configure the trigger bindings
 
-//        autoCommandChooser = AutoBuilder.buildAutoChooser("Basic")
+        autoCommandChooser = AutoBuilder.buildAutoChooser("4-Piece-Low")
 
         Drivetrain.defaultCommand = teleopDrive
 
         configureBindings()
 
-        //SmartDashboard.putData("Auto mode", autoCommandChooser)
+        SmartDashboard.putData("Auto mode", autoCommandChooser)
 
 
     }
@@ -105,6 +113,7 @@ class RobotContainer {
 
     private fun initializeObjects() {
         Drivetrain
+        PathPlanner
         Wrist
         Elevator
         Intake
@@ -146,15 +155,15 @@ class RobotContainer {
 
         autoIntake.onTrue(RunIntake())
 
-        highHatForward.whileTrue(RunOuttake(1.0))
+        highHatForward.whileTrue(RunOuttake(0.5))
         highHatBack.whileTrue(RunOuttake(-1.0))
 
         elevFWStepper.onTrue(MoveElevatorBy( 0.05 ))
         elevBWStepper.onTrue(MoveElevatorBy(-0.05))
 
 //        pivotFWStepper.whileTrue(VoltageWrist(0.2))
-            pivotFWStepper.onTrue(MoveWristBy(-0.05))
-        pivotBWStepper.onTrue(MoveWristBy(0.05))
+            pivotFWStepper.onTrue(MoveWristBy(-0.4))
+        pivotBWStepper.onTrue(MoveWristBy(0.4))
 
 //        pivotBWStepper.whileTrue(VoltageWrist(-0.2))
 

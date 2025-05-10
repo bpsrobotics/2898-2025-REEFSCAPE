@@ -28,7 +28,7 @@ object Intake : SubsystemBase() {
     val currentFilter = LinearFilter.movingAverage(20)
     var currentAverage = 0.0
 
-    val buffer = Debouncer(0.04, Debouncer.DebounceType.kRising)
+    val buffer = Debouncer(0.02, Debouncer.DebounceType.kRising)
     val bufferTimer = Timer()
     val intakeState get() = bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER)
     val gracePeriod get() = !bufferTimer.hasElapsed(IntakeConstants.STOP_BUFFER + 5.0)
@@ -51,7 +51,7 @@ object Intake : SubsystemBase() {
         defaultCommand = StopIntake()
     }
 
-    val hasCoral get() = colorSensor.proximity >= 100.0
+    val hasCoral get() = colorSensor.proximity >= 50.0
 
     override fun periodic() {
         // Coral input motor stuff

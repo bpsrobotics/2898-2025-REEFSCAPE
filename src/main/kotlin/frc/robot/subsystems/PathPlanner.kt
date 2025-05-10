@@ -21,6 +21,15 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.Constants
+import frc.robot.Constants.AutoConstants.RotationD
+import frc.robot.Constants.AutoConstants.RotationI
+import frc.robot.Constants.AutoConstants.RotationP
+import frc.robot.Constants.AutoConstants.TranslationD
+import frc.robot.Constants.AutoConstants.TranslationI
+import frc.robot.Constants.AutoConstants.TranslationP
+import frc.robot.subsystems.Drivetrain.driveConsumer
+import frc.robot.subsystems.Drivetrain.getAlliance
 import kotlin.math.PI
 
 
@@ -39,19 +48,21 @@ object PathPlanner : SubsystemBase() {
             e.printStackTrace();
         }
         // Configure AutoBuilder last
-//        AutoBuilder.configure(
-//            {Drivetrain.getPose()}, // Robot pose supplier
-//            {pose : Pose2d -> Drivetrain.resetOdometry(pose)}, // Method to reset odometry (will be called if your auto has a starting pose)
-//            {Drivetrain.getRobotRelativeSpeeds()}, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-//            {speeds : ChassisSpeeds -> Drivetrain.drive(speeds)}, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-//            PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-//                PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-//                PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-//            ),
-//            config, // The robot configuration
-//            { getInvert() },
-//            Drivetrain, this // Reference to this subsystem to set requirements
-//        );
+
+        AutoBuilder.configure(
+            Drivetrain::getPose,  // Robot pose supplier
+            Drivetrain::resetOdometry,  // Method to reset odometry (will be called if your auto has a starting pose)
+            Drivetrain::getRobotVelocity,  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            driveConsumer,  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            PPHolonomicDriveController( // PPolonomicController is the built-in path following controller for holonomic drive trains
+                PIDConstants(TranslationP, TranslationI, TranslationD),  // Translation PID constants
+                PIDConstants(RotationP, RotationI, RotationD)
+            ),
+            Constants.AutoConstants.Robot_Config,
+            getAlliance,
+            Drivetrain// Reference to this subsystem to set requirements
+        )
+
     }
     fun getInvert() : Boolean{
         var alliance = DriverStation.getAlliance();

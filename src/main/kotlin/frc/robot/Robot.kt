@@ -70,11 +70,11 @@ class Robot : TimedRobot() {
     /** This autonomous runs the autonomous command selected by your [RobotContainer] class.  */
     override fun autonomousInit() {
 //        if( SmartDashboard.getBoolean("/Auto/UseMovementAuto", false)) {
-        autoCommand = TopTenAutosThatMove()
-        autoCommand.schedule()
+//        autoCommand = TopTenAutosThatMove()
+//        autoCommand.schedule()
 
-//        autoCommand = robotContainer.getAutonomousCommand()
-//        autoCommand.let { autoCommand.schedule() }
+        autoCommand = robotContainer.getAutonomousCommand()
+        autoCommand.let { autoCommand.schedule() }
 
     }
 

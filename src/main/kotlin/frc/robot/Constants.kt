@@ -42,7 +42,7 @@ class Constants {
 
 
     object DriveConstants {
-        val MaxSpeedMetersPerSecond = (15.1).feetPerSecond.asMetersPerSecond
+        val MaxSpeedMetersPerSecond = (3.1).feetPerSecond.asMetersPerSecond
         // Chassis configuration (left to right dist of center of the wheels)
         val TrackWidth = Units.inchesToMeters(11.5)
 
@@ -74,7 +74,8 @@ class Constants {
 
         //FF constants
         const val kS = 0.045
-        const val kV = 7.44
+        const val kV = 8.14
+            //8.44
         // 6.0
 //            1.5136
         const val kG = 0.355

@@ -52,7 +52,7 @@ object  Drivetrain : SubsystemBase() {
     private val visionDriveTest = false
 
     /** The maximum speed of the swerve drive */
-    var maximumSpeed: Double = Units.feetToMeters(15.1)
+    var maximumSpeed = Constants.DriveConstants.MaxSpeedMetersPerSecond
 
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().

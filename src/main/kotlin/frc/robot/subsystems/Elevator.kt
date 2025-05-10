@@ -103,8 +103,8 @@ object Elevator : SubsystemBase() {
         profiledPID.reset(getPos())
 
 
-        SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
-        SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Top", !topLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Bottom", !botLimit.get())
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Targ_Position", profiledPID.setpoint.position)
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
@@ -118,8 +118,8 @@ object Elevator : SubsystemBase() {
         if (!botLimit.get()) {
             resetPos()
         }
-        SmartDashboard.putBoolean("/Elevator/Top", topLimit.get())
-        SmartDashboard.putBoolean("/Elevator/Bottom", botLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Top", !topLimit.get())
+        SmartDashboard.putBoolean("/Elevator/Bottom", !botLimit.get())
         SmartDashboard.putNumber("/Elevator/Position", getPos())
         SmartDashboard.putNumber("/Elevator/Rate", elevEncoder.rate)
         SmartDashboard.putNumber("/Elevator/Current", leftMaster.outputCurrent)
@@ -155,10 +155,11 @@ object Elevator : SubsystemBase() {
         SmartDashboard.putNumber("/Elevator/outputpower", pidOutput + ffOutput)
         SmartDashboard.putNumber("/Elevator/outputpid", pidOutput )
         SmartDashboard.putNumber("/Elevator/outputff", ffOutput)
+        val outputPower = pidOutput + ffOutput
+        if (!botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
+        if(!topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
 
-
-
-        leftMaster.setVoltage(pidOutput + ffOutput)
+        leftMaster.setVoltage(outputPower)
     }
     /** Resets the elevator encoder */
     fun resetPos() {
