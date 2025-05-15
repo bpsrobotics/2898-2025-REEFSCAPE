@@ -1,24 +1,32 @@
 package frc.robot
 
 import beaverlib.utils.geometry.Vector2
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_AMP
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_GROUND
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER1
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_SHOOTER2
-import frc.robot.Constants.ButtonConstants.ARM_DIRECT_STOWED
-import frc.robot.Constants.ButtonConstants.ARM_DOWN
-import frc.robot.Constants.ButtonConstants.ARM_UP
-import frc.robot.Constants.ButtonConstants.SHOOT
+
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj.event.BooleanEvent
-import edu.wpi.first.wpilibj.event.EventLoop
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+import edu.wpi.first.wpilibj2.command.button.JoystickButton
+import edu.wpi.first.wpilibj2.command.button.POVButton
 import frc.beaverlib.async.Promise
+import frc.robot.Constants.ButtonConstants.ALGAE_B1
+import frc.robot.Constants.ButtonConstants.ALGAE_B2
+import frc.robot.Constants.ButtonConstants.AUTO_INTAKE
+import frc.robot.Constants.ButtonConstants.BASE_STAGE
+import frc.robot.Constants.ButtonConstants.RESET_GYRO
+import frc.robot.Constants.ButtonConstants.CORAL_L2
+import frc.robot.Constants.ButtonConstants.CORAL_L3
+import frc.robot.Constants.ButtonConstants.CORAL_L4
+import frc.robot.Constants.ButtonConstants.ELEV_BW
+import frc.robot.Constants.ButtonConstants.ELEV_FW
+import frc.robot.Constants.ButtonConstants.PIVOT_BW
+import frc.robot.Constants.ButtonConstants.PIVOT_FW
+import frc.robot.Constants.ButtonConstants.TOGGLE_STATE
+
 import kotlin.math.pow
 import kotlin.math.sign
 
@@ -72,14 +80,8 @@ object OI : SubsystemBase() {
     fun Double.process(deadzone: Boolean = false, square: Boolean = false, cube: Boolean = false) =
         process(this, deadzone, square, cube)
 
-    private val driverController = XboxController(0)
-    private val operatorController = Joystick(1)
-
-    // Left and right shoulder switches (the ones next to the trigger) for quickturn
-    val quickTurnRight
-        get() = process(driverController.rightTriggerAxis, deadzone = true, square = true)
-    val quickTurnLeft
-        get() = process(driverController.leftTriggerAxis, deadzone = true, square = true)
+    private val driverController = CommandXboxController(0)
+    private val operatorController = CommandJoystick(1)
 
     // Right joystick y-axis.  Controller mapping can be tricky, the best way is to use the driver station to see what buttons and axis are being pressed.
     // Squared for better control on turn, cubed on throttle
@@ -101,39 +103,42 @@ object OI : SubsystemBase() {
         get() = driverController.leftTriggerAxis
     val rightTrigger
         get() = driverController.rightTriggerAxis
-    val driverY
-        get() = driverController.yButton
-    val driverX
-        get() = driverController.xButton
-    //    val resetGyro: BooleanEvent = driverController.rightBumper(loop).debounce(0.5).rising()
-    val resetGyro get() = driverController.rightBumperButton
 
-    val climb get() = operatorController.getRawButton(12)
+    // Coral out take positions move to
+    val moveL1 = operatorController.button(BASE_STAGE)
+    val moveL2 = operatorController.button(CORAL_L2)
+    val moveL3 = operatorController.button(CORAL_L3)
+    val moveL4 = operatorController.button(CORAL_L4)
+    val moveA1 = operatorController.button(ALGAE_B1)
+    val moveA2 = operatorController.button(ALGAE_B2)
 
-    val alignButton
-        get() = driverController.yButton
-    val alignButtonRelease
-        get() = driverController.yButtonReleased
-    val alignButtonPressed
-        get() = driverController.yButtonPressed
-    val highHat get() = operatorController.pov
-    val hatVector get() = when (operatorController.pov) {
-        0 -> Vector2(0.0,1.0)
-        90 -> Vector2(1.0,0.0)
-        180 -> Vector2(0.0,-1.0)
-        270 -> Vector2(-1.0,0.0)
-        else -> Vector2.zero()
-    }
+    val resetGyro = driverController.rightBumper()
+    val sysidFQ = driverController.x()
+    val sysidBQ = driverController.y()
+    val sysidFD = driverController.b()
+    val sysidBD = driverController.a()
+    val coralAlignLeft = driverController.povLeft()
+    val coralAlignRight = driverController.povRight()
 
-    val armSelectUp get() = operatorController.getRawButton(ARM_UP)
-    val armSelectDown get() = operatorController.getRawButton(ARM_DOWN)
+    val autoIntake = operatorController.button(AUTO_INTAKE)
+    val toggleWrist = operatorController.button(TOGGLE_STATE)
 
-    val armDirectGround get() = operatorController.getRawButton(ARM_DIRECT_GROUND)
-    val armDirectStowed get() = operatorController.getRawButton(ARM_DIRECT_STOWED)
-    val armDirectAmp get() = operatorController.getRawButton(ARM_DIRECT_AMP)
-    val armDirectShooter1 get() = operatorController.getRawButton(ARM_DIRECT_SHOOTER1)
-    val armDirectShooter1Pressed get() = operatorController.getRawButtonPressed(ARM_DIRECT_SHOOTER1)
-    val armDirectShooter2 get() = operatorController.getRawButton(ARM_DIRECT_SHOOTER2)
+    val pivotFWStepper = operatorController.button(PIVOT_FW)
+    val pivotBWStepper = operatorController.button(PIVOT_BW)
+
+    val elevFWStepper = operatorController.button(ELEV_FW)
+    val elevBWStepper = operatorController.button(ELEV_BW)
+
+
+    val highHatForward = operatorController.pov(0)
+    val highHatBack = operatorController.pov(180)
+//    val hatVector get() = when (operatorController.pov) {
+//        0 -> Vector2(0.0,1.0)
+//        90 -> Vector2(1.0,0.0)
+//        180 -> Vector2(0.0,-1.0)
+//        270 -> Vector2(-1.0,0.0)
+//        else -> Vector2.zero()
+//    }
 
     val intakeSpeed get() = operatorController.throttle
 
@@ -141,8 +146,7 @@ object OI : SubsystemBase() {
 //    val shooterOutake: BooleanEvent = BooleanEvent(loop) { hatVector == Vector(0, 1) }
 
 
-    val climbUp get() = operatorController.getRawButton(6)
-    val climbDown get() = operatorController.getRawButton(4)
+
     enum class Direction {
         LEFT, RIGHT, UP, DOWN, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT, INACTIVE;
 
@@ -151,7 +155,7 @@ object OI : SubsystemBase() {
             RIGHT -> LEFT
             else  -> this
         }
-        fun toVector() = when (this) {
+        fun toVector() = when(this) {
             LEFT -> Vector2(-1.0,0.0)
             RIGHT -> Vector2(1.0,0.0)
             UP -> Vector2(0.0,1.0)
@@ -164,20 +168,9 @@ object OI : SubsystemBase() {
         }
     }
 
-    val alignmentPad get() = when(driverController.pov) {
-        0    -> Direction.UP
-        45   -> Direction.UPRIGHT
-        90   -> Direction.RIGHT
-        135  -> Direction.DOWNRIGHT
-        180  -> Direction.DOWN
-        225  -> Direction.DOWNLEFT
-        270  -> Direction.LEFT
-        315  -> Direction.UPLEFT
-        else -> Direction.INACTIVE
-    }
 
     //    val operatorTrigger: BooleanEvent = operatorController.button(1, loop)
-    val operatorTrigger get() = operatorController.getRawButton(1)
+    //val operatorTrigger get() = operatorController.getRawButton(1)
     //    val operatorTriggerReleased: BooleanEvent = operatorTrigger.falling()
     object Rumble {
         private var isRumbling  = false
@@ -207,18 +200,8 @@ object OI : SubsystemBase() {
             }
         }
     }
+
     override fun periodic(){
         Rumble.update()
     }
-
-//    init {
-//        armUp.debounce(0.05).onTrue(InstantCommand({
-//            Arm.setGoal(Arm.setpoint + 0.1)
-//        }))
-//        armDown.debounce(0.05).onTrue(InstantCommand({
-//            Arm.setGoal(Arm.setpoint - 0.1)
-//        }))
-//    }
-
-
 }

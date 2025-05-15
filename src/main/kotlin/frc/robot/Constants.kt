@@ -5,18 +5,24 @@
 
 package frc.robot
 
+import beaverlib.utils.Units.Linear.feet
+import beaverlib.utils.Units.Linear.feetPerSecond
 import beaverlib.utils.Units.Linear.inches
-import com.revrobotics.spark.SparkBase
-import com.revrobotics.spark.config.SparkBaseConfig
+import beaverlib.utils.Units.lb
+import com.pathplanner.lib.config.ModuleConfig
+import com.pathplanner.lib.config.RobotConfig
+import beaverlib.utils.Units.Electrical.Current
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj.Filesystem
-import edu.wpi.first.wpilibj.Joystick
-import edu.wpi.first.wpilibj.XboxController
+import edu.wpi.first.wpilibj.util.Color
+import frc.robot.Constants.DriveConstants.DriveKinematics
+import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import java.io.File
+import kotlin.math.PI
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -36,70 +42,137 @@ class Constants {
 
 
     object DriveConstants {
-        // Driving Parameters - Note that these are not the maximum capable speeds of
-        // the robot, rather the allowed maximum speeds
-        const val MaxSpeedMetersPerSecond = 4.5
-        const val MaxAngularSpeed = 2 * Math.PI // radians per second (2*PI)
-        const val DirectionSlewRate = 2.0 // radians per second
-        const val MagnitudeSlewRate = 1.8 // percent per second (1 = 100%)
-        const val RotationalSlewRate = 10.0 // percent per second (1 = 100%)
-
+        val MaxSpeedMetersPerSecond = (3.1).feetPerSecond.asMetersPerSecond
         // Chassis configuration (left to right dist of center of the wheels)
-        val TrackWidth = Units.inchesToMeters(22.75)
+        val TrackWidth = Units.inchesToMeters(11.5)
 
         // Distance between centers of right and left wheels on robot (front to back dist)
-        val WheelBase = Units.inchesToMeters(22.75)
+        val WheelBase = Units.inchesToMeters(11.5)
 
         // Distance between front and back wheels on robot: CHANGE TO MATCH WITH ROBOT
-        val DriveKinematics = SwerveDriveKinematics(
-                Translation2d(-WheelBase / 2, TrackWidth / 2), // Front Left (-,+) 4:4 :1 :1
-                Translation2d(-WheelBase / 2, -TrackWidth / 2), // Front Right (+,+) 1:3 :4 :2
-                Translation2d(WheelBase / 2, TrackWidth / 2), // Back Left (-,-) 3:1 :2 :4
-                Translation2d(WheelBase / 2, -TrackWidth / 2)) //Back Right (+,-) 2:2 :3 :3
-
-        // Angular offsets of the modules relative to the chassis in radians
-        const val FrontLeftChassisAngularOffset  = 0.0
-        const val FrontRightChassisAngularOffset = 0.0
-        const val BackLeftChassisAngularOffset   = 0.0
-        const val BackRightChassisAngularOffset  = 0.0
-
+        val DriveKinematics = arrayOf(
+            Translation2d(WheelBase / 2, TrackWidth / 2),
+            Translation2d(WheelBase / 2, -TrackWidth / 2),
+            Translation2d(-WheelBase / 2, TrackWidth / 2),
+            Translation2d(-WheelBase / 2, -TrackWidth / 2)
+        )
         // YAGSL `File` Configs
-        val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve")
+        val DRIVE_CONFIG: File = File(Filesystem.getDeployDirectory(), "swerve1")
+
+        val MomentOfInertia = 4.09149392  // kg * m^2
 
     }
 
-    object ModuleConstants {
+    object ElevatorConstants {
+        const val MaxVel = 1.0
+        const val MaxAccel = 1.0
 
-//        var DrivingP = 0.1
-//        var DrivingI = 0.0
-//        var DrivingD = 0.0
-////        const val DrivingKs = 0.11937
-//        const val DrivingKs = 0.01937
-////        const val DrivingKv = 2.6335
-//        const val DrivingKv = 0.1335
-//        const val DrivingKa = 0.06035
-////        const val DrivingKa = 0.46035
-        var DrivingP = 0.05
-        var DrivingI = 0.0
-        var DrivingD = 0.01
-        const val DrivingKs = 0.0
-        const val DrivingKv = 0.55
-        const val DrivingKa = 0.0
-        const val DrivingMinOutput = -1.0
-        const val DrivingMaxOutput = 1.0
-        var TurningP = 0.9
-//        var TurningP = 0.75
-        var TurningI = 0.0
-        var TurningD = 0.0
-//        var Ks = 0.06 //0.085
-        const val TurningFF = 0.0
-        const val TurningMinOutput = 0.5
-        const val TurningMaxOutput = 1.0
-        val DrivingMotorIdleMode = SparkBaseConfig.IdleMode.kBrake
-        val TurningMotorIdleMode = SparkBaseConfig.IdleMode.kBrake
-        const val DrivingMotorCurrentLimit = 30 // amps
-        const val TurningMotorCurrentLimit = 10 // amps
+        //PID constants
+        const val kP = 5.0
+        const val kI = 0.0
+        const val kD = 1.0
+
+        //FF constants
+        const val kS = 0.045
+        const val kV = 8.14
+            //8.44
+        // 6.0
+//            1.5136
+        const val kG = 0.355
+        const val kA = 0.0
+
+        //Max elev driver outputs
+        const val NEG_MAX_OUTPUT = -2.0
+        const val POS_MAX_OUTPUT = 5.0
+
+        //SOFT Stop limits
+        const val UPPER_LIMIT = 1.45
+        const val LOWER_LIMIT = 0.0
+
+        enum class ElevatorState(val position: Double) {
+            Stow(0.0),
+            L2(0.21),
+            L3(0.64),
+            L4(1.425),
+            A1(0.45),
+            A2(0.9),
+        }
     }
+
+    object PivotConstants {
+        //Max elev driver outputs
+        const val NEG_MAX_OUTPUT = -1.75
+        const val POS_MAX_OUTPUT = 2.0
+
+        const val ObstructionAngle = 1.5
+
+        const val kP = 6.0
+        const val kI = 0.0
+        const val kD = 0.5
+
+        const val kS = 0.11
+        const val kG = 0.51
+        const val kV = 0.64
+        // 0.84
+
+        const val Max_Velocity = PI
+        const val Max_Accel = PI
+        //SOFT Stop limits
+        const val UPPER_LIMIT = 0.0
+        const val LOWER_LIMIT = 0.0
+
+
+        // FIXME set to real positions later
+        enum class PivotState(val position: Double) {
+            Traverse(0.87),
+            Stow(1.78),
+            AngleBranch(1.4),
+            VerticalBranch(0.6),
+            Algae(-0.95);
+
+            fun coralExtend() = when (this) {
+                Stow -> AngleBranch
+                AngleBranch -> Traverse
+                Traverse -> VerticalBranch
+                VerticalBranch -> VerticalBranch
+                Algae -> Algae
+            }
+            fun coralRetract() = when (this) {
+                Algae -> Algae
+                VerticalBranch -> Traverse
+                Traverse -> AngleBranch
+                AngleBranch -> Stow
+                Stow -> Stow
+            }
+            fun algaeExtend() = when (this) {
+                Stow -> Traverse
+                Traverse -> Algae
+                Algae -> Algae
+                VerticalBranch -> Algae
+                AngleBranch -> Traverse
+            }
+            fun algaeRetract() = when (this) {
+                Algae -> Traverse
+                Traverse -> Traverse
+                Stow -> Stow
+                VerticalBranch -> VerticalBranch
+                AngleBranch -> AngleBranch
+            }
+         }
+    }
+
+    object IntakeConstants {
+        const val ks = 0.0
+        const val kv = 0.0
+        const val ka = 0.0
+        const val STOP_BUFFER = 1.0
+        const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
+        val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
+        const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
+        const val INTAKE = 0.8
+        const val OUTTAKE = -0.4
+    }
+
 
     object OIConstants {
         const val DriverControllerPort = 0
@@ -107,10 +180,24 @@ class Constants {
         const val DriveDeadband = 0.05
         const val SpeedMultiplierMin = 0.4
         const val SpeedMultiplierMax = 1.0
+        const val DEADZONE_THRESHOLD = 0.1
     }
 
     object AutoConstants {
+        val Robot_Config = RobotConfig(
+            (120.0).lb.asKilograms,
+            MaxSpeedMetersPerSecond,
+            ModuleConfig(
+                (2.0).inches.asMeters,
+                MaxSpeedMetersPerSecond,
+                1.54,
+                DCMotor.getNEO(1).withReduction(6.75),
+                30.0,
+                1
+            ),
+            *DriveKinematics
 
+        )
         const val MaxAccelerationMetersPerSecondSquared = 3.0
         const val MaxAngularSpeedRadiansPerSecond = Math.PI
         const val MaxAngularSpeedRadiansPerSecondSquared = Math.PI
@@ -132,58 +219,42 @@ class Constants {
         )
     }
 
-    object NeoMotorConstants {
-        const val FreeSpeedRpm = 5676.0
-    }
 
-    object ArmConstants {
-        const val CurrentLimit = 40
-        const val ArmMaxSpeed = 1.5
-        const val Arm_MaxAccel = 1.5
-        enum class ArmHeights(val position: Double) {
-            STOWED(0.183),
-            AMP(-0.1),
-            SHOOTER1(1.0),
-            SHOOTER2(1.3),   //base
-            SIXPIECE1(1.15),
-            SIXPIECE2(1.05)
-
-        }
-    }
-
-    object IntakeConstants{
-        const val CURRENT_LIMIT = 15
-        const val INTAKE_SPEED = 0.75
-        const val STOP_BUFFER = 1.0
-    }
-    object ShooterConstants{
-        val FLYWHEEL_CIRCUMFERENCE = 4.inches
-        const val INTAKE_SPEED = 1.0
-        const val INTAKE_DURATION = 0.5
-    }
 
     // set to operator/driver's preferences
     object ButtonConstants {
         const val CLIMBER_UP = 2 // very hard to press accidentally
         const val CLIMBER_WAIT_DURATION = 0.5
 
-        const val SHOOT = 4
-        const val ARM_UP = 5
-        const val ARM_DOWN = 3
+        //Driver buttons
+        const val RESET_GYRO = 6
 
-        const val ARM_DIRECT_GROUND = 11
-        const val ARM_DIRECT_STOWED = 8
-        const val ARM_DIRECT_AMP = 7
-        const val ARM_DIRECT_SHOOTER1 = 9
-        const val ARM_DIRECT_SHOOTER2 = 10
-        const val ARM_DIRECT_WAIT_DURATION = 0.05
+        //Operator Controls
+        const val TOGGLE_STATE = 1
+        const val AUTO_INTAKE = 2
+
+        const val PIVOT_FW = 5
+        const val PIVOT_BW = 3
+
+        const val ELEV_FW = 6
+        const val ELEV_BW = 4
+
+        const val BASE_STAGE = 7
+        const val CORAL_L2 = 8
+        const val CORAL_L3 = 10
+        const val CORAL_L4 = 12
+
+        const val ALGAE_B1 = 9
+        const val ALGAE_B2 = 11
 
         const val PRESS_ACTIVATE_DURATION = 0.1
         const val INPUT_BUFFER_DURATION = 0.2
     }
-    object VisionConstants{
-        const val RED_ALLIANCE_SPEAKER_TAG_ID = 4
-        const val BLUE_ALLIANCE_SPEAKER_TAG_ID = 7
+
+    object VisionConstants {
+        const val CORAL_OFFSET_FROM_CENTER = 0.1524
     }
+
+
 
 }
