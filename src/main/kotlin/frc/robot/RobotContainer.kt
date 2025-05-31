@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.OI.autoIntake
 import frc.robot.OI.elevBWStepper
 import frc.robot.OI.elevFWStepper
@@ -36,8 +35,6 @@ import frc.robot.commands.swerve.TeleopDriveCommand
 import frc.robot.commands.swerve.*
 import frc.robot.commands.wrist.*
 import frc.robot.subsystems.*
-import kotlin.math.pow
-import kotlin.math.sign
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a

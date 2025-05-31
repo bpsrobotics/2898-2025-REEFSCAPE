@@ -5,20 +5,16 @@
 
 package frc.robot
 
-import beaverlib.utils.Units.Linear.feet
 import beaverlib.utils.Units.Linear.feetPerSecond
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.lb
 import com.pathplanner.lib.config.ModuleConfig
 import com.pathplanner.lib.config.RobotConfig
-import beaverlib.utils.Units.Electrical.Current
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Filesystem
-import edu.wpi.first.wpilibj.util.Color
 import frc.robot.Constants.DriveConstants.DriveKinematics
 import frc.robot.Constants.DriveConstants.MaxSpeedMetersPerSecond
 import java.io.File
@@ -166,9 +162,7 @@ class Constants {
         const val kv = 0.0
         const val ka = 0.0
         const val STOP_BUFFER = 1.0
-        const val CURRENT_WHEN_ROBOT_HAS_CORAL = 7.0 //FIXME set to real value
-        val CORAL_COLOR = Color(255, 255, 255) //FIXME set to real value
-        const val CORAL_COLOR_TOLERANCE = 10.0 //FIXME set to real value
+        const val SENSOR_PIN = 7
         const val INTAKE = 0.8
         const val OUTTAKE = -0.4
     }
@@ -176,7 +170,6 @@ class Constants {
 
     object OIConstants {
         const val DriverControllerPort = 0
-        @Suppress("SpellCheckingInspection")
         const val DriveDeadband = 0.05
         const val SpeedMultiplierMin = 0.4
         const val SpeedMultiplierMax = 1.0
