@@ -161,7 +161,8 @@ class Constants {
         const val ks = 0.0
         const val kv = 0.0
         const val ka = 0.0
-        const val STOP_BUFFER = 1.0
+        const val DEBOUNCE = 0.01
+        const val STOP_TIME = 0.14
         const val SENSOR_PIN = 7
         const val INTAKE = 0.8
         const val OUTTAKE = -0.4

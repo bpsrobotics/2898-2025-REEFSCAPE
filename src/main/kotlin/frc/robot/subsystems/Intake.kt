@@ -22,7 +22,7 @@ object Intake : SubsystemBase() {
     private val loop = EventLoop()
     private val sensorPort = DigitalInput(IntakeConstants.SENSOR_PIN)
     private val sensorEv = BooleanEvent(loop) { !sensorPort.get() }
-    val hasCoral: BooleanEvent = sensorEv.debounce(IntakeConstants.STOP_BUFFER, Debouncer.DebounceType.kRising)
+    val hasCoral: BooleanEvent = sensorEv.debounce(IntakeConstants.DEBOUNCE, Debouncer.DebounceType.kRising)
 
     init {
         // Intake motor initialisation stuff
