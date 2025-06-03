@@ -21,7 +21,7 @@ object Intake : SubsystemBase() {
 
     private val loop = EventLoop()
     private val sensorPort = DigitalInput(IntakeConstants.SENSOR_PIN)
-    private val sensorEv = BooleanEvent(loop) { sensorPort.get() }
+    private val sensorEv = BooleanEvent(loop) { !sensorPort.get() }
     val hasCoral: BooleanEvent = sensorEv.debounce(IntakeConstants.STOP_BUFFER, Debouncer.DebounceType.kRising)
 
     init {
@@ -46,20 +46,10 @@ object Intake : SubsystemBase() {
     }
 
     fun runMotor(speed: Double) {
-        /*if (!intakeState){
-            output = 0.0
-            return
-        }
-        if (buffer.calculate(hasCoral) && !gracePeriod) {
-            output = 0.0
-            bufferTimer.restart()
-            return
-        }
-        if (gracePeriod && hasCoral) {
-            output = speed
-        } else {
-            output = speed
-        }*/
         intakeMotor.set(speed)
+    }
+
+    fun stop() {
+        intakeMotor.stopMotor()
     }
 }

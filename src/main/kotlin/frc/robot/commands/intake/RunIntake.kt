@@ -9,7 +9,8 @@ class RunIntake(val speed: Double = 0.35) : Command() {
     }
     override fun initialize() {}
     override fun execute() {
-        Intake.runMotor(speed)
+        if (Intake.hasCoral.asBoolean) Intake.stop()
+        else Intake.runMotor(speed)
     }
 
     override fun isFinished(): Boolean {
