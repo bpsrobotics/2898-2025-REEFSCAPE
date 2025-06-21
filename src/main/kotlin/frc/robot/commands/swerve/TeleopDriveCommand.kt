@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
+import frc.robot.subsystems.VisionTesting
 import swervelib.SwerveController
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
@@ -62,6 +63,8 @@ class TeleopDriveCommand(
         var strafeVelocity = vStrafe()
         var angVelocity = omega()
         val slowMode = slowMode()
+
+        angVelocity += VisionTesting.angularVel
 //        SmartDashboard.putNumber("vX", forwardVelocity)
 //        SmartDashboard.putNumber("vY", strafeVelocity)
 //        SmartDashboard.putNumber("omega", angVelocity)

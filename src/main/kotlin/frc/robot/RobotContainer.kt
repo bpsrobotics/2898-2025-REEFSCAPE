@@ -114,6 +114,7 @@ class RobotContainer {
         Wrist
         Elevator
         Intake
+        VisionTesting
     }
 
     /**
@@ -197,7 +198,6 @@ class RobotContainer {
 //        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
 //        OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
 //        OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
-
 
 
 
