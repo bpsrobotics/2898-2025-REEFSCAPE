@@ -21,11 +21,12 @@ class MoveWristBy(var goalPosition: Double) : Command() {
     override fun initialize() {
         profiledPID.reset(pos, rate)
         profiledPID.enableContinuousInput(-PI, PI)
-        profiledPID.setTolerance(0.07)
-        newGoal = goalPosition + profiledPID.setpoint.position
+        profiledPID.setTolerance(0.0075)
     }
 
     override fun execute() {
+        newGoal = goalPosition + profiledPID.goal.position
+
         Wrist.profiledPIDControl(newGoal)
         SmartDashboard.putNumber("/wrist/targ_pos", goalPosition)
 

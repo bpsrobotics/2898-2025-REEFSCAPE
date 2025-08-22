@@ -38,7 +38,7 @@ class Constants {
 
 
     object DriveConstants {
-        val MaxSpeedMetersPerSecond = (3.1).feetPerSecond.asMetersPerSecond
+        val MaxSpeedMetersPerSecond = (15.1).feetPerSecond.asMetersPerSecond
         // Chassis configuration (left to right dist of center of the wheels)
         val TrackWidth = Units.inchesToMeters(11.5)
 
@@ -69,17 +69,19 @@ class Constants {
         const val kD = 1.0
 
         //FF constants
-        const val kS = 0.045
-        const val kV = 8.14
+        const val kS = 0.1
+            //0.045
+        const val kV = 12.14
             //8.44
         // 6.0
 //            1.5136
         const val kG = 0.355
+            //0.355
         const val kA = 0.0
 
         //Max elev driver outputs
         const val NEG_MAX_OUTPUT = -2.0
-        const val POS_MAX_OUTPUT = 5.0
+        const val POS_MAX_OUTPUT = 3.0
 
         //SOFT Stop limits
         const val UPPER_LIMIT = 1.45
@@ -102,13 +104,13 @@ class Constants {
 
         const val ObstructionAngle = 1.5
 
-        const val kP = 6.0
+        const val kP = 8.0
         const val kI = 0.0
         const val kD = 0.5
 
         const val kS = 0.11
         const val kG = 0.51
-        const val kV = 0.64
+        const val kV = 0.84
         // 0.84
 
         const val Max_Velocity = PI

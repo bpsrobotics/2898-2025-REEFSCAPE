@@ -155,12 +155,12 @@ class RobotContainer {
         highHatForward.whileTrue(RunOuttake(0.5))
         highHatBack.whileTrue(RunOuttake(-1.0))
 
-        elevFWStepper.onTrue(MoveElevatorBy( 0.05 ))
-        elevBWStepper.onTrue(MoveElevatorBy(-0.05))
+        elevFWStepper.whileTrue(MoveElevatorBy( 0.005 ))
+        elevBWStepper.whileTrue(MoveElevatorBy(-0.005))
 
 //        pivotFWStepper.whileTrue(VoltageWrist(0.2))
-            pivotFWStepper.onTrue(MoveWristBy(-0.4))
-        pivotBWStepper.onTrue(MoveWristBy(0.4))
+        pivotFWStepper.whileTrue(MoveWristBy(-0.03))
+        pivotBWStepper.whileTrue(MoveWristBy(0.03))
 
 //        pivotBWStepper.whileTrue(VoltageWrist(-0.2))
 

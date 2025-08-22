@@ -18,12 +18,12 @@ class MoveElevatorBy(val goalDist : Double) : Command() {
     override fun initialize() {
 //        if (goalPosition !in Constants.ElevatorConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT ) return
         profiledPID.reset(getPos())
-        profiledPID.setTolerance(0.075)
-        goalPosition = profiledPID.goal.position + goalDist
+        profiledPID.setTolerance(0.00075)
 
     }
 
     override fun execute() {
+        goalPosition = profiledPID.goal.position + goalDist
         Elevator.profiledPIDControl(goalPosition)
     }
 
