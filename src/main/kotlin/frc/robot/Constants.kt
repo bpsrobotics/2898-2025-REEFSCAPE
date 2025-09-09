@@ -5,6 +5,7 @@
 
 package frc.robot
 
+import beaverlib.utils.Units.Angular.radiansPerSecond
 import beaverlib.utils.Units.Linear.feetPerSecond
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.lb
@@ -38,7 +39,8 @@ class Constants {
 
 
     object DriveConstants {
-        val MaxSpeedMetersPerSecond = (15.1).feetPerSecond.asMetersPerSecond
+        val MaxSpeedMetersPerSecond = (15.1).feetPerSecond.asMetersPerSecond //TODO change back to 2.1
+        const val MaxAngularSpeedRadiansPerSecond =  PI * 1.5
         // Chassis configuration (left to right dist of center of the wheels)
         val TrackWidth = Units.inchesToMeters(11.5)
 
@@ -71,7 +73,7 @@ class Constants {
         //FF constants
         const val kS = 0.1
             //0.045
-        const val kV = 12.14
+        const val kV = 8.14
             //8.44
         // 6.0
 //            1.5136
@@ -80,8 +82,8 @@ class Constants {
         const val kA = 0.0
 
         //Max elev driver outputs
-        const val NEG_MAX_OUTPUT = -2.0
-        const val POS_MAX_OUTPUT = 3.0
+        const val NEG_MAX_OUTPUT = -2.5
+        const val POS_MAX_OUTPUT = 4.0
 
         //SOFT Stop limits
         const val UPPER_LIMIT = 1.45
@@ -106,7 +108,7 @@ class Constants {
 
         const val kP = 8.0
         const val kI = 0.0
-        const val kD = 0.5
+        const val kD = 0.25
 
         const val kS = 0.11
         const val kG = 0.51
@@ -116,15 +118,15 @@ class Constants {
         const val Max_Velocity = PI
         const val Max_Accel = PI
         //SOFT Stop limits
-        const val UPPER_LIMIT = 0.0
-        const val LOWER_LIMIT = 0.0
+        const val UPPER_LIMIT = -2.1
+        const val LOWER_LIMIT = 1.5
 
 
         // FIXME set to real positions later
         enum class PivotState(val position: Double) {
-            Traverse(0.87),
+            Traverse(0.4),
             Stow(1.78),
-            AngleBranch(1.4),
+            AngleBranch(1.5),
             VerticalBranch(0.6),
             Algae(-0.95);
 

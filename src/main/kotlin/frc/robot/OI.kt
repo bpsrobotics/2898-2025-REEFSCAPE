@@ -104,6 +104,9 @@ object OI : SubsystemBase() {
     val rightTrigger
         get() = driverController.rightTriggerAxis
 
+    val slowMode
+        get() = driverController.rightTriggerAxis
+
     // Coral out take positions move to
     val moveL1 = operatorController.button(BASE_STAGE)
     val moveL2 = operatorController.button(CORAL_L2)
@@ -119,6 +122,7 @@ object OI : SubsystemBase() {
     val sysidBD = driverController.a()
     val coralAlignLeft = driverController.povLeft()
     val coralAlignRight = driverController.povRight()
+
 
     val autoIntake = operatorController.button(AUTO_INTAKE)
     val toggleWrist = operatorController.button(TOGGLE_STATE)

@@ -25,6 +25,7 @@ import frc.robot.OI.highHatForward
 import frc.robot.OI.pivotBWStepper
 import frc.robot.OI.pivotFWStepper
 import frc.robot.OI.resetGyro
+import frc.robot.OI.slowMode
 import frc.robot.OI.toggleWrist
 import frc.robot.commands.elevator.*
 import frc.robot.commands.intake.RunIntake
@@ -58,8 +59,9 @@ class RobotContainer {
             { MathUtil.applyDeadband(translationX*reverseDrive, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
-            { false }
+            { MathUtil.applyDeadband(slowMode, 0.1) }
         )
+
 
 
     val navXResetCommand: NavXReset = NavXReset()
@@ -185,14 +187,11 @@ class RobotContainer {
             MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
 
         ))
-        OI.moveL3.onTrue(        SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
+        OI.moveL3.onTrue(        SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position),
             MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position),
-            MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
         ))
-        OI.moveL4.onTrue(SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position)
-        ))
+        OI.moveL4.onTrue(SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
+            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position)))
 
 //        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
 //        OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
