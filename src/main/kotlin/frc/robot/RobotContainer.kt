@@ -70,28 +70,6 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-
-
-        NamedCommands.registerCommand("coralouttake", RunOuttake(0.8)) //Todo set this properly
-        //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
-        NamedCommands.registerCommand("L1", Stow())
-        NamedCommands.registerCommand("L2", PositionL2())
-        NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
-        NamedCommands.registerCommand("L4", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position)
-        ))
-        NamedCommands.registerCommand("PlaceSequence", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
-            RunOuttake(0.8, 0.5)
-        ))
-        NamedCommands.registerCommand("autointake", RunIntake())
-        NamedCommands.registerCommand("GetCoralStationPiece", SequentialCommandGroup(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position),
-            MoveWrist(Constants.PivotConstants.PivotState.Stow.position),
-            RunIntake()
-        ))
-        NamedCommands.registerCommand("stabilize", StabilizeElevator())
         initializeObjects()
         // Configure the trigger bindings
 
@@ -116,6 +94,7 @@ class RobotContainer {
         Wrist
         Elevator
         Intake
+        Autos
     }
 
     /**
