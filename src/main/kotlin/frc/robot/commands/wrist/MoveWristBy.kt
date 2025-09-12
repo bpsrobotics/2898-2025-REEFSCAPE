@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants
+import frc.robot.Constants.PivotConstants.LOWER_LIMIT
+import frc.robot.Constants.PivotConstants.UPPER_LIMIT
 import frc.robot.subsystems.Wrist.profiledPID
 import frc.robot.subsystems.Wrist
 import frc.robot.subsystems.Wrist.pid
@@ -21,13 +23,15 @@ class MoveWristBy(var goalPosition: Double) : Command() {
     override fun initialize() {
         profiledPID.reset(pos, rate)
         profiledPID.enableContinuousInput(-PI, PI)
-        profiledPID.setTolerance(0.07)
-        newGoal = goalPosition + profiledPID.setpoint.position
+        profiledPID.setTolerance(0.01)
     }
 
     override fun execute() {
+        if ((goalPosition + profiledPID.goal.position) in UPPER_LIMIT..LOWER_LIMIT) {
+            newGoal = goalPosition + profiledPID.goal.position
+        }
         Wrist.profiledPIDControl(newGoal)
-        SmartDashboard.putNumber("/wrist/targ_pos", goalPosition)
+        SmartDashboard.putNumber("/wrist/targ_pos", newGoal)
 
 
     }

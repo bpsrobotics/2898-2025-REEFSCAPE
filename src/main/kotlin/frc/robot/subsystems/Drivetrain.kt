@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.Constants
+import frc.robot.Constants.AutoConstants.MaxAngularSpeedRadiansPerSecond
 import frc.robot.Constants.AutoConstants.RotationD
 import frc.robot.Constants.AutoConstants.RotationI
 import frc.robot.Constants.AutoConstants.RotationP
@@ -53,6 +54,8 @@ object  Drivetrain : SubsystemBase() {
 
     /** The maximum speed of the swerve drive */
     var maximumSpeed = Constants.DriveConstants.MaxSpeedMetersPerSecond
+
+    val maxAngularSpeed = Constants.DriveConstants.MaxAngularSpeedRadiansPerSecond
 
     /** SwerveModuleStates publisher for swerve display */
     var swerveStates: StructArrayPublisher<SwerveModuleState> = NetworkTableInstance.getDefault().

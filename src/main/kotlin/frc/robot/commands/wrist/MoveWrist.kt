@@ -10,6 +10,8 @@ import frc.robot.subsystems.Wrist.profiledPID
 import frc.robot.subsystems.Wrist
 import frc.robot.subsystems.Wrist.pos
 import frc.robot.subsystems.Wrist.rate
+import frc.robot.Constants.PivotConstants.LOWER_LIMIT
+import frc.robot.Constants.PivotConstants.UPPER_LIMIT
 import frc.robot.subsystems.Wrist.velocity
 import kotlin.math.PI
 
@@ -30,6 +32,6 @@ class MoveWrist(var goalPosition: Double) : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return profiledPID.atGoal()
+        return profiledPID.atGoal() || (goalPosition !in UPPER_LIMIT..LOWER_LIMIT)
     }
 }

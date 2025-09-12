@@ -24,6 +24,13 @@ object Intake : SubsystemBase() {
     private val sensorEv = BooleanEvent(loop) { !sensorPort.get() }
     val hasCoral: BooleanEvent = sensorEv.debounce(IntakeConstants.DEBOUNCE, Debouncer.DebounceType.kRising)
 
+    enum class RollerStates(val speed: Double) {
+        CoralIdle(-0.1),
+        AlgaeIdle(-0.4),
+        
+    }
+
+
     init {
         // Intake motor initialisation stuff
         IntakeConfig

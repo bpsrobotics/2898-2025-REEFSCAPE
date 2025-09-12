@@ -25,6 +25,7 @@ import frc.robot.OI.highHatForward
 import frc.robot.OI.pivotBWStepper
 import frc.robot.OI.pivotFWStepper
 import frc.robot.OI.resetGyro
+import frc.robot.OI.slowMode
 import frc.robot.OI.toggleWrist
 import frc.robot.commands.elevator.*
 import frc.robot.commands.intake.RunIntake
@@ -58,8 +59,9 @@ class RobotContainer {
             { MathUtil.applyDeadband(translationX*reverseDrive, 0.1) },
             { MathUtil.applyDeadband(-turnX, 0.1)},
             { true },
-            { false }
+            { MathUtil.applyDeadband(slowMode, 0.1) }
         )
+
 
 
     val navXResetCommand: NavXReset = NavXReset()
@@ -68,28 +70,6 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-
-
-        NamedCommands.registerCommand("coralouttake", RunOuttake(0.8)) //Todo set this properly
-        //todo NamedCommands.registerCommand("algaeintake", AlgaeIntakeOutake())
-        NamedCommands.registerCommand("L1", Stow())
-        NamedCommands.registerCommand("L2", PositionL2())
-        NamedCommands.registerCommand("L3", MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
-        NamedCommands.registerCommand("L4", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position)
-        ))
-        NamedCommands.registerCommand("PlaceSequence", SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
-            RunOuttake(0.8, 0.5)
-        ))
-        NamedCommands.registerCommand("autointake", RunIntake())
-        NamedCommands.registerCommand("GetCoralStationPiece", SequentialCommandGroup(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position),
-            MoveWrist(Constants.PivotConstants.PivotState.Stow.position),
-            RunIntake()
-        ))
-        NamedCommands.registerCommand("stabilize", StabilizeElevator())
         initializeObjects()
         // Configure the trigger bindings
 
@@ -114,7 +94,7 @@ class RobotContainer {
         Wrist
         Elevator
         Intake
-        VisionTesting
+        Autos
     }
 
     /**
@@ -156,12 +136,12 @@ class RobotContainer {
         highHatForward.whileTrue(RunOuttake(0.5))
         highHatBack.whileTrue(RunOuttake(-1.0))
 
-        elevFWStepper.onTrue(MoveElevatorBy( 0.05 ))
-        elevBWStepper.onTrue(MoveElevatorBy(-0.05))
+        elevFWStepper.whileTrue(MoveElevatorBy( 0.005 ))
+        elevBWStepper.whileTrue(MoveElevatorBy(-0.005))
 
 //        pivotFWStepper.whileTrue(VoltageWrist(0.2))
-            pivotFWStepper.onTrue(MoveWristBy(-0.4))
-        pivotBWStepper.onTrue(MoveWristBy(0.4))
+        pivotFWStepper.whileTrue(MoveWristBy(-0.03))
+        pivotBWStepper.whileTrue(MoveWristBy(0.03))
 
 //        pivotBWStepper.whileTrue(VoltageWrist(-0.2))
 
@@ -170,9 +150,7 @@ class RobotContainer {
             SequentialCommandGroup(
             MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position),
             MoveWrist(Constants.PivotConstants.PivotState.Algae.position)
-
-        )
-        )
+        ))
         OI.moveA2.onTrue(      SequentialCommandGroup(
             MoveElevator(Constants.ElevatorConstants.ElevatorState.A2.position),
             MoveWrist(Constants.PivotConstants.PivotState.Algae.position)
@@ -186,18 +164,16 @@ class RobotContainer {
             MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
 
         ))
-        OI.moveL3.onTrue(        SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
+        OI.moveL3.onTrue(        SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position),
             MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position),
-            MoveWrist(Constants.PivotConstants.PivotState.AngleBranch.position)
         ))
-        OI.moveL4.onTrue(SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.Traverse.position),
-            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position),
-            MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position)
-        ))
+        OI.moveL4.onTrue(SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
+            MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position)))
 
 //        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))
 //        OI.moveL2.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L2.position))
 //        OI.moveL3.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position))
+
 
 
 

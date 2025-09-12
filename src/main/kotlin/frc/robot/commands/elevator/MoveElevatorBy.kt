@@ -2,6 +2,7 @@ package frc.robot.commands.elevator
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj.Timer
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.Constants
 import frc.robot.subsystems.Elevator
@@ -18,13 +19,15 @@ class MoveElevatorBy(val goalDist : Double) : Command() {
     override fun initialize() {
 //        if (goalPosition !in Constants.ElevatorConstants.LOWER_LIMIT..Constants.ElevatorConstants.UPPER_LIMIT ) return
         profiledPID.reset(getPos())
-        profiledPID.setTolerance(0.075)
-        goalPosition = profiledPID.goal.position + goalDist
+        profiledPID.setTolerance(0.001)
 
     }
 
     override fun execute() {
+        goalPosition = profiledPID.goal.position + goalDist
         Elevator.profiledPIDControl(goalPosition)
+        SmartDashboard.putNumber("/Elevator/targ_pos", goalPosition)
+
     }
 
     override fun isFinished(): Boolean {

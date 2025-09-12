@@ -41,7 +41,7 @@ private val wristConfig : SparkMaxConfig = SparkMaxConfig()
 
 object Wrist : SubsystemBase() {
     val armMotor = SparkMax(PivotDriverID, SparkLowLevel.MotorType.kBrushless)
-    val encoder = DutyCycleEncoder(PivotPosID,2 * PI,3.9)
+    val encoder = DutyCycleEncoder(PivotPosID,2 * PI,4.6) //subtract the thingabobber
 
     var velocity = 0.0
     private val constraints = TrapezoidProfile.Constraints(Max_Velocity, Max_Accel)

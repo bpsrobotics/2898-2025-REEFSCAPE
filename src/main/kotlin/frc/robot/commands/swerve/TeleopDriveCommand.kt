@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Elevator
-import frc.robot.subsystems.VisionTesting
 import swervelib.SwerveController
 import java.util.function.BooleanSupplier
 import java.util.function.DoubleSupplier
+import kotlin.math.pow
 
 /**
  * A command that controls the swerve drive using joystick inputs.
@@ -30,13 +30,13 @@ class TeleopDriveCommand(
     vStrafe: () -> Double,
     omega: () -> Double,
     driveMode: () -> Boolean,
-    slowMode: () -> Boolean
+    slowMode: () -> Double
 ) : Command() {
     private val vForward: () -> Double
     private val vStrafe: () -> Double
     private val omega: () -> Double
     private val driveMode: () -> Boolean
-    private val slowMode: () -> Boolean
+    private val slowMode: () -> Double
     private val controller: SwerveController
     private val swerve: Drivetrain = Drivetrain
     var addSpeed = Transform2d()
@@ -62,18 +62,18 @@ class TeleopDriveCommand(
         var forwardVelocity = vForward()
         var strafeVelocity = vStrafe()
         var angVelocity = omega()
-        val slowMode = slowMode()
+        var slowMode = slowMode()
 
-        angVelocity += VisionTesting.angularVel
-//        SmartDashboard.putNumber("vX", forwardVelocity)
-//        SmartDashboard.putNumber("vY", strafeVelocity)
-//        SmartDashboard.putNumber("omega", angVelocity)
 
-        if (slowMode) {
-            forwardVelocity *= 0.6
-            strafeVelocity *= 0.6
-            angVelocity *= 0.6
-        }
+        forwardVelocity *= (1.0 - (slowMode.pow(3) * 0.8))
+
+        strafeVelocity *= (1.0 - (slowMode.pow(3) * 0.8))
+        angVelocity *= (1.0 - (slowMode.pow(3) * 0.85))
+        SmartDashboard.putNumber("vX", forwardVelocity)
+        SmartDashboard.putNumber("vY", strafeVelocity)
+        SmartDashboard.putNumber("omega", angVelocity)
+        SmartDashboard.putNumber("slowmode", slowMode)
+
 
         // Drive using raw values.
 //        swerve.drive(
@@ -87,7 +87,7 @@ class TeleopDriveCommand(
 //            angVelocity * controller.config.maxAngularVelocity,
 //            true
 //        )
-        swerve.driveFieldOriented(ChassisSpeeds(forwardVelocity * swerve.maximumSpeed + addSpeed.translation.x, strafeVelocity * swerve.maximumSpeed + addSpeed.translation.y, angVelocity * swerve.maximumSpeed))
+        swerve.driveFieldOriented(ChassisSpeeds(forwardVelocity * swerve.maximumSpeed + addSpeed.translation.x, strafeVelocity * swerve.maximumSpeed + addSpeed.translation.y, angVelocity * swerve.maxAngularSpeed))
     }
 
     /** @suppress */

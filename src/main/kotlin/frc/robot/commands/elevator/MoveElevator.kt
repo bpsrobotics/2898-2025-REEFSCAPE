@@ -29,6 +29,10 @@ class MoveElevator(val goalPosition : Double) : Command() {
         return profiledPID.atGoal()
     }
 
+    override fun end(interrupted: Boolean) {
+        println("Elevator at goals")
+    }
+
 
 }
 
