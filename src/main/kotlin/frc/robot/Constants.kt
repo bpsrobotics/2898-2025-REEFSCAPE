@@ -119,7 +119,7 @@ class Constants {
         const val Max_Accel = PI
         //SOFT Stop limits
         const val UPPER_LIMIT = -2.1
-        const val LOWER_LIMIT = 1.5
+        const val LOWER_LIMIT = 1.21
 
 
         // FIXME set to real positions later

@@ -150,9 +150,7 @@ class RobotContainer {
             SequentialCommandGroup(
             MoveElevator(Constants.ElevatorConstants.ElevatorState.A1.position),
             MoveWrist(Constants.PivotConstants.PivotState.Algae.position)
-
-        )
-        )
+        ))
         OI.moveA2.onTrue(      SequentialCommandGroup(
             MoveElevator(Constants.ElevatorConstants.ElevatorState.A2.position),
             MoveWrist(Constants.PivotConstants.PivotState.Algae.position)
