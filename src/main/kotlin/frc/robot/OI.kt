@@ -115,6 +115,7 @@ object OI : SubsystemBase() {
     val moveA1 = operatorController.button(ALGAE_B1)
     val moveA2 = operatorController.button(ALGAE_B2)
 
+    val align = driverController.leftBumper()
     val resetGyro = driverController.rightBumper()
     val sysidFQ = driverController.x()
     val sysidBQ = driverController.y()

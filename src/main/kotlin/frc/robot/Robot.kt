@@ -6,6 +6,7 @@ package frc.robot
 import com.fasterxml.jackson.databind.util.Named
 import com.pathplanner.lib.auto.NamedCommands
 import com.pathplanner.lib.commands.FollowPathCommand
+import com.pathplanner.lib.commands.PathfindingCommand
 import edu.wpi.first.cameraserver.CameraServer
 import edu.wpi.first.wpilibj.DataLogManager
 import edu.wpi.first.wpilibj.TimedRobot
@@ -41,7 +42,7 @@ class Robot : TimedRobot() {
         robotContainer = RobotContainer()
         SmartDashboard.putBoolean("/Auto/UseMovementAuto", true)
 
-
+        PathfindingCommand.warmupCommand().schedule();
 //        CameraServer.startAutomaticCapture()
     }
 
