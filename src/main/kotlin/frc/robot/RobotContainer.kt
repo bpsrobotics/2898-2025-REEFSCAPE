@@ -73,7 +73,7 @@ class RobotContainer {
         initializeObjects()
         // Configure the trigger bindings
 
-        autoCommandChooser = AutoBuilder.buildAutoChooser("4-Piece-Low")
+        autoCommandChooser = AutoBuilder.buildAutoChooser("Basic")
 
         Drivetrain.defaultCommand = teleopDrive
 
@@ -168,6 +168,7 @@ class RobotContainer {
             MoveElevator(Constants.ElevatorConstants.ElevatorState.L3.position),
         ))
         OI.moveL4.onTrue(SequentialCommandGroup(MoveWrist(Constants.PivotConstants.PivotState.VerticalBranch.position),
+
             MoveElevator(Constants.ElevatorConstants.ElevatorState.L4.position)))
 
 //        OI.moveL1.onTrue(MoveElevator(Constants.ElevatorConstants.ElevatorState.Stow.position))

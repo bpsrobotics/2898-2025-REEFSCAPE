@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Encoder
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.Constants.ElevatorConstants.LOWER_LIMIT
 import frc.robot.Constants.ElevatorConstants.MaxAccel
 import frc.robot.Constants.ElevatorConstants.MaxVel
 import frc.robot.Constants.ElevatorConstants.NEG_MAX_OUTPUT
@@ -159,7 +160,7 @@ object Elevator : SubsystemBase() {
         if (!botLimit.get()) {outputPower.coerceAtLeast(0.0)} //If touching bottom limit switch, stop moving down
         if(!topLimit.get()) {outputPower.coerceAtMost(kG)} // If touching top limit switch, stop moving up
 
-        leftMaster.setVoltage(outputPower)
+        leftMaster.setVoltage(outputPower.clamp(NEG_MAX_OUTPUT, POS_MAX_OUTPUT))
     }
     /** Resets the elevator encoder */
     fun resetPos() {

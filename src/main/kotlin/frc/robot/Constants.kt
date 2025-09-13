@@ -63,17 +63,17 @@ class Constants {
 
     object ElevatorConstants {
         const val MaxVel = 1.0
-        const val MaxAccel = 1.0
+        const val MaxAccel = 2.0
 
         //PID constants
-        const val kP = 5.0
-        const val kI = 0.0
-        const val kD = 1.0
+        const val kP = 16.0
+        const val kI = 3.0
+        const val kD = 0.1
 
         //FF constants
         const val kS = 0.1
             //0.045
-        const val kV = 8.14
+        const val kV = 10.0 //8.14
             //8.44
         // 6.0
 //            1.5136
@@ -82,8 +82,8 @@ class Constants {
         const val kA = 0.0
 
         //Max elev driver outputs
-        const val NEG_MAX_OUTPUT = -2.5
-        const val POS_MAX_OUTPUT = 4.0
+        const val NEG_MAX_OUTPUT = -4.0
+        const val POS_MAX_OUTPUT = 12.0
 
         //SOFT Stop limits
         const val UPPER_LIMIT = 1.45
@@ -118,8 +118,8 @@ class Constants {
         const val Max_Velocity = PI
         const val Max_Accel = PI
         //SOFT Stop limits
-        const val UPPER_LIMIT = -2.1
-        const val LOWER_LIMIT = 1.21
+        const val UPPER_LIMIT = -1.4
+        const val LOWER_LIMIT = 1.41
 
 
         // FIXME set to real positions later
@@ -199,15 +199,13 @@ class Constants {
         const val MaxAccelerationMetersPerSecondSquared = 3.0
         const val MaxAngularSpeedRadiansPerSecond = Math.PI
         const val MaxAngularSpeedRadiansPerSecondSquared = Math.PI
-        const val PXController = 1.0
-        const val PYController = 1.0
-        const val PThetaController = 1.0
 
-        const val TranslationP = 5.0
+
+        const val TranslationP = 5.0 //5.0
         const val TranslationI = 0.0
         const val TranslationD = 0.0
 
-        const val RotationP = 0.01
+        const val RotationP = 1.0  //1.0
         const val RotationI = 0.0
         const val RotationD = 0.0
 
