@@ -223,7 +223,6 @@ class Constants {
         const val CLIMBER_WAIT_DURATION = 0.5
 
         //Driver buttons
-        const val ALIGN = 5
         const val RESET_GYRO = 6
 
         //Operator Controls

@@ -121,8 +121,6 @@ object  Drivetrain : SubsystemBase() {
 
     }
 
-
-
     var publisher: StructPublisher<Pose2d> = NetworkTableInstance.getDefault()
         .getStructTopic("MyPose", Pose2d.struct).publish()
 
@@ -277,7 +275,7 @@ object  Drivetrain : SubsystemBase() {
      * @param rotation The desired rotational velocity of the robot.
      * @param fieldOriented Whether the robot's motion should be field oriented or robot oriented.
      * @param centerOfRotation The center of rotation of the robot.
-     *
+     */
     fun drive(
         translation: Translation2d,
         rotation: Double = 0.0,
